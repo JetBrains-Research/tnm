@@ -1,0 +1,6 @@
+.gradle
+.idea
+local_repository
+build
+resources
+_resources
