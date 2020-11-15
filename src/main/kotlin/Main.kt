@@ -1,4 +1,4 @@
-import gitParsers.FilesOwnershipMiner
+import gitMiners.FilesOwnershipMiner
 import org.eclipse.jgit.internal.storage.file.FileRepository
 
 

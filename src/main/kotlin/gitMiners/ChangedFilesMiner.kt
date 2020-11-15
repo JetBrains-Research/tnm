@@ -1,4 +1,4 @@
-package gitParsers
+package gitMiners
 
 import com.google.gson.Gson
 import org.eclipse.jgit.api.Git
