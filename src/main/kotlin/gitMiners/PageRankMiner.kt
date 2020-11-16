@@ -1,8 +1,6 @@
 package gitMiners
 
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import com.google.gson.stream.JsonReader
 import org.eclipse.jgit.api.BlameCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffEntry
@@ -20,8 +18,6 @@ import util.FileMapper
 import util.Graph
 import util.ProjectConfig
 import java.io.File
-import java.io.FileReader
-import java.lang.reflect.Type
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListSet
 import java.util.concurrent.Executors
@@ -47,52 +43,15 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner {
     // element signifies the probability of transition from the i-th page to the j-th page
     // pages - commits
     // TODO: probability == 1 ?
-//    var commitsGraph = Graph<Int>()
-    var commitsGraph = Graph<Int>()
-    private val filesLastCommit = HashMap<Int, Int>()
-    val fixCommits = ArrayList<Pair<RevCommit, RevCommit>>()
+    private val commitsGraph = Graph<Int>()
+    private val fixCommits = ArrayList<Pair<RevCommit, RevCommit>>()
 
     // TODO: skiplist set?
-//    val concurrentGraph = ConcurrentHashMap<Int, ConcurrentSkipListSet<Int>>()
-    var concurrentGraph = ConcurrentHashMap<Int, ConcurrentSkipListSet<Int>>()
-
-
-    // TODO: oldPath newPath ?
-    fun _process(currCommit: RevCommit, prevCommit: RevCommit) {
-        val currCommitId = CommitMapper.add(currCommit.name)
-        val prevCommitId = CommitMapper.add(prevCommit.name)
-
-        commitsGraph.addNode(currCommitId)
-        commitsGraph.addNode(prevCommitId)
-
-        val diffs = getDiffs(currCommit, prevCommit)
-        for (diff in diffs) {
-            val fileName = diff.oldPath
-            val fileId = FileMapper.add(fileName)
-
-            if (filesLastCommit.containsKey(fileId) && isBugFix(currCommit)) {
-                val editList = diffFormatter.toFileHeader(diff).toEditList()
-                for (edit in editList) {
-                    if (edit.type != Edit.Type.REPLACE && edit.type != Edit.Type.DELETE) continue
-                    val lines = edit.beginA until edit.endA
-
-                    val prevCommitBlame = getCommitsForLines(prevCommit, fileName)
-                    for (line in lines) {
-                        val commitId = CommitMapper.add(prevCommitBlame[line])
-                        commitsGraph.addEdge(currCommitId, commitId)
-                    }
-                }
-            }
-
-            filesLastCommit[fileId] = currCommitId
-        }
-
-
-    }
+    private val concurrentGraph = ConcurrentHashMap<Int, ConcurrentSkipListSet<Int>>()
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
-        val currCommitId = CommitMapper.add(currCommit.name)
-        val prevCommitId = CommitMapper.add(prevCommit.name)
+        CommitMapper.add(currCommit.name)
+        CommitMapper.add(prevCommit.name)
 
         if (isBugFix(currCommit)) {
             fixCommits.add(prevCommit to currCommit)
@@ -107,8 +66,6 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner {
         blamer.setFilePath(fileName)
         val blame = blamer.call()
 
-        // TODO: WHY? in jgit coock book
-//        val numOfLines: Int = countLinesOfFileInCommit(repository, commit.id, fileName)
         val resultContents = blame.resultContents
 
         for (i in 0 until resultContents.size()) {
@@ -244,12 +201,9 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner {
     }
 
 
-    fun isBugFix(commit: RevCommit): Boolean {
+    private fun isBugFix(commit: RevCommit): Boolean {
         return "fix" in commit.shortMessage.toLowerCase()
-
     }
-
-
 }
 
 fun main() {
