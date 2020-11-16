@@ -100,7 +100,6 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner {
 //        oneThreadRun()
     }
 
-
     private fun oneThreadRun() {
         for ((prevCommit, currCommit) in fixCommits) {
             val currCommitId = CommitMapper.add(currCommit.name)
