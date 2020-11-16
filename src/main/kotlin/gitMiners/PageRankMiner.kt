@@ -109,7 +109,7 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner {
 
         // TODO: WHY? in jgit coock book
 //        val numOfLines: Int = countLinesOfFileInCommit(repository, commit.id, fileName)
-        val resultContents = blame.getResultContents()
+        val resultContents = blame.resultContents
 
         for (i in 0 until resultContents.size()) {
             val commitOfLine = blame.getSourceCommit(i)
@@ -154,41 +154,46 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner {
 
             val diffs = getDiffs(currCommit, prevCommit)
 
-            val commitsAdj = mutableSetOf<Int>()
-            val filesCommits = mutableMapOf<Int, List<String>>()
-            for (diff in diffs) {
-                if (diff.changeType != DiffEntry.ChangeType.MODIFY) continue
-                val fileName = diff.oldPath
-                val fileId = FileMapper.add(fileName)
-
-                var prevCommitBlame = listOf<String>()
-
-                if (!filesCommits.containsKey(fileId)) {
-                    prevCommitBlame = getCommitsForLines(prevCommit, fileName)
-                    filesCommits[fileId] = prevCommitBlame
-                } else {
-                    val list = filesCommits[fileId]
-                    if (list != null) {
-                        prevCommitBlame = list
-                    }
-                }
-
-                val editList = diffFormatter.toFileHeader(diff).toEditList()
-                for (edit in editList) {
-                    if (edit.type != Edit.Type.REPLACE && edit.type != Edit.Type.DELETE) continue
-                    val lines = edit.beginA until edit.endA
-
-                    for (line in lines) {
-                        val commitId = CommitMapper.add(prevCommitBlame[line])
-                        commitsAdj.add(commitId)
-                    }
-                }
-
-            }
+            val commitsAdj = getCommitsAdj(diffs, prevCommit)
             for (commitId in commitsAdj) {
                 commitsGraph.addEdge(currCommitId, commitId)
             }
         }
+    }
+
+    private fun getCommitsAdj(diffs: MutableList<DiffEntry>, prevCommit: RevCommit): MutableSet<Int> {
+        val commitsAdj = mutableSetOf<Int>()
+        val filesCommits = mutableMapOf<Int, List<String>>()
+        for (diff in diffs) {
+            if (diff.changeType != DiffEntry.ChangeType.MODIFY) continue
+            val fileName = diff.oldPath
+            val fileId = FileMapper.add(fileName)
+
+            var prevCommitBlame = listOf<String>()
+
+            if (!filesCommits.containsKey(fileId)) {
+                prevCommitBlame = getCommitsForLines(prevCommit, fileName)
+                filesCommits[fileId] = prevCommitBlame
+            } else {
+                val list = filesCommits[fileId]
+                if (list != null) {
+                    prevCommitBlame = list
+                }
+            }
+
+            val editList = diffFormatter.toFileHeader(diff).toEditList()
+            for (edit in editList) {
+                if (edit.type != Edit.Type.REPLACE && edit.type != Edit.Type.DELETE) continue
+                val lines = edit.beginA until edit.endA
+
+                for (line in lines) {
+                    val commitId = CommitMapper.add(prevCommitBlame[line])
+                    commitsAdj.add(commitId)
+                }
+            }
+
+        }
+        return commitsAdj
     }
 
     private fun multiThreadRun(nThreads: Int = 5) {
@@ -224,39 +229,7 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner {
                     .setOldTree(oldTreeIter)
                     .call()
 
-                val commitsAdj = mutableSetOf<Int>()
-                val filesCommits = mutableMapOf<Int, List<String>>()
-                for (diff in diffs) {
-                    if (diff.changeType != DiffEntry.ChangeType.MODIFY) continue
-                    val fileName = diff.oldPath
-                    val fileId = FileMapper.add(fileName)
-
-                    var prevCommitBlame = listOf<String>()
-
-                    if (!filesCommits.containsKey(fileId)) {
-                        prevCommitBlame = getCommitsForLines(prevCommit, fileName)
-                        filesCommits[fileId] = prevCommitBlame
-                    } else {
-                        val list = filesCommits[fileId]
-                        if (list != null) {
-                            prevCommitBlame = list
-                        }
-                    }
-
-                    val editList = diffFormatter.toFileHeader(diff).toEditList()
-                    for (edit in editList) {
-                        if (edit.type != Edit.Type.REPLACE && edit.type != Edit.Type.DELETE) continue
-                        val lines = edit.beginA until edit.endA
-
-//                        val prevCommitBlame = getCommitsForLines(prevCommit, fileName)
-                        for (line in lines) {
-                            val commitId = CommitMapper.add(prevCommitBlame[line])
-                            commitsAdj.add(commitId)
-                        }
-                    }
-
-                }
-//                commitsGraph.addEdge(currCommitId, commitId)
+                val commitsAdj = getCommitsAdj(diffs, prevCommit)
                 for (commitId in commitsAdj) {
                     concurrentGraph.computeIfAbsent(currCommitId) { ConcurrentSkipListSet<Int>() }
                         .add(commitId)
@@ -276,49 +249,12 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner {
 
     }
 
-    fun isCodeChange(): Boolean {
-        TODO("Commit message check [9]")
-    }
 
 }
 
 fun main() {
-//    val m = PageRankMiner(ProjectConfig.repository)
-//    m.run()
-//    m.saveToJson()
-//    CommitMapper.saveToJson()
-//    File("./resources/commitsGraph").writeText(gson.toJson(commitsGraph))
-//    File("./resources/concurrentGraph").writeText(gson.toJson(concurrentGraph))
-    var reader = JsonReader(FileReader("./resources/commitsGraph"))
-    val gson = Gson()
-
-    var graph : HashMap<String, ArrayList<Double>> = HashMap()
-//    var graph = Graph<Int>()
-        graph = gson.fromJson(reader, graph.javaClass)
-
-    reader = JsonReader(FileReader("./_resources/concurrentGraph"))
-
-    var concurentGraph: HashMap<String, ArrayList<Double>> = HashMap()
-        concurentGraph = gson.fromJson(reader, concurentGraph.javaClass)
-
-    for (entryGrap in graph) {
-
-        val key = entryGrap.key
-        if (concurentGraph.contains(key)) {
-            var n = 0
-            for (i in entryGrap.value) {
-                if (!concurentGraph[key]!!.contains(i)) {
-                    n++
-                }
-            }
-
-            if (n != 0) {
-                println("Doesn't equal ${entryGrap.value} != \n ${concurentGraph[key]}")
-            }
-        } else {
-            if (entryGrap.value.size != 0)
-                println("Doesn't contains $entryGrap")
-        }
-
-    }
+    val m = PageRankMiner(ProjectConfig.repository)
+    m.run()
+    m.saveToJson()
+    CommitMapper.saveToJson()
 }
