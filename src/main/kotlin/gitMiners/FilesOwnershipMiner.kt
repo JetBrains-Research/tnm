@@ -55,14 +55,12 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner {
         val diffs = getDiffs(currCommit, prevCommit)
         val email = currCommit.authorIdent.emailAddress
 
-        UserMapper.add(email)
-        val userId = UserMapper.userToId[email]
+        val userId = UserMapper.add(email)
 
         for (diff in diffs) {
             val editList = diffFormatter.toFileHeader(diff).toEditList()
 
-            FileMapper.add(diff.oldPath)
-            val fileId = FileMapper.fileToId[diff.oldPath]
+            val fileId = FileMapper.add(diff.oldPath)
 
             val date = currCommit.authorIdent.getWhen()
 
@@ -70,14 +68,12 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner {
             val diffDays: Int = TimeUnit.DAYS.convert(latestCommitDate.time - date.time, TimeUnit.MILLISECONDS).toInt()
             for (edit in editList) {
                 // TODO: what about deleted lines?
-                if (userId != null && fileId != null) {
-                    filesOwnership
-                            .computeIfAbsent(fileId) { HashMap() }
-                            .computeIfAbsent(userId) { UserData() }
-                            .calculateAuthorship(edit.beginB..edit.endB, diffDays)
-                    addAuthorsForLines(edit.beginB..edit.endB, fileId, userId)
-                }
-//                linesDeleted += edit.endA - edit.beginA
+                filesOwnership
+                        .computeIfAbsent(fileId) { HashMap() }
+                        .computeIfAbsent(userId) { UserData() }
+                        .calculateAuthorship(edit.beginB..edit.endB, diffDays)
+                addAuthorsForLines(edit.beginB..edit.endB, fileId, userId)
+                //                linesDeleted += edit.endA - edit.beginA
 //                linesAdded += edit.endB - edit.beginB
 
             }
@@ -102,8 +98,8 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner {
             }
 
             val filePath = treeWalk.pathString
+            val fileId = FileMapper.add(filePath)
 
-            FileMapper.add(filePath)
             val result = git
                     .blame()
                     .setFilePath(filePath)
@@ -115,17 +111,13 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner {
                 val sourceAuthor = result.getSourceAuthor(i)
 //                val sourceCommit = result.getSourceCommit(i)
 
-                UserMapper.add(sourceAuthor.emailAddress)
-                val userId = UserMapper.userToId[sourceAuthor.emailAddress]
-                val fileId = FileMapper.fileToId[filePath]
+                val userId = UserMapper.add(sourceAuthor.emailAddress)
 
-                if (userId != null && fileId != null) {
-                    filesOwnership
-                            .computeIfAbsent(fileId) { HashMap() }
-                            .computeIfAbsent(userId) { UserData() }
-                            .calculateAuthorship(i..i, 0)
-                    addAuthorsForLines(i..i, fileId, userId)
-                }
+                filesOwnership
+                        .computeIfAbsent(fileId) { HashMap() }
+                        .computeIfAbsent(userId) { UserData() }
+                        .calculateAuthorship(i..i, 0)
+                addAuthorsForLines(i..i, fileId, userId)
             }
         }
     }

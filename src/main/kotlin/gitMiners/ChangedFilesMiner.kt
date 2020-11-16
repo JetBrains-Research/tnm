@@ -26,18 +26,12 @@ class ChangedFilesMiner(override val repository: FileRepository) : GitMiner {
         val diffs = getDiffs(currCommit, prevCommit)
 
         val userEmail = currCommit.authorIdent.emailAddress
-        UserMapper.add(userEmail)
+        val userId = UserMapper.add(userEmail)
 
         for (entry in diffs) {
-            FileMapper.add(entry.oldPath)
-            val fileId = FileMapper.fileToId[entry.oldPath]
-            val userId = UserMapper.userToId[userEmail]
-            fileId?.let {
-                if (userId != null) {
-                    userFilesIds.computeIfAbsent(userId) { mutableSetOf() }.add(it)
-                }
-                result.add(it)
-            }
+            val fileId = FileMapper.add(entry.oldPath)
+            userFilesIds.computeIfAbsent(userId) { mutableSetOf() }.add(fileId)
+            result.add(fileId)
         }
 
         lastProcessResult = result.toList()

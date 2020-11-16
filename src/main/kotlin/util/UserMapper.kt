@@ -12,12 +12,14 @@ object UserMapper : Mapper {
     var lastUserId = 0
         private set
 
-    override fun add(value: String) {
-        if (!userToId.containsKey(value)) {
-            userToId[value] = lastUserId
-            idToUser[lastUserId] = value
-            lastUserId++
-        }
+    override fun add(value: String): Int {
+        val id = userToId[value]
+        if (id != null) return id
+
+        userToId[value] = lastUserId
+        idToUser[lastUserId] = value
+        lastUserId++
+        return lastUserId - 1
     }
 
     override fun saveToJson() {

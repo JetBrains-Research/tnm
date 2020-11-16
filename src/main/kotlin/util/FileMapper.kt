@@ -11,11 +11,13 @@ object FileMapper: Mapper {
     var lastFileId = 0
     private set
 
-    override fun add(value: String) {
-        if (!fileToId.contains(value)) {
-            fileToId[value] = lastFileId
-            lastFileId++
-        }
+    override fun add(value: String): Int {
+        val id = fileToId[value]
+        if (id != null) return id
+
+        fileToId[value] = lastFileId
+        lastFileId++
+        return lastFileId - 1
     }
 
     override fun saveToJson() {
