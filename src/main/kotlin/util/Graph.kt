@@ -9,6 +9,11 @@ class Graph<T> {
                 .add(destinationVertex)
     }
 
+    fun addNode(node: T) {
+        adjacencyMap
+                .computeIfAbsent(node) { HashSet() }
+    }
+
     override fun toString(): String = StringBuffer().apply {
         for (key in adjacencyMap.keys) {
             append("$key -> ")

@@ -16,6 +16,7 @@ interface GitMiner {
     val reader: ObjectReader
     val gson: Gson
 
+    // prevCommit is always older than currCommit
     fun process(currCommit: RevCommit, prevCommit: RevCommit)
 
     fun run() {
