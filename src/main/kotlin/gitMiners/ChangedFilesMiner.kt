@@ -10,31 +10,22 @@ import util.ProjectConfig
 import util.UserMapper
 import java.io.File
 
-class ChangedFilesMiner(override val repository: FileRepository) : GitMiner {
+class ChangedFilesMiner(override val repository: FileRepository) : GitMiner() {
     override val git = Git(repository)
     override val reader: ObjectReader = repository.newObjectReader()
     override val gson: Gson = Gson()
 
     private val userFilesIds = hashMapOf<Int, MutableSet<Int>>()
-    var lastProcessResult: List<Int> = emptyList()
-        private set
 
     // TODO: add FilesChanges[fileId] = Set(commit1, ...)
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
-        val result = mutableSetOf<Int>()
-
-        val diffs = getDiffs(currCommit, prevCommit)
-
         val userEmail = currCommit.authorIdent.emailAddress
         val userId = UserMapper.add(userEmail)
+        val changedFiles = getChangedFiles(currCommit, prevCommit, reader, git)
 
-        for (entry in diffs) {
-            val fileId = FileMapper.add(entry.oldPath)
+        for (fileId in changedFiles) {
             userFilesIds.computeIfAbsent(userId) { mutableSetOf() }.add(fileId)
-            result.add(fileId)
         }
-
-        lastProcessResult = result.toList()
     }
 
     override fun saveToJson() {

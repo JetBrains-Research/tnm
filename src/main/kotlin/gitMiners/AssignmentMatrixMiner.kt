@@ -9,7 +9,13 @@ import util.FileMapper
 import util.UserMapper
 import java.io.File
 
-class AssignmentMatrixMiner(override val repository: FileRepository) : GitMiner {
+/**
+ * Assignment matrix miner
+ *
+ * @property repository
+ * @constructor Create empty Assignment matrix miner
+ */
+class AssignmentMatrixMiner(override val repository: FileRepository) : GitMiner() {
     override val git = Git(repository)
     override val reader: ObjectReader = repository.newObjectReader()
     override val gson: Gson = Gson()
@@ -19,10 +25,9 @@ class AssignmentMatrixMiner(override val repository: FileRepository) : GitMiner 
     private lateinit var assignmentMatrix: Array<Array<Int>>
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
-        changedFilesParser.process(currCommit, prevCommit)
-        val changedFiles = changedFilesParser.lastProcessResult
+        val changedFiles = getChangedFiles(currCommit, prevCommit, reader, git)
         val userEmail = currCommit.authorIdent.emailAddress
-        cache.add(userEmail to changedFiles)
+        cache.add(userEmail to changedFiles.toList())
     }
 
     override fun run() {

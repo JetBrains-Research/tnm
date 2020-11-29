@@ -22,7 +22,7 @@ import kotlin.math.pow
 // mining to improve software development"
 // https://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=5670&context=etd
 // TODO: Double, Float?
-class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner {
+class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() {
     override val git = Git(repository)
     override val reader: ObjectReader = repository.newObjectReader()
     override val gson: Gson = Gson()
@@ -52,7 +52,7 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner {
     }
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
-        val diffs = getDiffs(currCommit, prevCommit)
+        val diffs = getDiffs(currCommit, prevCommit, reader, git)
         val email = currCommit.authorIdent.emailAddress
 
         val userId = UserMapper.add(email)

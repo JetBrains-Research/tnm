@@ -14,19 +14,17 @@ import java.io.File
  * Change sets {A,B,C} and {A,B} the dependency matrix entries in D would be
  * D[A,B] = 2, D[A,C] = 1, and D[B,C] = 1
  */
-class FileDependencyMatrixMiner(override val repository: FileRepository) : GitMiner {
+class FileDependencyMatrixMiner(override val repository: FileRepository) : GitMiner() {
     override val git = Git(repository)
     override val reader: ObjectReader = repository.newObjectReader()
     override val gson: Gson = Gson()
 
     private val changedFilesMiner = ChangedFilesMiner(repository)
-    private val cache = mutableListOf<List<Int>>()
+    private val changedFiles = mutableListOf<List<Int>>()
     private lateinit var fileDependencyMatrix: Array<Array<Int>>
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
-        changedFilesMiner.process(currCommit, prevCommit)
-        val changedFiles = changedFilesMiner.lastProcessResult
-        cache.add(changedFiles)
+        changedFiles.add(getChangedFiles(currCommit, prevCommit, reader, git).toList())
     }
 
     override fun run() {
@@ -34,7 +32,7 @@ class FileDependencyMatrixMiner(override val repository: FileRepository) : GitMi
 
         val size = FileMapper.lastFileId
         fileDependencyMatrix = Array(size) { Array(size) { 0 } }
-        for (change in cache) {
+        for (change in changedFiles) {
             for ((index, currFile) in change.withIndex()) {
                 for (otherFile in change.subList(index, change.lastIndex)) {
                     if (currFile == otherFile)
