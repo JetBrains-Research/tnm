@@ -13,10 +13,7 @@ import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.treewalk.CanonicalTreeParser
 import org.eclipse.jgit.util.io.DisabledOutputStream
-import util.CommitMapper
-import util.FileMapper
-import util.Graph
-import util.ProjectConfig
+import util.*
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListSet
@@ -26,7 +23,7 @@ import java.util.concurrent.Executors
 // Class based on paper:
 // "An Application of the PageRank Algorithm"
 // https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8051375&tag=1
-class PageRankMiner(override val repository: FileRepository) : GitMiner {
+class PageRankMiner(override val repository: FileRepository) : GitMiner() {
     override val git = Git(repository)
     override val reader: ObjectReader = repository.newObjectReader()
     override val gson: Gson = Gson()
@@ -96,8 +93,7 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner {
             }
         }
 
-        multiThreadRun()
-//        oneThreadRun()
+        oneThreadRun()
     }
 
     private fun oneThreadRun() {
@@ -108,7 +104,7 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner {
             commitsGraph.addNode(currCommitId)
             commitsGraph.addNode(prevCommitId)
 
-            val diffs = getDiffs(currCommit, prevCommit)
+            val diffs = getDiffs(currCommit, prevCommit, reader, git)
 
             val commitsAdj = getCommitsAdj(diffs, prevCommit)
             for (commitId in commitsAdj) {
@@ -117,7 +113,7 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner {
         }
     }
 
-    private fun getCommitsAdj(diffs: MutableList<DiffEntry>, prevCommit: RevCommit): MutableSet<Int> {
+    private fun getCommitsAdj(diffs: List<DiffEntry>, prevCommit: RevCommit): Set<Int> {
         val commitsAdj = mutableSetOf<Int>()
         val filesCommits = mutableMapOf<Int, List<String>>()
         for (diff in diffs) {
@@ -152,6 +148,7 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner {
         return commitsAdj
     }
 
+    // TODO: missing blob/tree error
     private fun multiThreadRun(nThreads: Int = 5) {
 
         val executor = Executors.newFixedThreadPool(nThreads)
