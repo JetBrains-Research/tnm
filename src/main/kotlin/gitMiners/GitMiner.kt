@@ -16,9 +16,21 @@ interface GitMiner {
     val reader: ObjectReader
     val gson: Gson
 
-    // prevCommit is always older than currCommit
+    /**
+     * Mine all needed data from pair of commits.
+     * [prevCommit] is always older than [currCommit].
+     * TODO: All fields with mined results must call needed calculations in getters
+     *
+     * @param currCommit RevCommit which must be earlier then [prevCommit]
+     * @param prevCommit RevCommit which must be older then [currCommit]
+     */
     fun process(currCommit: RevCommit, prevCommit: RevCommit)
 
+    /**
+     * Mine all needed data from [repository]. In default realisation iterates through
+     * pairs of commits in DESC order while applying [process] function.
+     *
+     */
     fun run() {
         val branches: List<Ref> = git.branchList().call()
 
@@ -34,12 +46,19 @@ interface GitMiner {
         }
     }
 
-    fun getDiffs(currCommit: RevCommit, prevCommit: RevCommit): MutableList<DiffEntry> {
+    /**
+     * Get diffs between [commit1] and [commit2].
+     *
+     * @param commit1 RevCommit
+     * @param commit2 RevCommit
+     * @return List of DiffEntry's between [commit1] and [commit2].
+     */
+    fun getDiffs(commit1: RevCommit, commit2: RevCommit): List<DiffEntry> {
         val oldTreeIter = CanonicalTreeParser()
-        oldTreeIter.reset(reader, prevCommit.tree)
+        oldTreeIter.reset(reader, commit2.tree)
 
         val newTreeIter = CanonicalTreeParser()
-        newTreeIter.reset(reader, currCommit.tree)
+        newTreeIter.reset(reader, commit1.tree)
 
         return git.diff()
                 .setNewTree(newTreeIter)
@@ -47,5 +66,9 @@ interface GitMiner {
                 .call()
     }
 
+    /**
+     * Saves to json all mined data.
+     *
+     */
     fun saveToJson()
 }
