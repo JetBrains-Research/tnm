@@ -19,13 +19,13 @@ class FileDependencyMatrixMiner(override val repository: FileRepository) : GitMi
     override val reader: ObjectReader = repository.newObjectReader()
     override val gson: Gson = Gson()
 
-    private val changedFilesParser = ChangedFilesMiner(repository)
+    private val changedFilesMiner = ChangedFilesMiner(repository)
     private val cache = mutableListOf<List<Int>>()
-    private lateinit var matrix: Array<Array<Int>>
+    private lateinit var fileDependencyMatrix: Array<Array<Int>>
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
-        changedFilesParser.process(currCommit, prevCommit)
-        val changedFiles = changedFilesParser.lastProcessResult
+        changedFilesMiner.process(currCommit, prevCommit)
+        val changedFiles = changedFilesMiner.lastProcessResult
         cache.add(changedFiles)
     }
 
@@ -33,21 +33,21 @@ class FileDependencyMatrixMiner(override val repository: FileRepository) : GitMi
         super.run()
 
         val size = FileMapper.lastFileId
-        matrix = Array(size) { Array(size) { 0 } }
+        fileDependencyMatrix = Array(size) { Array(size) { 0 } }
         for (change in cache) {
             for ((index, currFile) in change.withIndex()) {
                 for (otherFile in change.subList(index, change.lastIndex)) {
                     if (currFile == otherFile)
                         continue
-                    matrix[currFile][otherFile] += 1
-                    matrix[otherFile][currFile] += 1
+                    fileDependencyMatrix[currFile][otherFile] += 1
+                    fileDependencyMatrix[otherFile][currFile] += 1
                 }
             }
         }
     }
 
     override fun saveToJson() {
-        changedFilesParser.saveToJson()
-        File("./resources/fileDependencyMatrix").writeText(gson.toJson(matrix))
+        changedFilesMiner.saveToJson()
+        File("./resources/fileDependencyMatrix").writeText(gson.toJson(fileDependencyMatrix))
     }
 }

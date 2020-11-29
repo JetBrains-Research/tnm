@@ -5,7 +5,6 @@ import util.Graph
 
 class CalcMirrorCongruence(private val artifactsRelations: Array<Array<Int>>, private val assignmentMatrix: Array<Array<Int>>) {
 
-
     fun run() {
         val Gs = createGraph(artifactsRelations)
         val Gp = createGraph(calcPeopleRelations(3))
@@ -33,7 +32,6 @@ class CalcMirrorCongruence(private val artifactsRelations: Array<Array<Int>>, pr
         println(k.toFloat() / y.toFloat())
 
     }
-
 
     fun _run() {
         val peopleRelations = calcPeopleRelations()

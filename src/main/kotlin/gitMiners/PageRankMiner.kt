@@ -163,7 +163,7 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner {
             commitsGraph.addNode(currCommitId)
             commitsGraph.addNode(prevCommitId)
 
-            concurrentGraph.computeIfAbsent(currCommitId) { ConcurrentSkipListSet<Int>() }
+            concurrentGraph.computeIfAbsent(currCommitId) { ConcurrentSkipListSet() }
 
             val worker = Runnable {
                 val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
@@ -187,7 +187,7 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner {
 
                 val commitsAdj = getCommitsAdj(diffs, prevCommit)
                 for (commitId in commitsAdj) {
-                    concurrentGraph.computeIfAbsent(currCommitId) { ConcurrentSkipListSet<Int>() }
+                    concurrentGraph.computeIfAbsent(currCommitId) { ConcurrentSkipListSet() }
                         .add(commitId)
                 }
             }

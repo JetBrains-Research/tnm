@@ -16,7 +16,7 @@ class AssignmentMatrixMiner(override val repository: FileRepository) : GitMiner 
 
     private val changedFilesParser = ChangedFilesMiner(repository)
     private val cache = mutableListOf<Pair<String, List<Int>>>()
-    private lateinit var matrix: Array<Array<Int>>
+    private lateinit var assignmentMatrix: Array<Array<Int>>
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
         changedFilesParser.process(currCommit, prevCommit)
@@ -30,17 +30,17 @@ class AssignmentMatrixMiner(override val repository: FileRepository) : GitMiner 
 
         val numOfFiles = FileMapper.lastFileId
         val numOfUsers = UserMapper.lastUserId
-        matrix = Array(numOfUsers) { Array(numOfFiles) { 0 } }
+        assignmentMatrix = Array(numOfUsers) { Array(numOfFiles) { 0 } }
         for (change in cache) {
             val userId = UserMapper.userToId[change.first]
             for (fileId in change.second) {
-                userId?.let { matrix[userId][fileId] += 1 }
+                userId?.let { assignmentMatrix[userId][fileId] += 1 }
             }
         }
     }
 
     override fun saveToJson() {
         changedFilesParser.saveToJson()
-        File("./resources/assignmentMatrix").writeText(gson.toJson(matrix))
+        File("./resources/assignmentMatrix").writeText(gson.toJson(assignmentMatrix))
     }
 }
