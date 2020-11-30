@@ -5,7 +5,6 @@ import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.revwalk.RevCommit
-import util.FileMapper
 import util.UserMapper
 import java.io.File
 
@@ -13,7 +12,7 @@ import java.io.File
  * Assignment matrix miner
  *
  * @property repository
- * @constructor Create empty Assignment matrix miner
+ * @constructor Create empty Assignment matrix miner for [repository] and store the results
  */
 class AssignmentMatrixMiner(override val repository: FileRepository) : GitMiner() {
     override val git = Git(repository)
@@ -21,27 +20,21 @@ class AssignmentMatrixMiner(override val repository: FileRepository) : GitMiner(
     override val gson: Gson = Gson()
 
     private val changedFilesParser = ChangedFilesMiner(repository)
-    private val cache = mutableListOf<Pair<String, List<Int>>>()
-    private lateinit var assignmentMatrix: Array<Array<Int>>
+    private val assignmentMatrix: HashMap<Int, HashMap<Int, Int>> = HashMap()
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
         val changedFiles = getChangedFiles(currCommit, prevCommit, reader, git)
-        val userEmail = currCommit.authorIdent.emailAddress
-        cache.add(userEmail to changedFiles.toList())
-    }
+        val userId = UserMapper.add(currCommit.authorIdent.emailAddress)
+        for (fileId in changedFiles) {
+            val newValue = assignmentMatrix
+                .computeIfAbsent(userId) {HashMap()}
+                .computeIfAbsent(fileId) {0}
+                .inc()
 
-    override fun run() {
-        super.run()
-
-        val numOfFiles = FileMapper.lastFileId
-        val numOfUsers = UserMapper.lastUserId
-        assignmentMatrix = Array(numOfUsers) { Array(numOfFiles) { 0 } }
-        for (change in cache) {
-            val userId = UserMapper.userToId[change.first]
-            for (fileId in change.second) {
-                userId?.let { assignmentMatrix[userId][fileId] += 1 }
-            }
+            assignmentMatrix
+                .computeIfAbsent(userId) {HashMap()} [fileId] = newValue
         }
+
     }
 
     override fun saveToJson() {
