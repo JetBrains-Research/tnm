@@ -19,11 +19,15 @@ abstract class GitMiner {
     abstract val gson: Gson
 
     companion object {
+        // TODO: mb change git, reader logic
+
         /**
          * Get diffs between [commit1] and [commit2].
          *
          * @param commit1 RevCommit
          * @param commit2 RevCommit
+         * @param reader must be created from same Repository as [git]
+         * @param git must be created from same Repository as [reader]
          * @return List of DiffEntry's between [commit1] and [commit2].
          */
         fun getDiffs(commit1: RevCommit, commit2: RevCommit, reader: ObjectReader, git: Git): List<DiffEntry> {
@@ -40,13 +44,13 @@ abstract class GitMiner {
         }
 
         /**
-         * Get changed files
+         * Get changed files between [commit1] and [commit2].
          *
-         * @param commit1
-         * @param commit2
-         * @param reader
-         * @param git
-         * @return
+         * @param commit1 RevCommit
+         * @param commit2 RevCommit
+         * @param reader must be created from same Repository as git
+         * @param git must be created from same Repository as [reader]
+         * @return set of changed files ids
          */
         fun getChangedFiles(commit1: RevCommit, commit2: RevCommit, reader: ObjectReader, git: Git): Set<Int> {
             val result = mutableSetOf<Int>()
