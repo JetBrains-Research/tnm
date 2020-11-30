@@ -1,6 +1,7 @@
 package gitMiners
 
-import com.google.gson.Gson
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
@@ -25,7 +26,6 @@ import kotlin.math.pow
 class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() {
     override val git = Git(repository)
     override val reader: ObjectReader = repository.newObjectReader()
-    override val gson: Gson = Gson()
 
     private val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
     // [fileId][userId]
@@ -68,6 +68,7 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() 
             val diffDays: Int = TimeUnit.DAYS.convert(latestCommitDate.time - date.time, TimeUnit.MILLISECONDS).toInt()
             for (edit in editList) {
                 // TODO: what about deleted lines?
+                // TODO: Wrong calculation?? doesn't saves the result?
                 filesOwnership
                         .computeIfAbsent(fileId) { HashMap() }
                         .computeIfAbsent(userId) { UserData() }
@@ -113,6 +114,7 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() 
 
                 val userId = UserMapper.add(sourceAuthor.emailAddress)
 
+                // TODO: Wrong calculation?? doesn't saves the result?
                 filesOwnership
                         .computeIfAbsent(fileId) { HashMap() }
                         .computeIfAbsent(userId) { UserData() }
@@ -123,9 +125,9 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() 
     }
 
     override fun saveToJson() {
-        File("./resources/filesOwnership").writeText(gson.toJson(filesOwnership))
-        File("./resources/potentialAuthorship").writeText(gson.toJson(potentialAuthorship))
-        File("./resources/developerKnowledge").writeText(gson.toJson(developerKnowledge))
+        File("./resources/filesOwnership").writeText(Json.encodeToString(filesOwnership))
+        File("./resources/potentialAuthorship").writeText(Json.encodeToString(potentialAuthorship))
+        File("./resources/developerKnowledge").writeText(Json.encodeToString(developerKnowledge))
     }
 
     private fun addAuthorsForLines(lines: IntRange, fileId:Int, userId: Int) {

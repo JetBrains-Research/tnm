@@ -1,6 +1,5 @@
 package gitMiners
 
-import com.google.gson.Gson
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.lib.ObjectReader
@@ -16,7 +15,6 @@ abstract class GitMiner {
     abstract val repository: Repository
     abstract val git: Git
     abstract val reader: ObjectReader
-    abstract val gson: Gson
 
     companion object {
         // TODO: mb change git, reader logic
@@ -26,8 +24,8 @@ abstract class GitMiner {
          *
          * @param commit1 RevCommit
          * @param commit2 RevCommit
-         * @param reader must be created from same Repository as [git]
-         * @param git must be created from same Repository as [reader]
+         * @param reader must be created from the same Repository as [git]
+         * @param git must be created from the same Repository as [reader]
          * @return List of DiffEntry's between [commit1] and [commit2].
          */
         fun getDiffs(commit1: RevCommit, commit2: RevCommit, reader: ObjectReader, git: Git): List<DiffEntry> {
@@ -48,8 +46,8 @@ abstract class GitMiner {
          *
          * @param commit1 RevCommit
          * @param commit2 RevCommit
-         * @param reader must be created from same Repository as git
-         * @param git must be created from same Repository as [reader]
+         * @param reader must be created from the same Repository as git
+         * @param git must be created from the same Repository as [reader]
          * @return set of changed files ids
          */
         fun getChangedFiles(commit1: RevCommit, commit2: RevCommit, reader: ObjectReader, git: Git): Set<Int> {

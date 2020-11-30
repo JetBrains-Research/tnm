@@ -1,6 +1,7 @@
 package gitMiners
 
-import com.google.gson.Gson
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.ObjectReader
@@ -17,7 +18,6 @@ import java.io.File
 class AssignmentMatrixMiner(override val repository: FileRepository) : GitMiner() {
     override val git = Git(repository)
     override val reader: ObjectReader = repository.newObjectReader()
-    override val gson: Gson = Gson()
 
     private val changedFilesParser = ChangedFilesMiner(repository)
     private val assignmentMatrix: HashMap<Int, HashMap<Int, Int>> = HashMap()
@@ -39,6 +39,6 @@ class AssignmentMatrixMiner(override val repository: FileRepository) : GitMiner(
 
     override fun saveToJson() {
         changedFilesParser.saveToJson()
-        File("./resources/assignmentMatrix").writeText(gson.toJson(assignmentMatrix))
+        File("./resources/assignmentMatrix").writeText(Json.encodeToString(assignmentMatrix))
     }
 }

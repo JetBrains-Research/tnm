@@ -1,6 +1,7 @@
 package gitMiners
 
-import com.google.gson.Gson
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.ObjectReader
@@ -13,7 +14,6 @@ import java.io.File
 class ChangedFilesMiner(override val repository: FileRepository) : GitMiner() {
     override val git = Git(repository)
     override val reader: ObjectReader = repository.newObjectReader()
-    override val gson: Gson = Gson()
 
     private val userFilesIds = hashMapOf<Int, MutableSet<Int>>()
 
@@ -29,7 +29,7 @@ class ChangedFilesMiner(override val repository: FileRepository) : GitMiner() {
     }
 
     override fun saveToJson() {
-        File("./resources/userFilesIds").writeText(gson.toJson(userFilesIds))
+        File("./resources/userFilesIds").writeText(Json.encodeToString(userFilesIds))
     }
 }
 

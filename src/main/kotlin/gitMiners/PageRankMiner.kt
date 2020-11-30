@@ -1,6 +1,7 @@
 package gitMiners
 
-import com.google.gson.Gson
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.eclipse.jgit.api.BlameCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffEntry
@@ -20,13 +21,19 @@ import java.util.concurrent.ConcurrentSkipListSet
 import java.util.concurrent.Executors
 
 
-// Class based on paper:
-// "An Application of the PageRank Algorithm"
-// https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8051375&tag=1
+
+/**
+ * Page rank miner
+ * Class based on paper:
+ * "An Application of the PageRank Algorithm"
+ * https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8051375&tag=1
+ *
+ * @property repository working repository
+ * @constructor Create Page rank miner for [repository] and store the results
+ */
 class PageRankMiner(override val repository: FileRepository) : GitMiner() {
     override val git = Git(repository)
     override val reader: ObjectReader = repository.newObjectReader()
-    override val gson: Gson = Gson()
 
     private val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
 
@@ -74,8 +81,8 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner() {
     }
 
     override fun saveToJson() {
-        File("./resources/commitsGraph").writeText(gson.toJson(commitsGraph.adjacencyMap))
-        File("./resources/concurrentGraph").writeText(gson.toJson(concurrentGraph))
+        File("./resources/commitsGraph").writeText(Json.encodeToString(commitsGraph.adjacencyMap))
+        File("./resources/concurrentGraph").writeText(Json.encodeToString(concurrentGraph))
     }
 
     override fun run() {
@@ -195,7 +202,6 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner() {
         while (!executor.isTerminated) {
         }
     }
-
 
     private fun isBugFix(commit: RevCommit): Boolean {
         return "fix" in commit.shortMessage.toLowerCase()
