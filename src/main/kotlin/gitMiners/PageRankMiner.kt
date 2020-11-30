@@ -1,7 +1,5 @@
 package gitMiners
 
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.eclipse.jgit.api.BlameCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffEntry
@@ -15,11 +13,9 @@ import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.treewalk.CanonicalTreeParser
 import org.eclipse.jgit.util.io.DisabledOutputStream
 import util.*
-import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListSet
 import java.util.concurrent.Executors
-
 
 
 /**
@@ -81,8 +77,8 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner() {
     }
 
     override fun saveToJson() {
-        File("./resources/commitsGraph").writeText(Json.encodeToString(commitsGraph.adjacencyMap))
-        File("./resources/concurrentGraph").writeText(Json.encodeToString(concurrentGraph))
+        UtilFunctions.saveToJson(ProjectConfig.COMMITS_GRAPH_PATH, commitsGraph.adjacencyMap)
+        UtilFunctions.saveToJson(ProjectConfig.CONCURRENT_GRAPH_PATH, concurrentGraph)
     }
 
     override fun run() {

@@ -2,8 +2,15 @@ package calculations
 
 import util.Graph
 
-
-class CalcMirrorCongruence(private val artifactsRelations: Array<Array<Int>>, private val assignmentMatrix: Array<Array<Int>>) {
+/**
+ * Calc mirror congruence
+ *
+ * @property artifactsRelations
+ * @property assignmentMatrix
+ * @constructor Create empty Calc mirror congruence
+ */
+class CalcMirrorCongruence(private val artifactsRelations: Array<Array<Int>>,
+                           private val assignmentMatrix: Array<Array<Int>>) {
 
     fun run() {
         val Gs = createGraph(artifactsRelations)
@@ -30,7 +37,6 @@ class CalcMirrorCongruence(private val artifactsRelations: Array<Array<Int>>, pr
         println("k = ${k}")
         println("y = ${y}")
         println(k.toFloat() / y.toFloat())
-
     }
 
     fun _run() {

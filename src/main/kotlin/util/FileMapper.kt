@@ -1,15 +1,13 @@
 package util
 
-import com.google.gson.Gson
-import java.io.File
 
-object FileMapper: Mapper {
-    override val gson: Gson = Gson()
-
-    val fileToId = HashMap<String, Int>()
-
-    var lastFileId = 0
-    private set
+/**
+ * This object maps files to unique id.
+ *
+ */
+object FileMapper : Mapper {
+    private val fileToId = HashMap<String, Int>()
+    private var lastFileId = 0
 
     override fun add(value: String): Int {
         val id = fileToId[value]
@@ -21,6 +19,6 @@ object FileMapper: Mapper {
     }
 
     override fun saveToJson() {
-        File("./resources/fileToId").writeText(gson.toJson(fileToId))
+        UtilFunctions.saveToJson(ProjectConfig.FILE_ID_PATH, fileToId)
     }
 }

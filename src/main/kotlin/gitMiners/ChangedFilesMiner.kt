@@ -1,7 +1,5 @@
 package gitMiners
 
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.ObjectReader
@@ -9,7 +7,7 @@ import org.eclipse.jgit.revwalk.RevCommit
 import util.FileMapper
 import util.ProjectConfig
 import util.UserMapper
-import java.io.File
+import util.UtilFunctions
 
 class ChangedFilesMiner(override val repository: FileRepository) : GitMiner() {
     override val git = Git(repository)
@@ -29,7 +27,7 @@ class ChangedFilesMiner(override val repository: FileRepository) : GitMiner() {
     }
 
     override fun saveToJson() {
-        File("./resources/userFilesIds").writeText(Json.encodeToString(userFilesIds))
+        UtilFunctions.saveToJson(ProjectConfig.USER_FILES_IDS_PATH, userFilesIds)
     }
 }
 

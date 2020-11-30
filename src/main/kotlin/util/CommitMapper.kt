@@ -1,16 +1,18 @@
 package util
 
-import com.google.gson.Gson
-import java.io.File
 
+/**
+ * This object maps commits to unique id.
+ *
+ */
 object CommitMapper : Mapper {
-    override val gson: Gson = Gson()
-    val commitToId = HashMap<String, Int>()
-    val idToCommit = HashMap<Int, String>()
-    var lastCommitId = 0
+    private val commitToId = HashMap<String, Int>()
+    private val idToCommit = HashMap<Int, String>()
+    private var lastCommitId = 0
 
-    override fun add(value: String):Int {
-        val id  = commitToId[value]
+
+    override fun add(value: String): Int {
+        val id = commitToId[value]
         if (id != null) return id
 
         commitToId[value] = lastCommitId
@@ -20,7 +22,7 @@ object CommitMapper : Mapper {
     }
 
     override fun saveToJson() {
-        File("./resources/commitToId").writeText(gson.toJson(commitToId))
-        File("./resources/idToCommit").writeText(gson.toJson(idToCommit))
+        UtilFunctions.saveToJson(ProjectConfig.COMMIT_ID_PATH, commitToId)
+        UtilFunctions.saveToJson(ProjectConfig.ID_COMMIT_PATH, idToCommit)
     }
 }

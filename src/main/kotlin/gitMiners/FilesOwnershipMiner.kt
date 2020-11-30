@@ -1,7 +1,5 @@
 package gitMiners
 
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
@@ -13,10 +11,9 @@ import org.eclipse.jgit.util.io.DisabledOutputStream
 import util.FileMapper
 import util.ProjectConfig
 import util.UserMapper
-import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.math.pow
-
+import util.*
 
 // Class based on paper:
 // "Engaging developers in open source software projects: harnessing social and technical data
@@ -124,10 +121,11 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() 
         }
     }
 
+    // TODO: check serialization
     override fun saveToJson() {
-        File("./resources/filesOwnership").writeText(Json.encodeToString(filesOwnership))
-        File("./resources/potentialAuthorship").writeText(Json.encodeToString(potentialAuthorship))
-        File("./resources/developerKnowledge").writeText(Json.encodeToString(developerKnowledge))
+        UtilFunctions.saveToJson(ProjectConfig.FILES_OWNERSHIP_PATH,filesOwnership)
+        UtilFunctions.saveToJson(ProjectConfig.POTENTIAL_OWNERSHIP_PATH, potentialAuthorship)
+        UtilFunctions.saveToJson(ProjectConfig.DEVELOPER_KNOWLEDGE_PATH, developerKnowledge)
     }
 
     private fun addAuthorsForLines(lines: IntRange, fileId:Int, userId: Int) {

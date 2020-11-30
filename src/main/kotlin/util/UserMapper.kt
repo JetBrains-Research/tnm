@@ -1,11 +1,10 @@
 package util
 
-import com.google.gson.Gson
-import java.io.File
-
+/**
+ * This object maps users to unique id.
+ *
+ */
 object UserMapper : Mapper {
-    override val gson: Gson = Gson()
-
     val userToId = HashMap<String, Int>()
     val idToUser = HashMap<Int, String>()
 
@@ -23,7 +22,7 @@ object UserMapper : Mapper {
     }
 
     override fun saveToJson() {
-        File("./resources/userToId").writeText(gson.toJson(userToId))
-        File("./resources/idToUser").writeText(gson.toJson(idToUser))
+        UtilFunctions.saveToJson(ProjectConfig.USER_ID_PATH, userToId)
+        UtilFunctions.saveToJson(ProjectConfig.ID_USER_PATH, idToUser)
     }
 }

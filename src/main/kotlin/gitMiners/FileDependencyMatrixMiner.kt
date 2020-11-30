@@ -6,7 +6,10 @@ import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.revwalk.RevCommit
+import util.ProjectConfig
+import util.UtilFunctions
 import java.io.File
+import javax.rmi.CORBA.Util
 
 /**
  * Class for parsing  file dependency matrix
@@ -20,7 +23,6 @@ class FileDependencyMatrixMiner(override val repository: FileRepository) : GitMi
     override val git = Git(repository)
     override val reader: ObjectReader = repository.newObjectReader()
 
-    private val changedFilesMiner = ChangedFilesMiner(repository)
     private val fileDependencyMatrix: HashMap<Int, HashMap<Int, Int>> = HashMap()
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
@@ -46,7 +48,6 @@ class FileDependencyMatrixMiner(override val repository: FileRepository) : GitMi
     }
 
     override fun saveToJson() {
-        changedFilesMiner.saveToJson()
-        File("./resources/fileDependencyMatrix").writeText(Json.encodeToString(fileDependencyMatrix))
+        UtilFunctions.saveToJson(ProjectConfig.FILE_DEPENDENCY_PATH, fileDependencyMatrix)
     }
 }
