@@ -1,15 +1,11 @@
 package gitMiners
 
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig
 import util.UtilFunctions
-import java.io.File
-import javax.rmi.CORBA.Util
 
 /**
  * Class for parsing  file dependency matrix
@@ -39,12 +35,12 @@ class FileDependencyMatrixMiner(override val repository: FileRepository) : GitMi
 
     private fun increment(fileId1: Int, fileId2: Int) {
         val newValue = fileDependencyMatrix
-            .computeIfAbsent(fileId1) {HashMap()}
-            .computeIfAbsent(fileId2) {0}
+            .computeIfAbsent(fileId1) { HashMap() }
+            .computeIfAbsent(fileId2) { 0 }
             .inc()
 
         fileDependencyMatrix
-            .computeIfAbsent(fileId1) {HashMap()} [fileId2] = newValue
+            .computeIfAbsent(fileId1) { HashMap() }[fileId2] = newValue
     }
 
     override fun saveToJson() {

@@ -9,8 +9,10 @@ import util.Graph
  * @property assignmentMatrix
  * @constructor Create empty Calc mirror congruence
  */
-class CalcMirrorCongruence(private val artifactsRelations: Array<Array<Int>>,
-                           private val assignmentMatrix: Array<Array<Int>>) {
+class CalcMirrorCongruence(
+    private val artifactsRelations: Array<Array<Int>>,
+    private val assignmentMatrix: Array<Array<Int>>
+) {
 
     fun run() {
         val Gs = createGraph(artifactsRelations)

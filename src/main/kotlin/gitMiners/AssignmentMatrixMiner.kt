@@ -1,7 +1,5 @@
 package gitMiners
 
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.ObjectReader
@@ -9,7 +7,6 @@ import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig
 import util.UserMapper
 import util.UtilFunctions
-import java.io.File
 
 /**
  * Assignment matrix miner
@@ -28,12 +25,12 @@ class AssignmentMatrixMiner(override val repository: FileRepository) : GitMiner(
         val userId = UserMapper.add(currCommit.authorIdent.emailAddress)
         for (fileId in changedFiles) {
             val newValue = assignmentMatrix
-                .computeIfAbsent(userId) {HashMap()}
-                .computeIfAbsent(fileId) {0}
+                .computeIfAbsent(userId) { HashMap() }
+                .computeIfAbsent(fileId) { 0 }
                 .inc()
 
             assignmentMatrix
-                .computeIfAbsent(userId) {HashMap()} [fileId] = newValue
+                .computeIfAbsent(userId) { HashMap() }[fileId] = newValue
         }
 
     }

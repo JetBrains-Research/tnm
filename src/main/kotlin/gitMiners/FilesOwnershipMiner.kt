@@ -12,9 +12,9 @@ import org.eclipse.jgit.util.io.DisabledOutputStream
 import util.FileMapper
 import util.ProjectConfig
 import util.UserMapper
+import util.UtilFunctions
 import java.util.concurrent.TimeUnit
 import kotlin.math.pow
-import util.*
 
 // Class based on paper:
 // "Engaging developers in open source software projects: harnessing social and technical data
@@ -26,19 +26,24 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() 
     override val reader: ObjectReader = repository.newObjectReader()
 
     private val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
+
     // [fileId][userId]
     private val filesOwnership: HashMap<Int, HashMap<Int, UserData>> = HashMap()
+
     // [fileId][line] = set(userId, ...)
     private val authorsForLine: HashMap<Int, HashMap<Int, HashSet<Int>>> = HashMap()
+
     // denoting the total potential authorship amount of all developers
     // [fileId]
     private val potentialAuthorship = mutableMapOf<Int, Int>()
+
     // denoting the total potential authorship amount of all developers
     // [userId][fileId]
     private val developerKnowledge: HashMap<Int, HashMap<Int, Double>> = HashMap()
 
 
     val decayFactor = 0.01
+
     // TODO: think about branches
     private val latestCommit = git.log().setMaxCount(1).call().iterator().next()
     private val latestCommitDate = latestCommit.authorIdent.getWhen()
@@ -66,9 +71,9 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() 
             for (edit in editList) {
                 // TODO: what about deleted lines?
                 filesOwnership
-                        .computeIfAbsent(fileId) { HashMap() }
-                        .computeIfAbsent(userId) { UserData() }
-                        .calculateAuthorship(edit.beginB..edit.endB, diffDays)
+                    .computeIfAbsent(fileId) { HashMap() }
+                    .computeIfAbsent(userId) { UserData() }
+                    .calculateAuthorship(edit.beginB..edit.endB, diffDays)
                 addAuthorsForLines(edit.beginB..edit.endB, fileId, userId)
                 // linesDeleted += edit.endA - edit.beginA
                 // linesAdded += edit.endB - edit.beginB
@@ -98,9 +103,9 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() 
             val fileId = FileMapper.add(filePath)
 
             val result = git
-                    .blame()
-                    .setFilePath(filePath)
-                    .setTextComparator(RawTextComparator.WS_IGNORE_ALL).call()
+                .blame()
+                .setFilePath(filePath)
+                .setTextComparator(RawTextComparator.WS_IGNORE_ALL).call()
 
             val rawText = result.resultContents
 
@@ -110,26 +115,26 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() 
                 val userId = UserMapper.add(sourceAuthor.emailAddress)
 
                 filesOwnership
-                        .computeIfAbsent(fileId) { HashMap() }
-                        .computeIfAbsent(userId) { UserData() }
-                        .calculateAuthorship(i..i, 0)
+                    .computeIfAbsent(fileId) { HashMap() }
+                    .computeIfAbsent(userId) { UserData() }
+                    .calculateAuthorship(i..i, 0)
                 addAuthorsForLines(i..i, fileId, userId)
             }
         }
     }
 
     override fun saveToJson() {
-        UtilFunctions.saveToJson(ProjectConfig.FILES_OWNERSHIP_PATH,filesOwnership)
+        UtilFunctions.saveToJson(ProjectConfig.FILES_OWNERSHIP_PATH, filesOwnership)
         UtilFunctions.saveToJson(ProjectConfig.POTENTIAL_OWNERSHIP_PATH, potentialAuthorship)
         UtilFunctions.saveToJson(ProjectConfig.DEVELOPER_KNOWLEDGE_PATH, developerKnowledge)
     }
 
-    private fun addAuthorsForLines(lines: IntRange, fileId:Int, userId: Int) {
+    private fun addAuthorsForLines(lines: IntRange, fileId: Int, userId: Int) {
         for (line in lines) {
             authorsForLine
-                    .computeIfAbsent(fileId) { HashMap() }
-                    .computeIfAbsent(userId) { HashSet() }
-                    .add(line)
+                .computeIfAbsent(fileId) { HashMap() }
+                .computeIfAbsent(userId) { HashSet() }
+                .add(line)
         }
     }
 
@@ -151,7 +156,7 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() 
                 val userId = entryUserData.key
                 val userData = entryUserData.value
                 developerKnowledge
-                        .computeIfAbsent(userId) { HashMap() }[fileId] = userData.authorship / potentialAuthorship[fileId]!!
+                    .computeIfAbsent(userId) { HashMap() }[fileId] = userData.authorship / potentialAuthorship[fileId]!!
             }
         }
     }

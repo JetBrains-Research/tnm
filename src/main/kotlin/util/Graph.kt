@@ -5,13 +5,13 @@ class Graph<T> {
 
     fun addEdge(sourceVertex: T, destinationVertex: T) {
         adjacencyMap
-                .computeIfAbsent(sourceVertex) { HashSet() }
-                .add(destinationVertex)
+            .computeIfAbsent(sourceVertex) { HashSet() }
+            .add(destinationVertex)
     }
 
     fun addNode(node: T) {
         adjacencyMap
-                .computeIfAbsent(node) { HashSet() }
+            .computeIfAbsent(node) { HashSet() }
     }
 
     override fun toString(): String = StringBuffer().apply {
