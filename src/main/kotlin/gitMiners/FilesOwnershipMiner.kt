@@ -1,5 +1,6 @@
 package gitMiners
 
+import kotlinx.serialization.Serializable
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
@@ -121,7 +122,6 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() 
         }
     }
 
-    // TODO: check serialization
     override fun saveToJson() {
         UtilFunctions.saveToJson(ProjectConfig.FILES_OWNERSHIP_PATH,filesOwnership)
         UtilFunctions.saveToJson(ProjectConfig.POTENTIAL_OWNERSHIP_PATH, potentialAuthorship)
@@ -160,6 +160,7 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() 
         }
     }
 
+    @Serializable
     inner class UserData {
         private val ownedLines = mutableSetOf<Int>()
         var authorship: Double = 0.0
@@ -176,9 +177,9 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() 
 }
 
 fun main() {
-    val parse = FilesOwnershipMiner(ProjectConfig.repository)
-    parse.run()
-    parse.saveToJson()
+    val miner = FilesOwnershipMiner(ProjectConfig.repository)
+    miner.run()
+    miner.saveToJson()
     FileMapper.saveToJson()
     UserMapper.saveToJson()
 }
