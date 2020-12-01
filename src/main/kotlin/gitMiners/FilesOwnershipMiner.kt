@@ -62,18 +62,16 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() 
 
             val date = currCommit.authorIdent.getWhen()
 
-            // Long -> Int
             val diffDays: Int = TimeUnit.DAYS.convert(latestCommitDate.time - date.time, TimeUnit.MILLISECONDS).toInt()
             for (edit in editList) {
                 // TODO: what about deleted lines?
-                // TODO: Wrong calculation?? doesn't saves the result?
                 filesOwnership
                         .computeIfAbsent(fileId) { HashMap() }
                         .computeIfAbsent(userId) { UserData() }
                         .calculateAuthorship(edit.beginB..edit.endB, diffDays)
                 addAuthorsForLines(edit.beginB..edit.endB, fileId, userId)
-                //                linesDeleted += edit.endA - edit.beginA
-//                linesAdded += edit.endB - edit.beginB
+                // linesDeleted += edit.endA - edit.beginA
+                // linesAdded += edit.endB - edit.beginB
 
             }
         }
@@ -108,11 +106,9 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() 
 
             for (i in 0 until rawText.size()) {
                 val sourceAuthor = result.getSourceAuthor(i)
-//                val sourceCommit = result.getSourceCommit(i)
 
                 val userId = UserMapper.add(sourceAuthor.emailAddress)
 
-                // TODO: Wrong calculation?? doesn't saves the result?
                 filesOwnership
                         .computeIfAbsent(fileId) { HashMap() }
                         .computeIfAbsent(userId) { UserData() }
