@@ -76,10 +76,7 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner() {
         return result
     }
 
-    override fun saveToJson() {
-        UtilFunctions.saveToJson(ProjectConfig.COMMITS_GRAPH_PATH, commitsGraph.adjacencyMap)
-        UtilFunctions.saveToJson(ProjectConfig.CONCURRENT_GRAPH_PATH, concurrentGraph)
-    }
+
 
     override fun run() {
         val branches: List<Ref> = git.branchList().call()
@@ -202,11 +199,18 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner() {
     private fun isBugFix(commit: RevCommit): Boolean {
         return "fix" in commit.shortMessage.toLowerCase()
     }
+
+    override fun saveToJson() {
+        UtilFunctions.saveToJson(ProjectConfig.COMMITS_GRAPH_PATH, commitsGraph.adjacencyMap)
+
+//        UtilFunctions.saveToJson(ProjectConfig.CONCURRENT_GRAPH_PATH, concurrentGraph)
+    }
+
 }
 
 fun main() {
-    val m = PageRankMiner(ProjectConfig.repository)
-    m.run()
-    m.saveToJson()
+    val miner = PageRankMiner(ProjectConfig.repository)
+    miner.run()
+    miner.saveToJson()
     CommitMapper.saveToJson()
 }

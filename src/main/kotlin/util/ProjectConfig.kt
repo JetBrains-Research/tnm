@@ -38,5 +38,9 @@ object ProjectConfig {
 
     // CalcCNMatrix
     const val CN_MATRIX_PATH = "$RESOURCES_PATH/CN"
+
+    // PageRank result
+    const val PAGERANK_MATRIX_PATH = "$RESOURCES_PATH/PrageRank"
+
     val repository = FileRepository("${REPO_DIR}/.git")
 }
