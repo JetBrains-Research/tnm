@@ -11,7 +11,14 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.HashMap
 
-
+/**
+ * Class for mining time distribution of commits for each user.
+ * As the result creates map of time and number of commits. Each
+ * key (time) represents minutes in week.
+ *
+ * @property repository
+ * @constructor Create empty Work time miner
+ */
 class WorkTimeMiner(override val repository: FileRepository) : GitMiner() {
     override val git = Git(repository)
     override val reader: ObjectReader = repository.newObjectReader()

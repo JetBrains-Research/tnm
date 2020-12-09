@@ -8,7 +8,7 @@ import util.ProjectConfig
 import util.UtilFunctions
 
 /**
- * Class for parsing  file dependency matrix
+ * Class for mining  file dependency matrix
  * based on https://ieeexplore.ieee.org/abstract/document/5740929
  * For example:
  * Change sets {A,B,C} and {A,B} the dependency matrix entries in D would be
