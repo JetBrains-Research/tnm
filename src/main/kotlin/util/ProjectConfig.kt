@@ -36,6 +36,10 @@ object ProjectConfig {
     // AssignmentMatrixMiner
     const val ASSIGNMENT_MATRIX_PATH = "$RESOURCES_PATH/assignmentMatrix"
 
+
+    // WorkTimeMiner
+    const val WORKTIME_DISTRIBUTION_PATH = "$RESOURCES_PATH/WorkTime"
+
     // CalcCNMatrix
     const val CN_MATRIX_PATH = "$RESOURCES_PATH/CN"
 
