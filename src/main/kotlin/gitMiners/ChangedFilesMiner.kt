@@ -20,7 +20,7 @@ class ChangedFilesMiner(override val repository: FileRepository) : GitMiner() {
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
         val userEmail = currCommit.authorIdent.emailAddress
         val userId = UserMapper.add(userEmail)
-        val changedFiles = getChangedFiles(currCommit, prevCommit, reader, git)
+        val changedFiles = UtilGitMiner.getChangedFiles(currCommit, prevCommit, reader, git)
 
         for (fileId in changedFiles) {
             userFilesIds.computeIfAbsent(userId) { mutableSetOf() }.add(fileId)

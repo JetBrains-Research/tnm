@@ -23,7 +23,7 @@ class FileDependencyMatrixMiner(override val repository: FileRepository) : GitMi
     private val fileDependencyMatrix: HashMap<Int, HashMap<Int, Int>> = HashMap()
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
-        val listOfChangedFiles = getChangedFiles(currCommit, prevCommit, reader, git).toList()
+        val listOfChangedFiles = UtilGitMiner.getChangedFiles(currCommit, prevCommit, reader, git).toList()
         for ((index, currFile) in listOfChangedFiles.withIndex()) {
             for (otherFile in listOfChangedFiles.subList(index, listOfChangedFiles.lastIndex)) {
                 if (currFile == otherFile)

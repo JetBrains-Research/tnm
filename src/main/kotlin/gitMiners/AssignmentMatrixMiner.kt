@@ -22,7 +22,7 @@ class AssignmentMatrixMiner(override val repository: FileRepository) : GitMiner(
     private val assignmentMatrix: HashMap<Int, HashMap<Int, Int>> = HashMap()
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
-        val changedFiles = getChangedFiles(currCommit, prevCommit, reader, git)
+        val changedFiles = UtilGitMiner.getChangedFiles(currCommit, prevCommit, reader, git)
         val userId = UserMapper.add(currCommit.authorIdent.emailAddress)
         for (fileId in changedFiles) {
             val newValue = assignmentMatrix

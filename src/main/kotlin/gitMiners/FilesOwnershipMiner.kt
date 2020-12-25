@@ -57,7 +57,7 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() 
     }
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
-        val diffs = getDiffs(currCommit, prevCommit, reader, git)
+        val diffs = UtilGitMiner.getDiffs(currCommit, prevCommit, reader, git)
         val email = currCommit.authorIdent.emailAddress
 
         val userId = UserMapper.add(email)
