@@ -107,7 +107,7 @@ class CalcMirrorCongruence(
         return result
     }
 
-    fun createJ(): Graph<Int> {
+    private fun createJ(): Graph<Int> {
         val result = Graph<Int>()
         val numOfArtifacts = artifactsRelations.size
         val numOfUsers = assignmentMatrix.size
