@@ -84,8 +84,6 @@ object UtilGitMiner {
         val allBranches = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call()
         for (branch in allBranches) {
             val shortBranchName = getShortBranchName(branch.name)
-            println(branch.name)
-            println(shortBranchName)
             if (shortBranchName in needed) {
                 needed.remove(shortBranchName)
                 result.add(branch)
