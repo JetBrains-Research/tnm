@@ -1,8 +1,10 @@
 package gitMiners
 
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.api.ListBranchCommand
 import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.lib.ObjectReader
+import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.treewalk.CanonicalTreeParser
 import util.FileMapper
@@ -54,4 +56,50 @@ object UtilGitMiner {
         return result
     }
 
+    /**
+     * Get short branch name. Removes first two parts before '/'.
+     * For example this parts could be 'refs/remotes/' or 'refs/head/'
+     *
+     * @param branchName full branch name from branch.name call
+     * @return short branch name
+     */
+    fun getShortBranchName(branchName: String): String {
+        val index = branchName.indexOf("/", branchName.indexOf("/") + 1)
+        if (index == -1) return branchName
+        return branchName.substring(index + 1, branchName.length)
+    }
+
+    /**
+     * Look for [neededBranches] in [git]. Proceed each branch name with [getShortBranchName]
+     * and check if [neededBranches] contains it. If it's true store in result.
+     * If all branches are found returns result, otherwise null.
+     *
+     * @param git git where to look for branches
+     * @param neededBranches set of needed branches
+     * @return set of Refs for needed branches or null
+     */
+    fun findNeededBranchesOrNull(git: Git, neededBranches: Set<String>): Set<Ref>? {
+        val result = mutableSetOf<Ref>()
+        val needed = neededBranches.toMutableSet()
+        val allBranches = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call()
+        for (branch in allBranches) {
+            val shortBranchName = getShortBranchName(branch.name)
+            println(branch.name)
+            println(shortBranchName)
+            if (shortBranchName in needed) {
+                needed.remove(shortBranchName)
+                result.add(branch)
+                continue
+            }
+        }
+
+        if (needed.isNotEmpty()) {
+            println("Couldn't find branches:")
+            needed.forEach{ println(it) }
+            println("Known branches:")
+            allBranches.forEach { println(getShortBranchName(it.name)) }
+            return null
+        }
+        return result
+    }
 }
