@@ -6,6 +6,7 @@ import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig
 import util.UtilFunctions
+import java.io.File
 
 /**
  * Class for mining  file dependency matrix
@@ -43,7 +44,7 @@ class FileDependencyMatrixMiner(override val repository: FileRepository) : GitMi
             .computeIfAbsent(fileId1) { HashMap() }[fileId2] = newValue
     }
 
-    override fun saveToJson() {
-        UtilFunctions.saveToJson(ProjectConfig.FILE_DEPENDENCY_PATH, fileDependencyMatrix)
+    override fun saveToJson(resourceDirectory: File) {
+        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.FILE_DEPENDENCY), fileDependencyMatrix)
     }
 }

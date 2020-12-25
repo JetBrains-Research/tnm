@@ -1,5 +1,7 @@
 package util
 
+import java.io.File
+
 
 /**
  * This object maps commits to unique id.
@@ -21,8 +23,8 @@ object CommitMapper : Mapper {
         return lastCommitId - 1
     }
 
-    override fun saveToJson() {
-        UtilFunctions.saveToJson(ProjectConfig.COMMIT_ID_PATH, commitToId)
-        UtilFunctions.saveToJson(ProjectConfig.ID_COMMIT_PATH, idToCommit)
+    override fun saveToJson(resourceDirectory: File) {
+        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.COMMIT_ID), commitToId)
+        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.ID_COMMIT), idToCommit)
     }
 }

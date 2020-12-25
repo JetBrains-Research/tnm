@@ -1,5 +1,7 @@
 package util
 
+import java.io.File
+
 
 /**
  * This object maps files to unique id.
@@ -18,7 +20,7 @@ object FileMapper : Mapper {
         return lastFileId - 1
     }
 
-    override fun saveToJson() {
-        UtilFunctions.saveToJson(ProjectConfig.FILE_ID_PATH, fileToId)
+    override fun saveToJson(resourceDirectory: File) {
+        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.FILE_ID), fileToId)
     }
 }

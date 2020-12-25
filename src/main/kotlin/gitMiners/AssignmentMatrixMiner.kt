@@ -7,6 +7,7 @@ import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig
 import util.UserMapper
 import util.UtilFunctions
+import java.io.File
 
 /**
  * Assignment matrix miner
@@ -35,7 +36,7 @@ class AssignmentMatrixMiner(override val repository: FileRepository) : GitMiner(
 
     }
 
-    override fun saveToJson() {
-        UtilFunctions.saveToJson(ProjectConfig.ASSIGNMENT_MATRIX_PATH, assignmentMatrix)
+    override fun saveToJson(resourceDirectory: File) {
+        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.ASSIGNMENT_MATRIX), assignmentMatrix)
     }
 }

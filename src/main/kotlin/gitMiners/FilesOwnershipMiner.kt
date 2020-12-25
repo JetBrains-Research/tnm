@@ -13,6 +13,7 @@ import util.FileMapper
 import util.ProjectConfig
 import util.UserMapper
 import util.UtilFunctions
+import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.math.pow
 
@@ -24,6 +25,7 @@ import kotlin.math.pow
 class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() {
     override val git = Git(repository)
     override val reader: ObjectReader = repository.newObjectReader()
+
 
     private val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
 
@@ -123,10 +125,10 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() 
         }
     }
 
-    override fun saveToJson() {
-        UtilFunctions.saveToJson(ProjectConfig.FILES_OWNERSHIP_PATH, filesOwnership)
-        UtilFunctions.saveToJson(ProjectConfig.POTENTIAL_OWNERSHIP_PATH, potentialAuthorship)
-        UtilFunctions.saveToJson(ProjectConfig.DEVELOPER_KNOWLEDGE_PATH, developerKnowledge)
+    override fun saveToJson(resourceDirectory: File) {
+        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.FILES_OWNERSHIP), filesOwnership)
+        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.POTENTIAL_OWNERSHIP), potentialAuthorship)
+        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.DEVELOPER_KNOWLEDGE), developerKnowledge)
     }
 
     private fun addAuthorsForLines(lines: IntRange, fileId: Int, userId: Int) {
@@ -180,7 +182,7 @@ class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() 
 fun main() {
     val miner = FilesOwnershipMiner(ProjectConfig.repository)
     miner.run()
-    miner.saveToJson()
-    FileMapper.saveToJson()
-    UserMapper.saveToJson()
+    miner.saveToJson(File(ProjectConfig.RESOURCES_PATH))
+    FileMapper.saveToJson(File(ProjectConfig.RESOURCES_PATH))
+    UserMapper.saveToJson(File(ProjectConfig.RESOURCES_PATH))
 }

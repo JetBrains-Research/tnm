@@ -8,6 +8,7 @@ import util.FileMapper
 import util.ProjectConfig
 import util.UserMapper
 import util.UtilFunctions
+import java.io.File
 
 class ChangedFilesMiner(override val repository: FileRepository) : GitMiner() {
     override val git = Git(repository)
@@ -26,14 +27,14 @@ class ChangedFilesMiner(override val repository: FileRepository) : GitMiner() {
         }
     }
 
-    override fun saveToJson() {
-        UtilFunctions.saveToJson(ProjectConfig.USER_FILES_IDS_PATH, userFilesIds)
+    override fun saveToJson(resourceDirectory: File) {
+        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.USER_FILES_IDS), userFilesIds)
     }
 }
 
 fun main() {
     val parseChangedFiles = ChangedFilesMiner(ProjectConfig.repository)
     parseChangedFiles.run()
-    FileMapper.saveToJson()
-    UserMapper.saveToJson()
+    FileMapper.saveToJson(File(ProjectConfig.RESOURCES_PATH))
+    UserMapper.saveToJson(File(ProjectConfig.RESOURCES_PATH))
 }

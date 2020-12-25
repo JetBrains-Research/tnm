@@ -10,9 +10,9 @@ import java.io.File
 
 object UtilFunctions {
     // TODO: try catch logic for encode and file
-    inline fun <reified T> saveToJson(filePath: String, data: T) {
+    inline fun <reified T> saveToJson(file: File, data: T) {
         val jsonString = Json.encodeToString(data)
-        File(filePath).writeText(jsonString)
+        file.writeText(jsonString)
     }
 
     fun loadArray(file: File, rows: Int, columns: Int): INDArray {

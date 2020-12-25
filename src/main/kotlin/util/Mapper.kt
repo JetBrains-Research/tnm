@@ -1,6 +1,8 @@
 package util
 
+import java.io.File
+
 interface Mapper {
     fun add(value: String): Int
-    fun saveToJson()
+    fun saveToJson(resourceDirectory: File)
 }

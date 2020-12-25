@@ -13,6 +13,7 @@ import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.treewalk.CanonicalTreeParser
 import org.eclipse.jgit.util.io.DisabledOutputStream
 import util.*
+import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListSet
 import java.util.concurrent.Executors
@@ -200,8 +201,8 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner() {
         return "fix" in commit.shortMessage.toLowerCase()
     }
 
-    override fun saveToJson() {
-        UtilFunctions.saveToJson(ProjectConfig.COMMITS_GRAPH_PATH, commitsGraph.adjacencyMap)
+    override fun saveToJson(resourceDirectory: File) {
+        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.COMMITS_GRAPH), commitsGraph.adjacencyMap)
 
 //        UtilFunctions.saveToJson(ProjectConfig.CONCURRENT_GRAPH_PATH, concurrentGraph)
     }
@@ -211,6 +212,6 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner() {
 fun main() {
     val miner = PageRankMiner(ProjectConfig.repository)
     miner.run()
-    miner.saveToJson()
-    CommitMapper.saveToJson()
+    miner.saveToJson(File(ProjectConfig.RESOURCES_PATH))
+    CommitMapper.saveToJson(File(ProjectConfig.RESOURCES_PATH))
 }

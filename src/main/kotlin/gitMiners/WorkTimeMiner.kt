@@ -7,6 +7,7 @@ import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig
 import util.UserMapper
 import util.UtilFunctions
+import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.HashMap
@@ -46,13 +47,13 @@ class WorkTimeMiner(override val repository: FileRepository) : GitMiner() {
 
     }
 
-    override fun saveToJson() {
-        UtilFunctions.saveToJson(ProjectConfig.WORKTIME_DISTRIBUTION_PATH, workTimeDistribution)
+    override fun saveToJson(resourceDirectory: File) {
+        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.WORKTIME_DISTRIBUTION), workTimeDistribution)
     }
 }
 
 fun main() {
     val miner = WorkTimeMiner(ProjectConfig.repository)
     miner.run()
-    miner.saveToJson()
+    miner.saveToJson(File(ProjectConfig.RESOURCES_PATH))
 }

@@ -9,12 +9,12 @@ import util.UtilFunctions
 import java.io.File
 
 class CalcPageRank {
-    fun run(alpha: Float = 0.85f) {
-        val jsonCommitsMapper = File(ProjectConfig.COMMIT_ID_PATH).readText()
+    fun run(resourceDirectory: File, alpha: Float = 0.85f) {
+        val jsonCommitsMapper = File(resourceDirectory, ProjectConfig.COMMIT_ID).readText()
         val commitsMap = Json.decodeFromString<HashMap<String, Int>>(jsonCommitsMapper)
         val size = commitsMap.size
 
-        val commitsGraphFile = File(ProjectConfig.COMMITS_GRAPH_PATH)
+        val commitsGraphFile = File(resourceDirectory, ProjectConfig.COMMITS_GRAPH)
 
         val H = UtilFunctions.loadGraph(commitsGraphFile, size)
         val A = loadMatrixA(commitsGraphFile, size)
@@ -32,7 +32,7 @@ class CalcPageRank {
 
         // TODO: do we really need?
         UtilFunctions.normalizeMax(I)
-        UtilFunctions.saveToJson(ProjectConfig.PAGERANK_MATRIX_PATH, I.toFloatMatrix())
+        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.PAGERANK_MATRIX), I.toFloatMatrix())
 
     }
 
@@ -53,5 +53,5 @@ class CalcPageRank {
 
 fun main() {
     val calc = CalcPageRank()
-    calc.run()
+    calc.run(File(ProjectConfig.RESOURCES_PATH))
 }

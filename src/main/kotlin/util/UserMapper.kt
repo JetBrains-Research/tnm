@@ -1,5 +1,7 @@
 package util
 
+import java.io.File
+
 /**
  * This object maps users to unique id.
  *
@@ -21,8 +23,8 @@ object UserMapper : Mapper {
         return lastUserId - 1
     }
 
-    override fun saveToJson() {
-        UtilFunctions.saveToJson(ProjectConfig.USER_ID_PATH, userToId)
-        UtilFunctions.saveToJson(ProjectConfig.ID_USER_PATH, idToUser)
+    override fun saveToJson(resourceDirectory: File) {
+        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.USER_ID), userToId)
+        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.ID_USER), idToUser)
     }
 }

@@ -2,13 +2,16 @@ package gitMiners
 
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffEntry
+import org.eclipse.jgit.lib.Config
 import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.treewalk.CanonicalTreeParser
 import util.FileMapper
+import util.ProjectConfig
 import util.UserMapper
+import java.io.File
 
 abstract class GitMiner {
 
@@ -98,5 +101,5 @@ abstract class GitMiner {
      * Saves to json all mined data.
      *
      */
-    abstract fun saveToJson()
+    abstract fun saveToJson(resourceDirectory: File)
 }
