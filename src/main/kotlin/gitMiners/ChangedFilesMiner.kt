@@ -10,7 +10,10 @@ import util.UserMapper
 import util.UtilFunctions
 import java.io.File
 
-class ChangedFilesMiner(override val repository: FileRepository) : GitMiner() {
+class ChangedFilesMiner(
+    override val repository: FileRepository,
+    override val neededBranches: Set<String> = ProjectConfig.neededBranches
+) : GitMiner() {
     override val git = Git(repository)
     override val reader: ObjectReader = repository.newObjectReader()
 

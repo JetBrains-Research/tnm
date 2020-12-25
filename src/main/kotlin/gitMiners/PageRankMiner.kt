@@ -8,7 +8,6 @@ import org.eclipse.jgit.diff.Edit
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.ObjectReader
-import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.treewalk.CanonicalTreeParser
 import org.eclipse.jgit.util.io.DisabledOutputStream
@@ -28,7 +27,10 @@ import java.util.concurrent.Executors
  * @property repository working repository
  * @constructor Create Page rank miner for [repository] and store the results
  */
-class PageRankMiner(override val repository: FileRepository) : GitMiner() {
+class PageRankMiner(
+    override val repository: FileRepository,
+    override val neededBranches: Set<String> = ProjectConfig.neededBranches
+) : GitMiner() {
     override val git = Git(repository)
     override val reader: ObjectReader = repository.newObjectReader()
 
@@ -79,7 +81,7 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner() {
 
 
     override fun run() {
-        val branches: List<Ref> = git.branchList().call()
+        val branches = UtilGitMiner.findNeededBranchesOrNull(git, neededBranches) ?: return
 
         for (branch in branches) {
             val commitsInBranch = git.log()

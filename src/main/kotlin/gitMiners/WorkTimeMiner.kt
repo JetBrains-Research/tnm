@@ -20,7 +20,10 @@ import kotlin.collections.HashMap
  * @property repository
  * @constructor Create empty Work time miner
  */
-class WorkTimeMiner(override val repository: FileRepository) : GitMiner() {
+class WorkTimeMiner(
+    override val repository: FileRepository,
+    override val neededBranches: Set<String> = ProjectConfig.neededBranches
+) : GitMiner() {
     override val git = Git(repository)
     override val reader: ObjectReader = repository.newObjectReader()
 

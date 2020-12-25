@@ -15,7 +15,10 @@ import java.io.File
  * @property repository
  * @constructor Create empty Assignment matrix miner for [repository] and store the results
  */
-class AssignmentMatrixMiner(override val repository: FileRepository) : GitMiner() {
+class AssignmentMatrixMiner(
+    override val repository: FileRepository,
+    override val neededBranches: Set<String> = ProjectConfig.neededBranches
+) : GitMiner() {
     override val git = Git(repository)
     override val reader: ObjectReader = repository.newObjectReader()
 

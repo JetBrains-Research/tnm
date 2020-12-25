@@ -2,7 +2,6 @@ package gitMiners
 
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.ObjectReader
-import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevCommit
 import java.io.File
@@ -12,6 +11,7 @@ abstract class GitMiner {
     abstract val repository: Repository
     abstract val git: Git
     abstract val reader: ObjectReader
+    abstract val neededBranches: Set<String>
 
     /**
      * Mine all needed data from pair of commits.
@@ -29,7 +29,7 @@ abstract class GitMiner {
      *
      */
     open fun run() {
-        val branches: List<Ref> = git.branchList().call()
+        val branches = UtilGitMiner.findNeededBranchesOrNull(git, neededBranches) ?: return
 
         for (branch in branches) {
             val commitsInBranch = git.log().add(repository.resolve(branch.name)).call()

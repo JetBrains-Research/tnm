@@ -16,7 +16,10 @@ import java.io.File
  * D[A,B] = 2, D[A,C] = 1, and D[B,C] = 1
  *
  */
-class FileDependencyMatrixMiner(override val repository: FileRepository) : GitMiner() {
+class FileDependencyMatrixMiner(
+    override val repository: FileRepository,
+    override val neededBranches: Set<String> = ProjectConfig.neededBranches
+) : GitMiner() {
     override val git = Git(repository)
     override val reader: ObjectReader = repository.newObjectReader()
 

@@ -22,7 +22,10 @@ import kotlin.math.pow
 // mining to improve software development"
 // https://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=5670&context=etd
 // TODO: Double, Float?
-class FilesOwnershipMiner(override val repository: FileRepository) : GitMiner() {
+class FilesOwnershipMiner(
+    override val repository: FileRepository,
+    override val neededBranches: Set<String> = ProjectConfig.neededBranches
+) : GitMiner() {
     override val git = Git(repository)
     override val reader: ObjectReader = repository.newObjectReader()
 

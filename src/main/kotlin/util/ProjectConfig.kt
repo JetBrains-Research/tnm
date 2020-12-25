@@ -47,4 +47,5 @@ object ProjectConfig {
     const val PAGERANK_MATRIX = "PrageRank"
 
     val repository = FileRepository("${REPO_DIR}/.git")
+    val neededBranches = setOf("master")
 }
