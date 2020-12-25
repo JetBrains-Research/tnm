@@ -93,7 +93,7 @@ object UtilGitMiner {
 
         if (needed.isNotEmpty()) {
             println("Couldn't find branches:")
-            needed.forEach{ println(it) }
+            needed.forEach { println(it) }
             println("Known branches:")
             allBranches.forEach { println(getShortBranchName(it.name)) }
             return null

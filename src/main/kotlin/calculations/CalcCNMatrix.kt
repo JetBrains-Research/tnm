@@ -2,9 +2,6 @@ package calculations
 
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.nd4j.linalg.api.ndarray.INDArray
-import org.nd4j.linalg.dataset.api.preprocessor.NormalizerMinMaxScaler
-import org.nd4j.linalg.factory.Nd4j
 import util.ProjectConfig
 import util.UtilFunctions
 import java.io.File
@@ -34,7 +31,6 @@ class CalcCNMatrix(private val resourceDirectory: File) {
         UtilFunctions.normalizeMax(CN)
         UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.CN_MATRIX), CN.toFloatMatrix())
     }
-
 
 
 }

@@ -78,7 +78,6 @@ class PageRankMiner(override val repository: FileRepository) : GitMiner() {
     }
 
 
-
     override fun run() {
         val branches: List<Ref> = git.branchList().call()
 

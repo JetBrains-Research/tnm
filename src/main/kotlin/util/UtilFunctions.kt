@@ -30,7 +30,7 @@ object UtilFunctions {
         val result = Array(size) { FloatArray(size) }
         val map = Json.decodeFromString<HashMap<Int, HashSet<Int>>>(file.readText())
         for (entry in map) {
-            val nodeFrom  = entry.key
+            val nodeFrom = entry.key
             for (nodeTo in entry.value) {
                 result[nodeFrom][nodeTo] = 1F
             }

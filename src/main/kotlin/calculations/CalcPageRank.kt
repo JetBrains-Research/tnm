@@ -19,10 +19,10 @@ class CalcPageRank {
         val H = UtilFunctions.loadGraph(commitsGraphFile, size)
         val A = loadMatrixA(commitsGraphFile, size)
         val ones = Nd4j.ones(size, size)
-        val G = H.muli(alpha).addi(A.muli(alpha)).addi(ones.muli( (1 - alpha) / size ))
+        val G = H.muli(alpha).addi(A.muli(alpha)).addi(ones.muli((1 - alpha) / size))
 
-        var I =  Nd4j.zeros(size, 1)
-        I.put(0,0,1F)
+        var I = Nd4j.zeros(size, 1)
+        I.put(0, 0, 1F)
 
 
         // must be between 50-100 iterations
@@ -42,7 +42,7 @@ class CalcPageRank {
         val result = Nd4j.create(Array(size) { FloatArray(size) { coefficient } })
         val map = Json.decodeFromString<HashMap<Int, HashSet<Int>>>(file.readText())
         for (entry in map) {
-            val nodeFrom  = entry.key
+            val nodeFrom = entry.key
             if (entry.value.size != 0) {
                 result.getColumn(nodeFrom.toLong()).addi(-coefficient)
             }
