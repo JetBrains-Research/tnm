@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm") version "1.4.10"
     kotlin("plugin.serialization") version "1.4.10"
     id("application")
+    `maven-publish`
 }
 
 application {
@@ -28,4 +29,28 @@ dependencies {
 
 tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "tcd"
+            artifactId = "technical-connections"
+            version = "0.2"
+
+            from(components["java"])
+        }
+    }
+    val spaceUsername: String by project
+    val spacePassword: String by project
+
+    repositories {
+        maven {
+            url = uri("https://packages.jetbrains.team/maven/p/tcd/maven")
+            credentials {
+                username = spaceUsername
+                password = spacePassword
+            }
+        }
+    }
 }
