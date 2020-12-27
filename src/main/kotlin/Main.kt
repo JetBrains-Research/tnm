@@ -1,29 +1,13 @@
-import gitMiners.FilesOwnershipMiner
+import gitMiners.UtilGitMiner
+import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 
 
 fun main() {
-//    val uri = "https://github.com/facebook/react.git"
-    val dir = "./local_repository"
+    val neededBranches  = setOf("control-3", "origin/control-3-dev")
+    val repoJava = FileRepository("/home/nikolaisv/study/java/java-2_2020/.git/")
+    val git = Git(repoJava)
 
-    val repository = FileRepository("${dir}/.git")
-//    val parseChangedFiles = ParseChangedFiles(repository)
-//    parseChangedFiles.run()
+    println(UtilGitMiner.findNeededBranchesOrNull(git, neededBranches))
 
-//    val parseFileDependencyMatrix = ParseFileDependencyMatrix(repository)
-//    parseFileDependencyMatrix.run()
-
-//    val parseAssignmentMatrix = ParseAssignmentMatrix(repository)
-//    parseAssignmentMatrix.run()
-
-//    val gson = Gson()
-//    val readerArtifacts = JsonReader(FileReader("./resources/fileDependencyMatrix"))
-//    val readerAssignment = JsonReader(FileReader("./resources/assignmentMatrix"))
-//    val artifactsRelations: Array<Array<Int>> = gson.fromJson(readerArtifacts, Array<Array<Int>>::class.java)
-//    val assignmentMatrix: Array<Array<Int>> = gson.fromJson(readerAssignment, Array<Array<Int>>::class.java)
-
-//    CalcMirrorCongruence(artifactsRelations, assignmentMatrix).run()
-
-    val parse = FilesOwnershipMiner(repository)
-    parse.run()
 }

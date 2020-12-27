@@ -24,6 +24,7 @@ dependencies {
     implementation("org.deeplearning4j:deeplearning4j-core:1.0.0-beta6")
     implementation("org.nd4j:nd4j-native-platform:1.0.0-beta6")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")
+    implementation("org.apache.commons:commons-math3:3.6.1")
     testImplementation(kotlin("test-junit"))
 }
 

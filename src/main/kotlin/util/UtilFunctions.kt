@@ -26,7 +26,7 @@ object UtilFunctions {
         return Nd4j.create(result)
     }
 
-    fun loadGraph(file: File, size: Int): INDArray {
+    fun loadGraph_Nd4j(file: File, size: Int): INDArray {
         val result = Array(size) { FloatArray(size) }
         val map = Json.decodeFromString<HashMap<Int, HashSet<Int>>>(file.readText())
         for (entry in map) {
@@ -37,6 +37,19 @@ object UtilFunctions {
         }
 
         return Nd4j.create(result)
+    }
+
+    fun loadGraph(file: File, size: Int): Array<DoubleArray> {
+        val result = Array(size) { DoubleArray(size) }
+        val map = Json.decodeFromString<HashMap<Int, HashSet<Int>>>(file.readText())
+        for (entry in map) {
+            val nodeFrom = entry.key
+            for (nodeTo in entry.value) {
+                result[nodeFrom][nodeTo] = 1.0
+            }
+        }
+
+        return result
     }
 
     fun normalizeMax(matrix: INDArray) {
