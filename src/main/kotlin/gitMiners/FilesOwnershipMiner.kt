@@ -107,23 +107,23 @@ class FilesOwnershipMiner(
             val filePath = treeWalk.pathString
             val fileId = FileMapper.add(filePath)
 
-            val result = git
+            val blameResult = git
                 .blame()
                 .setFilePath(filePath)
                 .setTextComparator(RawTextComparator.WS_IGNORE_ALL).call()
 
-            val rawText = result.resultContents
+            val rawText = blameResult.resultContents
 
-            for (i in 0 until rawText.size()) {
-                val sourceAuthor = result.getSourceAuthor(i)
+            for (line in 0 until rawText.size()) {
+                val sourceAuthor = blameResult.getSourceAuthor(line)
 
                 val userId = UserMapper.add(sourceAuthor.emailAddress)
 
                 filesOwnership
                     .computeIfAbsent(fileId) { HashMap() }
                     .computeIfAbsent(userId) { UserData() }
-                    .calculateAuthorship(i..i, 0)
-                addAuthorsForLines(i..i, fileId, userId)
+                    .calculateAuthorship(line..line, 0)
+                addAuthorsForLines(line..line, fileId, userId)
             }
         }
     }
