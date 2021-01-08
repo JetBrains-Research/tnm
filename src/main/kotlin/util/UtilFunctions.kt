@@ -17,8 +17,8 @@ object UtilFunctions {
 
     fun loadArray(file: File, rows: Int, columns: Int): INDArray {
         val result = Array(rows) { FloatArray(columns) }
-        val map = Json.decodeFromString<HashMap<Int, HashMap<Int, Int>>>(file.readText())
-        for ((x, innerMap) in map) {
+        val adjacencyMap = Json.decodeFromString<HashMap<Int, HashMap<Int, Int>>>(file.readText())
+        for ((x, innerMap) in adjacencyMap) {
             for ((y, value) in innerMap) {
                 result[x][y] = value.toFloat()
             }
@@ -28,8 +28,8 @@ object UtilFunctions {
 
     fun loadGraph(file: File, size: Int): INDArray {
         val result = Array(size) { FloatArray(size) }
-        val map = Json.decodeFromString<HashMap<Int, HashSet<Int>>>(file.readText())
-        for (entry in map) {
+        val adjacencyMap = Json.decodeFromString<HashMap<Int, HashSet<Int>>>(file.readText())
+        for (entry in adjacencyMap) {
             val nodeFrom = entry.key
             for (nodeTo in entry.value) {
                 result[nodeFrom][nodeTo] = 1F
