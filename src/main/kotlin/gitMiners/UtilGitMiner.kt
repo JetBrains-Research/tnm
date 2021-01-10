@@ -87,7 +87,6 @@ object UtilGitMiner {
             if (shortBranchName in needed) {
                 needed.remove(shortBranchName)
                 result.add(branch)
-                continue
             }
         }
 
