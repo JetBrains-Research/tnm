@@ -36,15 +36,17 @@ object ProjectConfig {
     // AssignmentMatrixMiner
     const val ASSIGNMENT_MATRIX = "assignmentMatrix"
 
-
     // WorkTimeMiner
     const val WORKTIME_DISTRIBUTION = "WorkTime"
 
-    // CalcCNMatrix
+    // CNMatrix
     const val CN_MATRIX = "CN"
 
     // PageRank result
     const val PAGERANK_MATRIX = "PrageRank"
+
+    // MirrorCongruence
+    const val MIRROR_CONGRUENCE = "mirrorCongruence"
 
     val repository = FileRepository("${REPO_DIR}/.git")
     val neededBranches = setOf("master")
