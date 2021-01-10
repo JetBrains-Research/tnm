@@ -8,12 +8,19 @@ import util.ProjectConfig
 import util.UtilFunctions
 import java.io.File
 
-class CalcPageRank {
-    fun run(resourceDirectory: File, alpha: Float = 0.85f) {
+class PageRankCalculation(private val resourceDirectory: File, private val alpha: Float = 0.85f) : Calculation {
+    val size: Int
+    var result: INDArray? = null
+        private set
+
+    init {
+        // TODO: change size?
         val jsonCommitsMapper = File(resourceDirectory, ProjectConfig.COMMIT_ID).readText()
         val commitsMap = Json.decodeFromString<HashMap<String, Int>>(jsonCommitsMapper)
-        val size = commitsMap.size
+        size = commitsMap.size
+    }
 
+    override fun run() {
         val commitsGraphFile = File(resourceDirectory, ProjectConfig.COMMITS_GRAPH)
 
         val H = UtilFunctions.loadGraph(commitsGraphFile, size)
@@ -24,7 +31,6 @@ class CalcPageRank {
         var I = Nd4j.zeros(size, 1)
         I.put(0, 0, 1F)
 
-
         // must be between 50-100 iterations
         for (i in 0 until 60) {
             I = G.mmul(I)
@@ -32,8 +38,17 @@ class CalcPageRank {
 
         // TODO: do we really need?
         UtilFunctions.normalizeMax(I)
-        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.PAGERANK_MATRIX), I.toFloatMatrix())
+        result = I
 
+    }
+
+    override fun saveToJson(resourceDirectory: File) {
+        result?.let {
+            UtilFunctions.saveToJson(
+                File(resourceDirectory, ProjectConfig.PAGERANK_MATRIX),
+                it.toFloatMatrix()
+            )
+        }
     }
 
     // TODO: find set to 0
@@ -49,9 +64,5 @@ class CalcPageRank {
         }
         return result
     }
-}
 
-fun main() {
-    val calc = CalcPageRank()
-    calc.run(File(ProjectConfig.RESOURCES_PATH))
 }
