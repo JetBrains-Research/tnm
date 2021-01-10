@@ -1,8 +1,6 @@
 package gitMiners
 
-import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
-import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.revwalk.RevCommit
 import util.FileMapper
 import util.ProjectConfig
@@ -11,11 +9,9 @@ import util.UtilFunctions
 import java.io.File
 
 class ChangedFilesMiner(
-    override val repository: FileRepository,
-    override val neededBranches: Set<String> = ProjectConfig.neededBranches
-) : GitMiner() {
-    override val git = Git(repository)
-    override val reader: ObjectReader = repository.newObjectReader()
+    repository: FileRepository,
+    neededBranches: Set<String> = ProjectConfig.neededBranches
+) : GitMiner(repository, neededBranches) {
 
     private val userFilesIds = hashMapOf<Int, MutableSet<Int>>()
 

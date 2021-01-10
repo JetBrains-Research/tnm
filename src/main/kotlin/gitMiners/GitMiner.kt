@@ -6,12 +6,9 @@ import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevCommit
 import java.io.File
 
-abstract class GitMiner {
-
-    abstract val repository: Repository
-    abstract val git: Git
-    abstract val reader: ObjectReader
-    abstract val neededBranches: Set<String>
+abstract class GitMiner(protected val repository: Repository, val neededBranches: Set<String>) {
+    protected val git = Git(repository)
+    protected val reader: ObjectReader = repository.newObjectReader()
 
     /**
      * Mine all needed data from pair of commits.

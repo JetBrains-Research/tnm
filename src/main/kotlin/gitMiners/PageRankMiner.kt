@@ -28,11 +28,9 @@ import java.util.concurrent.Executors
  * @constructor Create Page rank miner for [repository] and store the results
  */
 class PageRankMiner(
-    override val repository: FileRepository,
-    override val neededBranches: Set<String> = ProjectConfig.neededBranches
-) : GitMiner() {
-    override val git = Git(repository)
-    override val reader: ObjectReader = repository.newObjectReader()
+    repository: FileRepository,
+    neededBranches: Set<String> = ProjectConfig.neededBranches
+) : GitMiner(repository, neededBranches) {
 
     private val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
 

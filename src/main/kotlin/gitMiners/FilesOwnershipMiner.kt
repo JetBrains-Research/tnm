@@ -1,11 +1,9 @@
 package gitMiners
 
 import kotlinx.serialization.Serializable
-import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.internal.storage.file.FileRepository
-import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.treewalk.TreeWalk
 import org.eclipse.jgit.util.io.DisabledOutputStream
@@ -23,13 +21,9 @@ import kotlin.math.pow
 // https://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=5670&context=etd
 // TODO: Double, Float?
 class FilesOwnershipMiner(
-    override val repository: FileRepository,
-    override val neededBranches: Set<String> = ProjectConfig.neededBranches
-) : GitMiner() {
-    override val git = Git(repository)
-    override val reader: ObjectReader = repository.newObjectReader()
-
-
+    repository: FileRepository,
+    neededBranches: Set<String> = ProjectConfig.neededBranches
+) : GitMiner(repository, neededBranches) {
     private val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
 
     // [fileId][userId]

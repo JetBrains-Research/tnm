@@ -69,6 +69,15 @@ object UtilGitMiner {
         return branchName.substring(index + 1, branchName.length)
     }
 
+    fun getAvailableBranchesShortNames(git: Git): Set<String> {
+        return git
+            .branchList()
+            .setListMode(ListBranchCommand.ListMode.ALL)
+            .call()
+            .map { getShortBranchName(it.name) }
+            .toSet()
+    }
+
     /**
      * Look for [neededBranches] in [git]. Proceed each branch name with [getShortBranchName]
      * and check if [neededBranches] contains it. If it's true store in result.

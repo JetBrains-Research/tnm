@@ -1,8 +1,6 @@
 package gitMiners
 
-import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
-import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig
 import util.UserMapper
@@ -21,11 +19,9 @@ import kotlin.collections.HashMap
  * @constructor Create empty Work time miner
  */
 class WorkTimeMiner(
-    override val repository: FileRepository,
-    override val neededBranches: Set<String> = ProjectConfig.neededBranches
-) : GitMiner() {
-    override val git = Git(repository)
-    override val reader: ObjectReader = repository.newObjectReader()
+    repository: FileRepository,
+    neededBranches: Set<String> = ProjectConfig.neededBranches
+) : GitMiner(repository, neededBranches) {
 
     // [user][minuteInWeek] = numOfCommits
     private val workTimeDistribution = HashMap<Int, HashMap<Int, Int>>()
