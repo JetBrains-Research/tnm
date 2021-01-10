@@ -8,7 +8,7 @@ import util.UtilFunctions
 import java.io.File
 
 
-class CalcCNMatrix(resourceDirectory: File) : Calculation {
+class CNMatrixCalculation(resourceDirectory: File) : Calculation {
     val D: INDArray
     val A: INDArray
     var CN: INDArray? = null
@@ -44,6 +44,6 @@ class CalcCNMatrix(resourceDirectory: File) : Calculation {
 
 
 fun main() {
-    val calc = CalcCNMatrix(File(ProjectConfig.RESOURCES_PATH))
+    val calc = CNMatrixCalculation(File(ProjectConfig.RESOURCES_PATH))
     calc.run()
 }
