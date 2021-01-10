@@ -1,6 +1,9 @@
 package calculations
 
 import util.Graph
+import util.ProjectConfig
+import util.UtilFunctions
+import java.io.File
 
 /**
  * Calc mirror congruence
@@ -9,13 +12,16 @@ import util.Graph
  * @property assignmentMatrix
  * @constructor Create empty Calc mirror congruence
  */
-class CalcMirrorCongruence(
+class MirrorCongruenceCalculation(
     private val artifactsRelations: Array<Array<Int>>,
     private val assignmentMatrix: Array<Array<Int>>
-) {
+) : Calculation {
+    var congruence: Float? = null
+        private set
 
-    fun run() {
+    override fun run() {
         val Gs = createGraph(artifactsRelations)
+        // TODO: replace, delete threshold
         val Gp = createGraph(calcPeopleRelations(3))
         val J = createJ()
 
@@ -38,32 +44,12 @@ class CalcMirrorCongruence(
         }
         println("k = ${k}")
         println("y = ${y}")
-        println(k.toFloat() / y.toFloat())
+        println(congruence)
+        congruence = k.toFloat() / y.toFloat()
     }
 
-    fun _run() {
-        val peopleRelations = calcPeopleRelations()
-        var y = 0
-        var k = 0
-
-        val numOfArtifacts = artifactsRelations.size
-        val numOfUsers = assignmentMatrix.size
-        for (i in 0 until numOfArtifacts) {
-            for (j in 0 until numOfArtifacts) {
-                if (artifactsRelations[i][j] == 0) continue
-
-                for (userId1 in 0 until numOfUsers) {
-                    for (userId2 in 0 until numOfUsers) {
-                        if (userId1 != userId2) y++
-                        if (peopleRelations[userId1][userId2] != 0) k++
-                    }
-                }
-            }
-        }
-
-
-        println(k / y)
-
+    override fun saveToJson(resourceDirectory: File) {
+        congruence?.let { UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.MIRROR_CONGRUENCE), it) }
     }
 
     private fun calcPeopleRelations(threshold: Int = 10): Array<Array<Int>> {
