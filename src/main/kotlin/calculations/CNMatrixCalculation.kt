@@ -12,6 +12,7 @@ class CNMatrixCalculation(resourceDirectory: File) : Calculation {
     val D: INDArray
     val A: INDArray
     var CN: INDArray? = null
+        private set
 
     init {
         val jsonFileMapper = File(resourceDirectory, ProjectConfig.FILE_ID).readText()
