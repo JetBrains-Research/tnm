@@ -8,10 +8,12 @@ import util.ProjectConfig
 import util.UtilFunctions
 import java.io.File
 
-class PageRankCalculation(private val resourceDirectory: File, private val alpha: Float = 0.85f) : Calculation {
-    val size: Int
+class PageRankCalculation(resourceDirectory: File, private val alpha: Float = 0.85f) : Calculation {
     var result: INDArray? = null
         private set
+
+    private val size: Int
+    private val commitsGraphFile = File(resourceDirectory, ProjectConfig.COMMITS_GRAPH)
 
     init {
         // TODO: change size?
@@ -21,8 +23,6 @@ class PageRankCalculation(private val resourceDirectory: File, private val alpha
     }
 
     override fun run() {
-        val commitsGraphFile = File(resourceDirectory, ProjectConfig.COMMITS_GRAPH)
-
         val H = UtilFunctions.loadGraph(commitsGraphFile, size)
         val A = loadMatrixA(commitsGraphFile, size)
         val ones = Nd4j.ones(size, size)
@@ -39,7 +39,6 @@ class PageRankCalculation(private val resourceDirectory: File, private val alpha
         // TODO: do we really need?
         UtilFunctions.normalizeMax(I)
         result = I
-
     }
 
     override fun saveToJson(resourceDirectory: File) {
