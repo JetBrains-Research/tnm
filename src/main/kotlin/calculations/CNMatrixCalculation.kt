@@ -42,9 +42,3 @@ class CNMatrixCalculation(resourceDirectory: File) : Calculation {
     }
 
 }
-
-
-fun main() {
-    val calc = CNMatrixCalculation(File(ProjectConfig.RESOURCES_PATH))
-    calc.run()
-}
