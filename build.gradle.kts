@@ -8,7 +8,8 @@ plugins {
 }
 
 application {
-    mainClassName = "gitMiners.ChangedFilesMinerKt"
+//    mainClassName = "gitMiners.ChangedFilesMinerKt"
+    mainClassName = "Main"
 }
 
 group = "me.nikolaisv"
@@ -28,6 +29,8 @@ dependencies {
     implementation("org.deeplearning4j:deeplearning4j-core:1.0.0-beta6")
     implementation("org.nd4j:nd4j-native-platform:1.0.0-beta6")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")
+    implementation("com.github.ajalt.clikt:clikt:3.1.0")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.21")
     testImplementation(kotlin("test-junit"))
 }
 
