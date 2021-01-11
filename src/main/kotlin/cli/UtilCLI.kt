@@ -1,16 +1,21 @@
 package cli
 
+import gitMiners.UtilGitMiner
+import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 
 object UtilCLI {
 
-    const val helpTypeOpt = ""
-    const val helpRepositoryOpt = ""
-    const val helpResourcesOpt = ""
-    const val helpGraphNameOpt = ""
+    const val helpResourcesOpt = "Directory where to store all results"
 
-    fun checkBranchesArgs(repository: FileRepository?): String {
-        return "Smth wrong"
+    fun checkBranchesArgsMsg(repository: FileRepository?): String {
+        repository ?: return ""
+
+        val branchesShortNames = UtilGitMiner.getBranchesShortNames(Git(repository))
+        return buildString {
+            appendLine("Chose from following branches:")
+            branchesShortNames.forEach { appendLine(it) }
+        }
     }
 
 }

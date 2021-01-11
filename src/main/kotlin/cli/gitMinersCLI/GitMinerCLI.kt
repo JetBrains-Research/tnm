@@ -18,7 +18,7 @@ import org.eclipse.jgit.internal.storage.file.FileRepository
 abstract class GitMinerCLI(infoCLI: InfoCLI) :
     CliktCommand(name = infoCLI.name, help = infoCLI.help) {
 
-    protected val repository by option("--repository", help = UtilCLI.helpRepositoryOpt)
+    protected val repository by option("--repository", help = "Git repository directory")
         .file(mustExist = true, canBeDir = true, canBeFile = false)
         .convert { FileRepository(it) }
         .check("is not git repository ") { !it.isBare }
@@ -26,11 +26,11 @@ abstract class GitMinerCLI(infoCLI: InfoCLI) :
     protected val resources by option("--resources", help = UtilCLI.helpResourcesOpt)
         .file(mustExist = true, canBeDir = true, canBeFile = false)
 
-    protected val branches by argument("-b", "-branches")
+    protected val branches by argument(help = "Set of branches which need to be proceeded ")
         .multiple()
         .unique()
-        .check(UtilCLI.checkBranchesArgs(repository)) {
+        .check(UtilCLI.checkBranchesArgsMsg(repository)) {
             repository ?: return@check false
-            (it - UtilGitMiner.getAvailableBranchesShortNames(Git(repository))).isEmpty()
+            (it - UtilGitMiner.getBranchesShortNames(Git(repository))).isEmpty()
         }
 }

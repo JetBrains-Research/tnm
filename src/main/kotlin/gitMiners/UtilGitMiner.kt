@@ -69,7 +69,7 @@ object UtilGitMiner {
         return branchName.substring(index + 1, branchName.length)
     }
 
-    fun getAvailableBranchesShortNames(git: Git): Set<String> {
+    fun getBranchesShortNames(git: Git): Set<String> {
         return git
             .branchList()
             .setListMode(ListBranchCommand.ListMode.ALL)
