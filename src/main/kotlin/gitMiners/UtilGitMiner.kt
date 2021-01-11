@@ -3,6 +3,7 @@ package gitMiners
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.ListBranchCommand
 import org.eclipse.jgit.diff.DiffEntry
+import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.revwalk.RevCommit
@@ -107,5 +108,18 @@ object UtilGitMiner {
             return null
         }
         return result
+    }
+
+    fun getCommits(
+        git: Git,
+        repository: FileRepository,
+        branchName: String,
+        reversed: Boolean = false
+    ): List<RevCommit> {
+        return if (reversed) {
+            git.log().add(repository.resolve(branchName)).call().reversed()
+        } else {
+            git.log().add(repository.resolve(branchName)).call().reversed()
+        }
     }
 }

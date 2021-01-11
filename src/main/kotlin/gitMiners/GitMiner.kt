@@ -1,14 +1,19 @@
 package gitMiners
 
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.ObjectReader
-import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevCommit
+import util.CommitMapper
 import java.io.File
 
-abstract class GitMiner(protected val repository: Repository, val neededBranches: Set<String>) {
+abstract class GitMiner(
+    protected val repository: FileRepository, val neededBranches: Set<String>,
+    private val reversed: Boolean = false
+) {
     protected val git = Git(repository)
     protected val reader: ObjectReader = repository.newObjectReader()
+    private val comparedCommits = HashMap<Int, MutableSet<Int>>()
 
     /**
      * Mine all needed data from pair of commits.
@@ -29,15 +34,14 @@ abstract class GitMiner(protected val repository: Repository, val neededBranches
         val branches = UtilGitMiner.findNeededBranchesOrNull(git, neededBranches) ?: return
 
         for (branch in branches) {
-            var commitsCount = 0
-            for ((_, _) in git.log().add(repository.resolve(branch.name)).call().windowed(2)) {
-                commitsCount++
-            }
+            println("Start mining for branch ${UtilGitMiner.getShortBranchName(branch.name)}")
 
+            val commitsCount = countCommits(branch.name)
             var currentCommitIndex = 0
             val logFrequency = 100
-            val commitsInBranch = git.log().add(repository.resolve(branch.name)).call()
+            val commitsInBranch = UtilGitMiner.getCommits(git, repository, branch.name, reversed)
             for ((currCommit, prevCommit) in commitsInBranch.windowed(2)) {
+                if (!addProceedCommits(currCommit, prevCommit)) continue
                 if (++currentCommitIndex % logFrequency == 0) {
                     println("Processed $currentCommitIndex commits of $commitsCount")
                 }
@@ -46,6 +50,7 @@ abstract class GitMiner(protected val repository: Repository, val neededBranches
 
             // TODO: last commit and empty tree
 //            val empty = repository.resolve("")
+            println("End mining for branch ${UtilGitMiner.getShortBranchName(branch.name)}")
         }
     }
 
@@ -54,4 +59,31 @@ abstract class GitMiner(protected val repository: Repository, val neededBranches
      *
      */
     abstract fun saveToJson(resourceDirectory: File)
+
+    protected fun addProceedCommits(currCommit: RevCommit, prevCommit: RevCommit): Boolean {
+        val currCommitId = CommitMapper.add(currCommit.name)
+        val prevCommitId = CommitMapper.add(prevCommit.name)
+        // TODO: better logic?
+        val addForCurr = comparedCommits.computeIfAbsent(currCommitId) { mutableSetOf() }.add(prevCommitId)
+        val addForPrev = comparedCommits.computeIfAbsent(prevCommitId) { mutableSetOf() }.add(currCommitId)
+        return addForCurr || addForPrev
+    }
+
+    protected fun checkProceedCommits(currCommit: RevCommit, prevCommit: RevCommit): Boolean {
+        val currCommitId = CommitMapper.add(currCommit.name)
+        val prevCommitId = CommitMapper.add(prevCommit.name)
+        // TODO: better logic?
+        return comparedCommits.computeIfAbsent(currCommitId) { mutableSetOf() }.contains(prevCommitId) ||
+                comparedCommits.computeIfAbsent(prevCommitId) { mutableSetOf() }.contains(currCommitId)
+    }
+
+    protected fun countCommits(branchName: String): Int {
+        var commitsCount = 0
+        val commitsInBranch = UtilGitMiner.getCommits(git, repository, branchName, reversed)
+        for ((currCommit, prevCommit) in commitsInBranch.windowed(2)) {
+            if (checkProceedCommits(currCommit, prevCommit)) continue
+            commitsCount++
+        }
+        return commitsCount
+    }
 }

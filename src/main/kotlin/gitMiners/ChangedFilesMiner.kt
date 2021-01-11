@@ -30,10 +30,3 @@ class ChangedFilesMiner(
         UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.USER_FILES_IDS), userFilesIds)
     }
 }
-
-fun main() {
-    val parseChangedFiles = ChangedFilesMiner(ProjectConfig.repository)
-    parseChangedFiles.run()
-    FileMapper.saveToJson(File(ProjectConfig.RESOURCES_PATH))
-    UserMapper.saveToJson(File(ProjectConfig.RESOURCES_PATH))
-}

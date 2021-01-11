@@ -175,11 +175,3 @@ class FilesOwnershipMiner(
 
     }
 }
-
-fun main() {
-    val miner = FilesOwnershipMiner(ProjectConfig.repository)
-    miner.run()
-    miner.saveToJson(File(ProjectConfig.RESOURCES_PATH))
-    FileMapper.saveToJson(File(ProjectConfig.RESOURCES_PATH))
-    UserMapper.saveToJson(File(ProjectConfig.RESOURCES_PATH))
-}

@@ -50,9 +50,3 @@ class WorkTimeMiner(
         UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.WORKTIME_DISTRIBUTION), workTimeDistribution)
     }
 }
-
-fun main() {
-    val miner = WorkTimeMiner(ProjectConfig.repository)
-    miner.run()
-    miner.saveToJson(File(ProjectConfig.RESOURCES_PATH))
-}

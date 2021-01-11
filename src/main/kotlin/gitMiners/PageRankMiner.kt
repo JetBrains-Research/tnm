@@ -1,21 +1,15 @@
 package gitMiners
 
 import org.eclipse.jgit.api.BlameCommand
-import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.Edit
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.internal.storage.file.FileRepository
-import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.revwalk.RevCommit
-import org.eclipse.jgit.treewalk.CanonicalTreeParser
 import org.eclipse.jgit.util.io.DisabledOutputStream
 import util.*
 import java.io.File
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentSkipListSet
-import java.util.concurrent.Executors
 
 
 /**
@@ -30,7 +24,7 @@ import java.util.concurrent.Executors
 class PageRankMiner(
     repository: FileRepository,
     neededBranches: Set<String> = ProjectConfig.neededBranches
-) : GitMiner(repository, neededBranches) {
+) : GitMiner(repository, neededBranches, reversed = true) {
 
     private val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
 
@@ -45,17 +39,21 @@ class PageRankMiner(
     // pages - commits
     // TODO: probability == 1 ?
     private val commitsGraph = Graph<Int>()
-    private val fixCommits = ArrayList<Pair<RevCommit, RevCommit>>()
-
-    // TODO: skiplist set?
-    private val concurrentGraph = ConcurrentHashMap<Int, ConcurrentSkipListSet<Int>>()
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
-        CommitMapper.add(currCommit.name)
-        CommitMapper.add(prevCommit.name)
+        val currCommitId = CommitMapper.add(currCommit.name)
+        val prevCommitId = CommitMapper.add(prevCommit.name)
 
         if (isBugFix(currCommit)) {
-            fixCommits.add(prevCommit to currCommit)
+            commitsGraph.addNode(currCommitId)
+            commitsGraph.addNode(prevCommitId)
+
+            val diffs = UtilGitMiner.getDiffs(currCommit, prevCommit, reader, git)
+
+            val commitsAdj = getCommitsAdj(diffs, prevCommit)
+            for (commitId in commitsAdj) {
+                commitsGraph.addEdge(currCommitId, commitId)
+            }
         }
     }
 
@@ -75,42 +73,6 @@ class PageRankMiner(
         }
 
         return result
-    }
-
-
-    override fun run() {
-        val branches = UtilGitMiner.findNeededBranchesOrNull(git, neededBranches) ?: return
-
-        for (branch in branches) {
-            val commitsInBranch = git.log()
-                .add(repository.resolve(branch.name))
-                .call()
-                .reversed()
-
-            // TODO: first commit and empty tree
-            for ((prevCommit, currCommit) in commitsInBranch.windowed(2)) {
-                process(currCommit, prevCommit)
-            }
-        }
-
-        oneThreadRun()
-    }
-
-    private fun oneThreadRun() {
-        for ((prevCommit, currCommit) in fixCommits) {
-            val currCommitId = CommitMapper.add(currCommit.name)
-            val prevCommitId = CommitMapper.add(prevCommit.name)
-
-            commitsGraph.addNode(currCommitId)
-            commitsGraph.addNode(prevCommitId)
-
-            val diffs = UtilGitMiner.getDiffs(currCommit, prevCommit, reader, git)
-
-            val commitsAdj = getCommitsAdj(diffs, prevCommit)
-            for (commitId in commitsAdj) {
-                commitsGraph.addEdge(currCommitId, commitId)
-            }
-        }
     }
 
     private fun getCommitsAdj(diffs: List<DiffEntry>, prevCommit: RevCommit): Set<Int> {
@@ -148,69 +110,12 @@ class PageRankMiner(
         return commitsAdj
     }
 
-    // TODO: missing blob/tree error
-    private fun multiThreadRun(nThreads: Int = 5) {
-
-        val executor = Executors.newFixedThreadPool(nThreads)
-
-        for ((prevCommit, currCommit) in fixCommits) {
-            val currCommitId = CommitMapper.add(currCommit.name)
-            val prevCommitId = CommitMapper.add(prevCommit.name)
-
-            commitsGraph.addNode(currCommitId)
-            commitsGraph.addNode(prevCommitId)
-
-            concurrentGraph.computeIfAbsent(currCommitId) { ConcurrentSkipListSet() }
-
-            val worker = Runnable {
-                val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
-                diffFormatter.setRepository(repository)
-                diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
-                diffFormatter.isDetectRenames = true
-
-                val git = Git(repository)
-                val reader: ObjectReader = repository.newObjectReader()
-
-                val oldTreeIter = CanonicalTreeParser()
-                oldTreeIter.reset(reader, prevCommit.tree)
-
-                val newTreeIter = CanonicalTreeParser()
-                newTreeIter.reset(reader, currCommit.tree)
-
-                val diffs = git.diff()
-                    .setNewTree(newTreeIter)
-                    .setOldTree(oldTreeIter)
-                    .call()
-
-                val commitsAdj = getCommitsAdj(diffs, prevCommit)
-                for (commitId in commitsAdj) {
-                    concurrentGraph.computeIfAbsent(currCommitId) { ConcurrentSkipListSet() }
-                        .add(commitId)
-                }
-            }
-            executor.execute(worker)
-        }
-
-        executor.shutdown()
-        while (!executor.isTerminated) {
-        }
-    }
-
     private fun isBugFix(commit: RevCommit): Boolean {
         return "fix" in commit.shortMessage.toLowerCase()
     }
 
     override fun saveToJson(resourceDirectory: File) {
         UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.COMMITS_GRAPH), commitsGraph.adjacencyMap)
-
-//        UtilFunctions.saveToJson(ProjectConfig.CONCURRENT_GRAPH_PATH, concurrentGraph)
     }
 
-}
-
-fun main() {
-    val miner = PageRankMiner(ProjectConfig.repository)
-    miner.run()
-    miner.saveToJson(File(ProjectConfig.RESOURCES_PATH))
-    CommitMapper.saveToJson(File(ProjectConfig.RESOURCES_PATH))
 }
