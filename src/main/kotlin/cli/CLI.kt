@@ -6,11 +6,7 @@ import cli.gitMinersCLI.*
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
 
-// TODO: autocomplition
-// TODO: println -> echo ?
-
-class CLI : CliktCommand() {
-    //    private val graphName by option("-g", "--graph-name", help = UtilCLI.helpGraphNameOpt)
+class CLI : CliktCommand(name = "run.sh") {
     override fun run() {}
 }
 
