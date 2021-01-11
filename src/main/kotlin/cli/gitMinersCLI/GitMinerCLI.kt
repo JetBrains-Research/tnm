@@ -4,9 +4,9 @@ import cli.InfoCLI
 import cli.UtilCLI
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
-import com.github.ajalt.clikt.parameters.arguments.check
 import com.github.ajalt.clikt.parameters.arguments.multiple
 import com.github.ajalt.clikt.parameters.arguments.unique
+import com.github.ajalt.clikt.parameters.arguments.validate
 import com.github.ajalt.clikt.parameters.options.check
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.option
@@ -29,8 +29,11 @@ abstract class GitMinerCLI(infoCLI: InfoCLI) :
     protected val branches by argument(help = "Set of branches which need to be proceeded ")
         .multiple()
         .unique()
-        .check(UtilCLI.checkBranchesArgsMsg(repository)) {
-            repository ?: return@check false
-            (it - UtilGitMiner.getBranchesShortNames(Git(repository))).isEmpty()
+        .validate {
+            require((it - UtilGitMiner.getBranchesShortNames(Git(repository))).isEmpty()) {
+                UtilCLI.checkBranchesArgsMsg(
+                    repository
+                )
+            }
         }
 }
