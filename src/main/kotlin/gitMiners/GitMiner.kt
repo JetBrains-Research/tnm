@@ -29,9 +29,18 @@ abstract class GitMiner(protected val repository: Repository, val neededBranches
         val branches = UtilGitMiner.findNeededBranchesOrNull(git, neededBranches) ?: return
 
         for (branch in branches) {
-            val commitsInBranch = git.log().add(repository.resolve(branch.name)).call()
+            var commitsCount = 0
+            for ((_, _) in git.log().add(repository.resolve(branch.name)).call().windowed(2)) {
+                commitsCount++
+            }
 
+            var currentCommitIndex = 0
+            val logFrequency = 100
+            val commitsInBranch = git.log().add(repository.resolve(branch.name)).call()
             for ((currCommit, prevCommit) in commitsInBranch.windowed(2)) {
+                if (++currentCommitIndex % logFrequency == 0) {
+                    println("Processed $currentCommitIndex commits of $commitsCount")
+                }
                 process(currCommit, prevCommit)
             }
 
