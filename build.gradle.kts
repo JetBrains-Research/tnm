@@ -8,8 +8,7 @@ plugins {
 }
 
 application {
-//    mainClassName = "gitMiners.ChangedFilesMinerKt"
-    mainClassName = "cli.CLI"
+    mainClassName = "cli.CLIKt"
 }
 
 group = "me.nikolaisv"
