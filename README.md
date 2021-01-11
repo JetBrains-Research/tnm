@@ -1,31 +1,8 @@
-# tcd/technical-connections
+## How to use
 
+### CLI
+Run `./gradlew :installDist` (`build.sh` script) to create script for creating 
+execution scripts in `./build/install/technical-connections/bin/` directory.
 
-
-## Getting Started
-
-Download links:
-
-SSH clone URL: ssh://git@git.jetbrains.team/tcd/technical-connections.git
-
-HTTPS clone URL: https://git.jetbrains.team/tcd/technical-connections.git
-
-
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
-## Prerequisites
-
-What things you need to install the software and how to install them.
-
-```
-Examples
-```
-
-## Deployment
-
-Add additional notes about how to deploy this on a production system.
-
-## Resources
-
-Add links to external resources for this project, such as CI server, bug tracker, etc.
+Then depending on your platform execute script from `build/install/technical-connections/bin/`.
+For windows, it will be `*.bat` and second one for others (run.sh).
