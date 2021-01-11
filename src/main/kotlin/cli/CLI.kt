@@ -1,5 +1,7 @@
 package cli
 
+import cli.calculculationsCLI.CNMatrixCalculationCLI
+import cli.calculculationsCLI.PageRankCalculationCLI
 import cli.gitMinersCLI.*
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
@@ -18,5 +20,7 @@ fun main(args: Array<String>) = CLI().subcommands(
     FileDependencyMatrixMinerCLI(),
     FilesOwnershipMinerCLI(),
     PageRankMinerCLI(),
-    WorkTimeMinerCLI()
+    WorkTimeMinerCLI(),
+    PageRankCalculationCLI(),
+    CNMatrixCalculationCLI()
 ).main(args)
