@@ -35,6 +35,11 @@ tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "1.8"
 }
 
+tasks.test {
+    useJUnit()
+    maxHeapSize = "1G"
+}
+
 publishing {
     publications {
         create<MavenPublication>("maven") {
