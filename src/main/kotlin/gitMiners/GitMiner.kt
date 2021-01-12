@@ -72,7 +72,7 @@ abstract class GitMiner(
 
             val latch = CountDownLatch(commitsCount)
 
-            val commitsInBranch = UtilGitMiner.getCommits(git, repository, branch.name, false)
+            val commitsInBranch = UtilGitMiner.getCommits(git, repository, branch.name, reversed)
             for ((currCommit, prevCommit) in commitsInBranch.windowed(2)) {
                 if (!addProceedCommits(currCommit, prevCommit)) continue
 

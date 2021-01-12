@@ -119,7 +119,7 @@ object UtilGitMiner {
         return if (reversed) {
             git.log().add(repository.resolve(branchName)).call().reversed()
         } else {
-            git.log().add(repository.resolve(branchName)).call().reversed()
+            git.log().add(repository.resolve(branchName)).call().toList()
         }
     }
 }
