@@ -11,7 +11,6 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 
-// TODO: add better logic for count commits
 abstract class GitMiner(
     protected val repository: FileRepository, val neededBranches: Set<String>,
     protected val reversed: Boolean = false,
@@ -41,10 +40,12 @@ abstract class GitMiner(
         for (branch in branches) {
             println("Start mining for branch ${UtilGitMiner.getShortBranchName(branch.name)}")
 
-            val commitsCount = countCommits(branch.name)
+            val commitsInBranch = getUnprocessedCommits(branch.name)
+
+            val commitsCount = if (commitsInBranch.size % 2 == 0) commitsInBranch.size else commitsInBranch.size - 1
             var currentCommitIndex = 0
             val logFrequency = 100
-            val commitsInBranch = UtilGitMiner.getCommits(git, repository, branch.name, reversed)
+
             for ((currCommit, prevCommit) in commitsInBranch.windowed(2)) {
                 if (!addProceedCommits(currCommit, prevCommit)) continue
                 if (++currentCommitIndex % logFrequency == 0) {
@@ -66,13 +67,14 @@ abstract class GitMiner(
         for (branch in branches) {
             println("Start mining for branch ${UtilGitMiner.getShortBranchName(branch.name)}")
 
-            val commitsCount = countCommits(branch.name)
+            val commitsInBranch = getUnprocessedCommits(branch.name)
+
+            val commitsCount = if (commitsInBranch.size % 2 == 0) commitsInBranch.size else commitsInBranch.size - 1
             val proceedCommits = AtomicInteger(0)
             val logFrequency = 100
 
             val latch = CountDownLatch(commitsCount)
 
-            val commitsInBranch = UtilGitMiner.getCommits(git, repository, branch.name, reversed)
             for ((currCommit, prevCommit) in commitsInBranch.windowed(2)) {
                 if (!addProceedCommits(currCommit, prevCommit)) continue
 
@@ -120,13 +122,14 @@ abstract class GitMiner(
                 comparedCommits.computeIfAbsent(prevCommitId) { mutableSetOf() }.contains(currCommitId)
     }
 
-    protected fun countCommits(branchName: String): Int {
-        var commitsCount = 0
+    protected fun getUnprocessedCommits(branchName: String): Set<RevCommit> {
+        val result = linkedSetOf<RevCommit>()
         val commitsInBranch = UtilGitMiner.getCommits(git, repository, branchName, reversed)
         for ((currCommit, prevCommit) in commitsInBranch.windowed(2)) {
             if (checkProceedCommits(currCommit, prevCommit)) continue
-            commitsCount++
+            result.add(currCommit)
+            result.add(prevCommit)
         }
-        return commitsCount
+        return result
     }
 }
