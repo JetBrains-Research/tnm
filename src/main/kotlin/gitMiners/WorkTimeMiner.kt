@@ -1,5 +1,6 @@
 package gitMiners
 
+import org.bytedeco.openblas.presets.openblas_nolapack
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.Mapper
@@ -8,8 +9,9 @@ import util.UserMapper
 import util.UtilFunctions
 import java.io.File
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
-import kotlin.collections.HashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Class for mining time distribution of commits for each user.
@@ -21,34 +23,39 @@ import kotlin.collections.HashMap
  */
 class WorkTimeMiner(
     repository: FileRepository,
-    neededBranches: Set<String> = ProjectConfig.neededBranches
-) : GitMiner(repository, neededBranches) {
+    neededBranches: Set<String> = ProjectConfig.neededBranches,
+    numThreads: Int = ProjectConfig.numThreads
+) : GitMiner(repository, neededBranches, numThreads = numThreads) {
 
     // [user][minuteInWeek] = numOfCommits
-    private val workTimeDistribution = HashMap<Int, HashMap<Int, Int>>()
-    private val calendar: Calendar = GregorianCalendar.getInstance()
+    private val workTimeDistribution = ConcurrentHashMap<Int, ConcurrentHashMap<Int, AtomicInteger>>()
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
         val email = currCommit.authorIdent.emailAddress
         val userId = UserMapper.add(email)
 
+        val calendar: Calendar = GregorianCalendar.getInstance()
         val date = Date(currCommit.commitTime * 1000L)
         calendar.time = date
 
         val time =
             (TimeUnit.HOURS.toMinutes(calendar[Calendar.HOUR_OF_DAY].toLong()) + calendar[Calendar.MINUTE]).toInt()
-        val newValue = workTimeDistribution
-            .computeIfAbsent(userId) { HashMap() }
-            .computeIfAbsent(time) { 0 }
-            .inc()
 
         workTimeDistribution
-            .computeIfAbsent(userId) { HashMap() }[time] = newValue
+            .computeIfAbsent(userId) { ConcurrentHashMap() }
+            .computeIfAbsent(time) { AtomicInteger(0) }
+            .incrementAndGet()
+    }
 
+    override fun run() {
+        multithreadingRun()
     }
 
     override fun saveToJson(resourceDirectory: File) {
-        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.WORKTIME_DISTRIBUTION), workTimeDistribution)
+        UtilFunctions.saveToJson(
+            File(resourceDirectory, ProjectConfig.WORKTIME_DISTRIBUTION),
+            UtilFunctions.convertConcurrentMapOfConcurrentMaps(workTimeDistribution)
+        )
         Mapper.saveAll(resourceDirectory)
     }
 }
