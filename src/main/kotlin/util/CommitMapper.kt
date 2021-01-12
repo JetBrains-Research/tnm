@@ -1,6 +1,8 @@
 package util
 
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 
 /**
@@ -8,23 +10,24 @@ import java.io.File
  *
  */
 object CommitMapper : Mapper {
-    private val commitToId = HashMap<String, Int>()
-    private val idToCommit = HashMap<Int, String>()
-    private var lastCommitId = 0
+    private val commitToId = ConcurrentHashMap<String, Int>()
+    private val idToCommit = ConcurrentHashMap<Int, String>()
+    private var lastCommitId = AtomicInteger(-1)
 
 
     override fun add(value: String): Int {
         val id = commitToId[value]
         if (id != null) return id
 
-        commitToId[value] = lastCommitId
-        idToCommit[lastCommitId] = value
-        lastCommitId++
-        return lastCommitId - 1
+        val currId = lastCommitId.incrementAndGet()
+        commitToId[value] = currId
+        idToCommit[currId] = value
+
+        return currId
     }
 
     override fun saveToJson(resourceDirectory: File) {
-        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.COMMIT_ID), commitToId)
-        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.ID_COMMIT), idToCommit)
+        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.COMMIT_ID), commitToId.toMap())
+        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.ID_COMMIT), idToCommit.toMap())
     }
 }

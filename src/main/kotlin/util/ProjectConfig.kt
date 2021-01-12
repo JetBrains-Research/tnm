@@ -13,6 +13,7 @@ object ProjectConfig {
 
     // FileMapper
     const val FILE_ID = "fileToId"
+    const val ID_FILE = "idToFile"
 
     // CommitMapper
     const val COMMIT_ID = "commitToId"
