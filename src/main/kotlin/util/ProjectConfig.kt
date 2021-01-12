@@ -51,5 +51,5 @@ object ProjectConfig {
     const val MIRROR_CONGRUENCE = "mirrorCongruence"
 
     val repository = FileRepository("${REPO_DIR}/.git")
-    val neededBranches = setOf("master")
+    val neededBranches = setOf("origin/master")
 }

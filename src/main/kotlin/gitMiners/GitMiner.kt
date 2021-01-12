@@ -69,7 +69,7 @@ abstract class GitMiner(
 
             val commitsInBranch = getUnprocessedCommits(branch.name)
 
-            val commitsCount = if (commitsInBranch.size % 2 == 0) commitsInBranch.size else commitsInBranch.size - 1
+            val commitsCount = commitsInBranch.size - 1
             val proceedCommits = AtomicInteger(0)
             val logFrequency = 100
 
