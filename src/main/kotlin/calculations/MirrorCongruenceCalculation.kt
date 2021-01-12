@@ -14,15 +14,15 @@ import java.io.File
  */
 class MirrorCongruenceCalculation(
     private val artifactsRelations: Array<Array<Int>>,
-    private val assignmentMatrix: Array<Array<Int>>
+    private val assignmentMatrix: Array<Array<Int>>,
+    private val developersRelations: Array<Array<Int>>
 ) : Calculation {
     var congruence: Float? = null
         private set
 
     override fun run() {
         val Gs = createGraph(artifactsRelations)
-        // TODO: replace, delete threshold
-        val Gp = createGraph(calcPeopleRelations(3))
+        val Gp = createGraph(developersRelations)
         val J = createJ()
 
         var y = 0
@@ -42,39 +42,11 @@ class MirrorCongruenceCalculation(
                 }
             }
         }
-        println("k = ${k}")
-        println("y = ${y}")
-        println(congruence)
         congruence = k.toFloat() / y.toFloat()
     }
 
     override fun saveToJson(resourceDirectory: File) {
         congruence?.let { UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.MIRROR_CONGRUENCE), it) }
-    }
-
-    private fun calcPeopleRelations(threshold: Int = 10): Array<Array<Int>> {
-        val numOfUsers = assignmentMatrix.size
-        val numOfFiles = assignmentMatrix[0].size
-
-        val result = Array(numOfUsers) { Array(numOfFiles) { 0 } }
-
-        for (j in 0 until numOfFiles) {
-            val users = arrayListOf<Int>()
-            for (i in 0 until numOfUsers) {
-                if (assignmentMatrix[i][j] >= threshold) {
-                    users.add(i)
-                }
-            }
-
-            for ((index, userId1) in users.withIndex()) {
-                for (userId2 in users.subList(index, users.lastIndex)) {
-                    result[userId1][userId2] = 1
-                    result[userId2][userId1] = 1
-                }
-            }
-        }
-
-        return result
     }
 
     private fun createGraph(adjacencyMatrix: Array<Array<Int>>): Graph<Int> {
