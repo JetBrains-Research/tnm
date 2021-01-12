@@ -33,9 +33,6 @@ class ChangedFilesMiner(
         }
     }
 
-    override fun run() {
-        multithreadingRun()
-    }
 
     override fun saveToJson(resourceDirectory: File) {
         val map = hashMapOf<Int, MutableSet<Int>>()

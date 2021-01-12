@@ -39,10 +39,6 @@ class AssignmentMatrixMiner(
         }
     }
 
-    override fun run() {
-        multithreadingRun()
-    }
-
     override fun saveToJson(resourceDirectory: File) {
         UtilFunctions.saveToJson(
             File(resourceDirectory, ProjectConfig.ASSIGNMENT_MATRIX),

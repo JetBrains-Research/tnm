@@ -36,32 +36,6 @@ abstract class GitMiner(
      */
     open fun run() {
         val branches = UtilGitMiner.findNeededBranchesOrNull(git, neededBranches) ?: return
-
-        for (branch in branches) {
-            println("Start mining for branch ${UtilGitMiner.getShortBranchName(branch.name)}")
-
-            val commitsInBranch = getUnprocessedCommits(branch.name)
-
-            val commitsCount = if (commitsInBranch.size % 2 == 0) commitsInBranch.size else commitsInBranch.size - 1
-            var currentCommitIndex = 0
-            val logFrequency = 100
-
-            for ((currCommit, prevCommit) in commitsInBranch.windowed(2)) {
-                if (!addProceedCommits(currCommit, prevCommit)) continue
-                if (++currentCommitIndex % logFrequency == 0) {
-                    println("Processed $currentCommitIndex commits of $commitsCount")
-                }
-                process(currCommit, prevCommit)
-            }
-
-            // TODO: last commit and empty tree
-//            val empty = repository.resolve("")
-            println("End mining for branch ${UtilGitMiner.getShortBranchName(branch.name)}")
-        }
-    }
-
-    fun multithreadingRun() {
-        val branches = UtilGitMiner.findNeededBranchesOrNull(git, neededBranches) ?: return
         val threadPool = Executors.newFixedThreadPool(numThreads)
 
         for (branch in branches) {

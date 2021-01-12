@@ -42,10 +42,6 @@ class FileDependencyMatrixMiner(
         }
     }
 
-    override fun run() {
-        multithreadingRun()
-    }
-
     private fun increment(fileId1: Int, fileId2: Int) {
         fileDependencyMatrix
             .computeIfAbsent(fileId1) { ConcurrentHashMap() }

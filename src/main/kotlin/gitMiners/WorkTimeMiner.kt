@@ -46,10 +46,6 @@ class WorkTimeMiner(
             .incrementAndGet()
     }
 
-    override fun run() {
-        multithreadingRun()
-    }
-
     override fun saveToJson(resourceDirectory: File) {
         UtilFunctions.saveToJson(
             File(resourceDirectory, ProjectConfig.WORKTIME_DISTRIBUTION),

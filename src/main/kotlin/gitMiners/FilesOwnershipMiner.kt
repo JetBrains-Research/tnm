@@ -20,7 +20,7 @@ import kotlin.math.pow
 class FilesOwnershipMiner(
     repository: FileRepository,
     neededBranches: Set<String> = ProjectConfig.neededBranches
-) : GitMiner(repository, neededBranches) {
+) : GitMiner(repository, neededBranches, numThreads = 1) {
     private val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
 
     // [fileId][userId]

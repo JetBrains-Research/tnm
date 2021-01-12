@@ -54,10 +54,6 @@ class PageRankMiner(
         }
     }
 
-    override fun run() {
-        multithreadingRun()
-    }
-
     private fun getCommitsForLines(commit: RevCommit, fileName: String): List<String> {
         val result = ArrayList<String>()
 
