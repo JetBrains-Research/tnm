@@ -41,43 +41,8 @@ class AssignmentMatrixMiner(
         }
     }
 
-
     override fun run() {
-        val branches = UtilGitMiner.findNeededBranchesOrNull(git, neededBranches) ?: return
-        val threadPool = Executors.newFixedThreadPool(numThreads)
-
-        for (branch in branches) {
-            println("Start mining for branch ${UtilGitMiner.getShortBranchName(branch.name)}")
-
-            val commitsCount = countCommits(branch.name)
-            val proceedCommits = AtomicInteger(0)
-            val logFrequency = 100
-
-            val latch = CountDownLatch(commitsCount)
-
-            val commitsInBranch = UtilGitMiner.getCommits(git, repository, branch.name, false)
-            for ((currCommit, prevCommit) in commitsInBranch.windowed(2)) {
-                if (!addProceedCommits(currCommit, prevCommit)) continue
-
-                threadPool.execute {
-                    try {
-                        process(currCommit, prevCommit)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    } finally {
-                        val num = proceedCommits.incrementAndGet()
-                        if (num % logFrequency == 0 || num == commitsCount) {
-                            println("Processed $num commits of $commitsCount")
-                        }
-
-                        latch.countDown()
-                    }
-                }
-            }
-            latch.await()
-            println("End mining for branch ${UtilGitMiner.getShortBranchName(branch.name)}")
-        }
-        threadPool.shutdown()
+        multithreadingRun()
     }
 
     override fun saveToJson(resourceDirectory: File) {

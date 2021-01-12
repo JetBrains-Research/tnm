@@ -1,10 +1,14 @@
 package gitMiners
 
+import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
+import util.Mapper
 import util.ProjectConfig
 import util.UtilFunctions
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Class for mining  file dependency matrix
@@ -16,12 +20,16 @@ import java.io.File
  */
 class FileDependencyMatrixMiner(
     repository: FileRepository,
-    neededBranches: Set<String> = ProjectConfig.neededBranches
-) : GitMiner(repository, neededBranches) {
+    neededBranches: Set<String> = ProjectConfig.neededBranches,
+    numThreads: Int = ProjectConfig.numThreads
+) : GitMiner(repository, neededBranches, numThreads = numThreads) {
 
-    private val fileDependencyMatrix: HashMap<Int, HashMap<Int, Int>> = HashMap()
+    private val fileDependencyMatrix: ConcurrentHashMap<Int, ConcurrentHashMap<Int, AtomicInteger>> = ConcurrentHashMap()
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
+        val git = Git(ProjectConfig.repository)
+        val reader = ProjectConfig.repository.newObjectReader()
+
         val listOfChangedFiles = UtilGitMiner.getChangedFiles(currCommit, prevCommit, reader, git).toList()
         for ((index, currFile) in listOfChangedFiles.withIndex()) {
             for (otherFile in listOfChangedFiles.subList(index, listOfChangedFiles.lastIndex)) {
@@ -33,17 +41,28 @@ class FileDependencyMatrixMiner(
         }
     }
 
-    private fun increment(fileId1: Int, fileId2: Int) {
-        val newValue = fileDependencyMatrix
-            .computeIfAbsent(fileId1) { HashMap() }
-            .computeIfAbsent(fileId2) { 0 }
-            .inc()
+    override fun run() {
+        multithreadingRun()
+    }
 
+    private fun increment(fileId1: Int, fileId2: Int) {
         fileDependencyMatrix
-            .computeIfAbsent(fileId1) { HashMap() }[fileId2] = newValue
+            .computeIfAbsent(fileId1) { ConcurrentHashMap() }
+            .computeIfAbsent(fileId2) { AtomicInteger(0) }
+            .incrementAndGet()
+
     }
 
     override fun saveToJson(resourceDirectory: File) {
-        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.FILE_DEPENDENCY), fileDependencyMatrix)
+        val map = HashMap<Int, HashMap<Int, Int>>()
+        for (entry in fileDependencyMatrix.entries) {
+            for (entry2 in entry.value.entries) {
+                map.computeIfAbsent(entry.key) { HashMap() }
+                    .computeIfAbsent(entry2.key) { entry2.value.get() }
+            }
+        }
+
+        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.FILE_DEPENDENCY), map)
+        Mapper.saveAll(resourceDirectory)
     }
 }
