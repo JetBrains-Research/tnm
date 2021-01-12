@@ -2,7 +2,7 @@ package gitMiners
 
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
-import util.FileMapper
+import util.Mapper
 import util.ProjectConfig
 import util.UserMapper
 import util.UtilFunctions
@@ -28,5 +28,6 @@ class ChangedFilesMiner(
 
     override fun saveToJson(resourceDirectory: File) {
         UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.USER_FILES_IDS), userFilesIds)
+        Mapper.saveAll(resourceDirectory)
     }
 }

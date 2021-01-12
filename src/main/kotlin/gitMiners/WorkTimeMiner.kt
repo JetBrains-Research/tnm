@@ -2,6 +2,7 @@ package gitMiners
 
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
+import util.Mapper
 import util.ProjectConfig
 import util.UserMapper
 import util.UtilFunctions
@@ -48,5 +49,6 @@ class WorkTimeMiner(
 
     override fun saveToJson(resourceDirectory: File) {
         UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.WORKTIME_DISTRIBUTION), workTimeDistribution)
+        Mapper.saveAll(resourceDirectory)
     }
 }

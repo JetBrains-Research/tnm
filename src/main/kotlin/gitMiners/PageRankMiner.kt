@@ -116,6 +116,7 @@ class PageRankMiner(
 
     override fun saveToJson(resourceDirectory: File) {
         UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.COMMITS_GRAPH), commitsGraph.adjacencyMap)
+        Mapper.saveAll(resourceDirectory)
     }
 
 }
