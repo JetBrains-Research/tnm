@@ -41,7 +41,7 @@ object ProjectConfig {
     // WorkTimeMiner
     const val WORKTIME_DISTRIBUTION = "WorkTime"
 
-    // CNMatrix
+    // CoordinationNeedsMatrix
     const val CN_MATRIX = "CN"
 
     // PageRank result

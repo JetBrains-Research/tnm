@@ -1,6 +1,6 @@
 package cli
 
-import cli.calculculationsCLI.CNMatrixCalculationCLI
+import cli.calculculationsCLI.CoordinationNeedsMatrixCalculationCLI
 import cli.calculculationsCLI.PageRankCalculationCLI
 import cli.gitMinersCLI.*
 import com.github.ajalt.clikt.core.CliktCommand
@@ -18,5 +18,5 @@ fun main(args: Array<String>) = CLI().subcommands(
     PageRankMinerCLI(),
     WorkTimeMinerCLI(),
     PageRankCalculationCLI(),
-    CNMatrixCalculationCLI()
+    CoordinationNeedsMatrixCalculationCLI()
 ).main(args)

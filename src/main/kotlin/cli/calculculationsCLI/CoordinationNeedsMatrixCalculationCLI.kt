@@ -1,16 +1,16 @@
 package cli.calculculationsCLI
 
-import calculations.CNMatrixCalculation
+import calculations.CoordinationNeedsMatrixCalculation
 import cli.InfoCLI
 
-class CNMatrixCalculationCLI : CalculationCLI(
+class CoordinationNeedsMatrixCalculationCLI : CalculationCLI(
     InfoCLI(
-        "CNMatrixCalculation",
+        "CoordinationNeedsMatrixCalculation",
         "Calculation of needed congruence between developers"
     )
 ) {
     override fun run() {
-        val calculation = CNMatrixCalculation(resources!!)
+        val calculation = CoordinationNeedsMatrixCalculation(resources!!)
         calculation.run()
         calculation.saveToJson(resources!!)
     }

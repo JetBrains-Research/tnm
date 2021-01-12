@@ -8,7 +8,7 @@ import util.UtilFunctions
 import java.io.File
 
 
-class CNMatrixCalculation(resourceDirectory: File) : Calculation {
+class CoordinationNeedsMatrixCalculation(resourceDirectory: File) : Calculation {
     val D: INDArray
     val A: INDArray
     var CN: INDArray? = null
