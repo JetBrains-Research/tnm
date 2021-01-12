@@ -1,17 +1,20 @@
 package util
 
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentSkipListSet
+
 class Graph<T> {
-    val adjacencyMap: HashMap<T, HashSet<T>> = HashMap()
+    val adjacencyMap: ConcurrentHashMap<T, ConcurrentSkipListSet<T>> = ConcurrentHashMap()
 
     fun addEdge(sourceVertex: T, destinationVertex: T) {
         adjacencyMap
-            .computeIfAbsent(sourceVertex) { HashSet() }
+            .computeIfAbsent(sourceVertex) { ConcurrentSkipListSet() }
             .add(destinationVertex)
     }
 
     fun addNode(node: T) {
         adjacencyMap
-            .computeIfAbsent(node) { HashSet() }
+            .computeIfAbsent(node) { ConcurrentSkipListSet() }
     }
 
     override fun toString(): String = StringBuffer().apply {

@@ -1,6 +1,7 @@
 package gitMiners
 
 import org.eclipse.jgit.api.BlameCommand
+import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.Edit
@@ -23,16 +24,9 @@ import java.io.File
  */
 class PageRankMiner(
     repository: FileRepository,
-    neededBranches: Set<String> = ProjectConfig.neededBranches
-) : GitMiner(repository, neededBranches, reversed = true) {
-
-    private val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
-
-    init {
-        diffFormatter.setRepository(repository)
-        diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
-        diffFormatter.isDetectRenames = true
-    }
+    neededBranches: Set<String> = ProjectConfig.neededBranches,
+    numThreads: Int = ProjectConfig.numThreads
+) : GitMiner(repository, neededBranches, numThreads = numThreads, reversed = true) {
 
     // H is the transition probability matrix whose (i, j)
     // element signifies the probability of transition from the i-th page to the j-th page
@@ -41,6 +35,9 @@ class PageRankMiner(
     private val commitsGraph = Graph<Int>()
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
+        val git = Git(repository)
+        val reader = repository.newObjectReader()
+
         val currCommitId = CommitMapper.add(currCommit.name)
         val prevCommitId = CommitMapper.add(prevCommit.name)
 
@@ -95,6 +92,11 @@ class PageRankMiner(
                 }
             }
 
+            val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
+            diffFormatter.setRepository(repository)
+            diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
+            diffFormatter.isDetectRenames = true
+
             val editList = diffFormatter.toFileHeader(diff).toEditList()
             for (edit in editList) {
                 if (edit.type != Edit.Type.REPLACE && edit.type != Edit.Type.DELETE) continue
@@ -115,7 +117,13 @@ class PageRankMiner(
     }
 
     override fun saveToJson(resourceDirectory: File) {
-        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.COMMITS_GRAPH), commitsGraph.adjacencyMap)
+        val map = hashMapOf<Int, MutableSet<Int>>()
+        for (entry in commitsGraph.adjacencyMap.entries) {
+            map[entry.key] = entry.value
+        }
+
+        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.COMMITS_GRAPH), map)
+        Mapper.saveAll(resourceDirectory)
     }
 
 }

@@ -6,6 +6,7 @@ object ProjectConfig {
     private const val URI = "https://github.com/facebook/react.git"
     private const val REPO_DIR = "./local_repository/"
     const val RESOURCES_PATH = "./resources"
+    const val numThreads = 4
 
     // UserMapper
     const val USER_ID = "userToId"
@@ -13,6 +14,7 @@ object ProjectConfig {
 
     // FileMapper
     const val FILE_ID = "fileToId"
+    const val ID_FILE = "idToFile"
 
     // CommitMapper
     const val COMMIT_ID = "commitToId"
@@ -48,6 +50,6 @@ object ProjectConfig {
     // MirrorCongruence
     const val MIRROR_CONGRUENCE = "mirrorCongruence"
 
-    val repository = FileRepository("${REPO_DIR}/.git")
-    val neededBranches = setOf("master")
+    val REPOSITORY = FileRepository("${REPO_DIR}/.git")
+    val neededBranches = setOf("origin/master")
 }

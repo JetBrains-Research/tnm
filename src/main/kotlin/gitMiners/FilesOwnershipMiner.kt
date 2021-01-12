@@ -7,10 +7,7 @@ import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.treewalk.TreeWalk
 import org.eclipse.jgit.util.io.DisabledOutputStream
-import util.FileMapper
-import util.ProjectConfig
-import util.UserMapper
-import util.UtilFunctions
+import util.*
 import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.math.pow
@@ -23,7 +20,7 @@ import kotlin.math.pow
 class FilesOwnershipMiner(
     repository: FileRepository,
     neededBranches: Set<String> = ProjectConfig.neededBranches
-) : GitMiner(repository, neededBranches) {
+) : GitMiner(repository, neededBranches, numThreads = 1) {
     private val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
 
     // [fileId][userId]
@@ -126,6 +123,7 @@ class FilesOwnershipMiner(
         UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.FILES_OWNERSHIP), filesOwnership)
         UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.POTENTIAL_OWNERSHIP), potentialAuthorship)
         UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.DEVELOPER_KNOWLEDGE), developerKnowledge)
+        Mapper.saveAll(resourceDirectory)
     }
 
     private fun addAuthorsForLines(lines: IntRange, fileId: Int, userId: Int) {

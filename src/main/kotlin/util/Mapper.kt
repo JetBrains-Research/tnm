@@ -1,8 +1,31 @@
 package util
 
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
-interface Mapper {
-    fun add(value: String): Int
-    fun saveToJson(resourceDirectory: File)
+// TODO: make generic, serialize error with generic Only KClass supported as classifier, got V
+abstract class Mapper(private val entityToIdFileName: String, private val idToEntityFileName: String) {
+    companion object {
+        fun saveAll(resourceDirectory: File) {
+            UserMapper.saveToJson(resourceDirectory)
+            FileMapper.saveToJson(resourceDirectory)
+            CommitMapper.saveToJson(resourceDirectory)
+        }
+    }
+
+    private val entityToId = ConcurrentHashMap<String, Int>()
+    private val idToEntity = ConcurrentHashMap<Int, String>()
+    private var lastId = AtomicInteger(-1)
+
+    fun add(value: String): Int {
+        val currId = entityToId.computeIfAbsent(value) { lastId.incrementAndGet() }
+        idToEntity[currId] = value
+        return currId
+    }
+
+    fun saveToJson(resourceDirectory: File) {
+        UtilFunctions.saveToJson(File(resourceDirectory, entityToIdFileName), entityToId.toMap())
+        UtilFunctions.saveToJson(File(resourceDirectory, idToEntityFileName), idToEntity.toMap())
+    }
 }
