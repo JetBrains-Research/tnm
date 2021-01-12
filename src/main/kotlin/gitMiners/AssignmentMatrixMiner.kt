@@ -9,8 +9,6 @@ import util.UserMapper
 import util.UtilFunctions
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -46,15 +44,10 @@ class AssignmentMatrixMiner(
     }
 
     override fun saveToJson(resourceDirectory: File) {
-        val map = HashMap<Int, HashMap<Int, Int>>()
-        for (entry in assignmentMatrix.entries) {
-            for (entry2 in entry.value.entries) {
-                map.computeIfAbsent(entry.key) { HashMap() }
-                    .computeIfAbsent(entry2.key) { entry2.value.get() }
-            }
-        }
-
-        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.ASSIGNMENT_MATRIX), map)
+        UtilFunctions.saveToJson(
+            File(resourceDirectory, ProjectConfig.ASSIGNMENT_MATRIX),
+            UtilFunctions.convertConcurrentMapOfConcurrentMaps(assignmentMatrix)
+        )
         Mapper.saveAll(resourceDirectory)
     }
 }

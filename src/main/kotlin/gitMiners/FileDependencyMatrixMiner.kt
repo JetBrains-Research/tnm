@@ -24,7 +24,8 @@ class FileDependencyMatrixMiner(
     numThreads: Int = ProjectConfig.numThreads
 ) : GitMiner(repository, neededBranches, numThreads = numThreads) {
 
-    private val fileDependencyMatrix: ConcurrentHashMap<Int, ConcurrentHashMap<Int, AtomicInteger>> = ConcurrentHashMap()
+    private val fileDependencyMatrix: ConcurrentHashMap<Int, ConcurrentHashMap<Int, AtomicInteger>> =
+        ConcurrentHashMap()
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
         val git = Git(ProjectConfig.repository)
@@ -54,15 +55,10 @@ class FileDependencyMatrixMiner(
     }
 
     override fun saveToJson(resourceDirectory: File) {
-        val map = HashMap<Int, HashMap<Int, Int>>()
-        for (entry in fileDependencyMatrix.entries) {
-            for (entry2 in entry.value.entries) {
-                map.computeIfAbsent(entry.key) { HashMap() }
-                    .computeIfAbsent(entry2.key) { entry2.value.get() }
-            }
-        }
-
-        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.FILE_DEPENDENCY), map)
+        UtilFunctions.saveToJson(
+            File(resourceDirectory, ProjectConfig.FILE_DEPENDENCY),
+            UtilFunctions.convertConcurrentMapOfConcurrentMaps(fileDependencyMatrix)
+        )
         Mapper.saveAll(resourceDirectory)
     }
 }
