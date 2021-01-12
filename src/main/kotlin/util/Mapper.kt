@@ -10,6 +10,7 @@ interface Mapper {
             CommitMapper.saveToJson(resourceDirectory)
         }
     }
+
     fun add(value: String): Int
     fun saveToJson(resourceDirectory: File)
 }

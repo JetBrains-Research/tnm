@@ -5,11 +5,13 @@ import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.revwalk.RevCommit
 import util.CommitMapper
+import util.ProjectConfig
 import java.io.File
 
 abstract class GitMiner(
     protected val repository: FileRepository, val neededBranches: Set<String>,
-    private val reversed: Boolean = false
+    protected val reversed: Boolean = false,
+    protected val numThreads: Int = ProjectConfig.numThreads
 ) {
     protected val git = Git(repository)
     protected val reader: ObjectReader = repository.newObjectReader()

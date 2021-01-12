@@ -46,7 +46,7 @@ object UtilGitMiner {
      */
     fun getChangedFiles(commit1: RevCommit, commit2: RevCommit, reader: ObjectReader, git: Git): Set<Int> {
         val result = mutableSetOf<Int>()
-        val diffs = UtilGitMiner.getDiffs(commit1, commit2, reader, git)
+        val diffs = getDiffs(commit1, commit2, reader, git)
         val userEmail = commit1.authorIdent.emailAddress
         UserMapper.add(userEmail)
 

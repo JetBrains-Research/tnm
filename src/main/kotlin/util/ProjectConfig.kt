@@ -6,6 +6,7 @@ object ProjectConfig {
     private const val URI = "https://github.com/facebook/react.git"
     private const val REPO_DIR = "./local_repository/"
     const val RESOURCES_PATH = "./resources"
+    const val numThreads = 4
 
     // UserMapper
     const val USER_ID = "userToId"
