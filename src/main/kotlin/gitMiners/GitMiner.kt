@@ -11,6 +11,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 
+// TODO: add better logic for count commits
 abstract class GitMiner(
     protected val repository: FileRepository, val neededBranches: Set<String>,
     protected val reversed: Boolean = false,
@@ -23,7 +24,6 @@ abstract class GitMiner(
     /**
      * Mine all needed data from pair of commits.
      * [prevCommit] is always older than [currCommit].
-     * TODO: All fields with mined results must call needed calculations in getters
      *
      * @param currCommit RevCommit which must be earlier then [prevCommit]
      * @param prevCommit RevCommit which must be older then [currCommit]
