@@ -4,6 +4,7 @@ import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
+// TODO: make generic, serialize error with generic Only KClass supported as classifier, got V
 abstract class Mapper(private val entityToIdFileName: String, private val idToEntityFileName: String) {
     companion object {
         fun saveAll(resourceDirectory: File) {
@@ -18,16 +19,8 @@ abstract class Mapper(private val entityToIdFileName: String, private val idToEn
     private var lastId = AtomicInteger(-1)
 
     fun add(value: String): Int {
-//        TODO: find better solution
-        val currId: Int
-        synchronized(entityToId) {
-            val id = entityToId[value]
-            if (id != null) return id
-            currId = lastId.incrementAndGet()
-            entityToId[value] = currId
-        }
+        val currId = entityToId.computeIfAbsent(value) { lastId.incrementAndGet() }
         idToEntity[currId] = value
-
         return currId
     }
 
