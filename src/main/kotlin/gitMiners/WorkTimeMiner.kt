@@ -1,6 +1,5 @@
 package gitMiners
 
-import org.bytedeco.openblas.presets.openblas_nolapack
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.Mapper

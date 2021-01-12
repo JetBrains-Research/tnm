@@ -21,8 +21,8 @@ class ChangedFilesMiner(
 
     // TODO: add FilesChanges[fileId] = Set(commit1, ...)
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
-        val git = Git(ProjectConfig.repository)
-        val reader = ProjectConfig.repository.newObjectReader()
+        val git = Git(repository)
+        val reader = repository.newObjectReader()
 
         val userEmail = currCommit.authorIdent.emailAddress
         val userId = UserMapper.add(userEmail)

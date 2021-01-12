@@ -35,8 +35,8 @@ class PageRankMiner(
     private val commitsGraph = Graph<Int>()
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
-        val git = Git(ProjectConfig.repository)
-        val reader = ProjectConfig.repository.newObjectReader()
+        val git = Git(repository)
+        val reader = repository.newObjectReader()
 
         val currCommitId = CommitMapper.add(currCommit.name)
         val prevCommitId = CommitMapper.add(prevCommit.name)
