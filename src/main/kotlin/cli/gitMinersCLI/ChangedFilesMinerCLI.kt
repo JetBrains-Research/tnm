@@ -10,8 +10,8 @@ class ChangedFilesMinerCLI : MultithreadedGitMinerCLI(
     )
 ) {
     override fun run() {
-        val miner = ChangedFilesMiner(repository!!, branches, numThreads = numThreads)
+        val miner = ChangedFilesMiner(repository, branches, numThreads = numThreads)
         miner.run()
-        miner.saveToJson(resources!!)
+        miner.saveToJson(resources)
     }
 }

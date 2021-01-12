@@ -8,8 +8,8 @@ class AssignmentMatrixMinerCLI :
         (InfoCLI("AssignmentMatrixMiner", "Mine the assignments of people to a technical entities")) {
 
     override fun run() {
-        val miner = AssignmentMatrixMiner(repository!!, branches, numThreads = numThreads)
+        val miner = AssignmentMatrixMiner(repository, branches, numThreads = numThreads)
         miner.run()
-        miner.saveToJson(resources!!)
+        miner.saveToJson(resources)
     }
 }

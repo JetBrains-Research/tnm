@@ -10,8 +10,8 @@ class PageRankMinerCLI : MultithreadedGitMinerCLI(
     )
 ) {
     override fun run() {
-        val miner = PageRankMiner(repository!!, branches, numThreads = numThreads)
+        val miner = PageRankMiner(repository, branches, numThreads = numThreads)
         miner.run()
-        miner.saveToJson(resources!!)
+        miner.saveToJson(resources)
     }
 }

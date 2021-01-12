@@ -9,8 +9,8 @@ class FileDependencyMatrixMinerCLI :
     ) {
 
     override fun run() {
-        val miner = FileDependencyMatrixMiner(repository!!, branches, numThreads = numThreads)
+        val miner = FileDependencyMatrixMiner(repository, branches, numThreads = numThreads)
         miner.run()
-        miner.saveToJson(resources!!)
+        miner.saveToJson(resources)
     }
 }

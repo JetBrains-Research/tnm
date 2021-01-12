@@ -10,6 +10,7 @@ import com.github.ajalt.clikt.parameters.arguments.validate
 import com.github.ajalt.clikt.parameters.options.check
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
 import gitMiners.UtilGitMiner
 import org.eclipse.jgit.api.Git
@@ -21,10 +22,12 @@ abstract class GitMinerCLI(infoCLI: InfoCLI) :
     protected val repository by option("--repository", help = "Git repository directory")
         .file(mustExist = true, canBeDir = true, canBeFile = false)
         .convert { FileRepository(it) }
+        .required()
         .check("is not git repository ") { !it.isBare }
 
     protected val resources by option("--resources", help = UtilCLI.helpResourcesOpt)
         .file(mustExist = true, canBeDir = true, canBeFile = false)
+        .required()
 
     protected val branches by argument(help = "Set of branches which need to be proceeded ")
         .multiple()

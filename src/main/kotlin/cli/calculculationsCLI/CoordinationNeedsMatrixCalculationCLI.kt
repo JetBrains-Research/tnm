@@ -6,12 +6,12 @@ import cli.InfoCLI
 class CoordinationNeedsMatrixCalculationCLI : CalculationCLI(
     InfoCLI(
         "CoordinationNeedsMatrixCalculation",
-        "Calculation of needed congruence between developers"
+        "Calculation of coordination needed between developers"
     )
 ) {
     override fun run() {
-        val calculation = CoordinationNeedsMatrixCalculation(resources!!)
+        val calculation = CoordinationNeedsMatrixCalculation(resources)
         calculation.run()
-        calculation.saveToJson(resources!!)
+        calculation.saveToJson(resources)
     }
 }

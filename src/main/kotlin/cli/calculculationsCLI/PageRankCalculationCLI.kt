@@ -16,8 +16,8 @@ class PageRankCalculationCLI : CalculationCLI(
         .default(0.85f)
 
     override fun run() {
-        val calculation = PageRankCalculation(resources!!, alpha)
+        val calculation = PageRankCalculation(resources, alpha)
         calculation.run()
-        calculation.saveToJson(resources!!)
+        calculation.saveToJson(resources)
     }
 }
