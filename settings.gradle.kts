@@ -1,0 +1,3 @@
+
+rootProject.name = "technical-connections"
+
