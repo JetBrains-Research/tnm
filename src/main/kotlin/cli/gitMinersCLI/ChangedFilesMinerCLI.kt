@@ -2,11 +2,13 @@ package cli.gitMinersCLI
 
 import cli.InfoCLI
 import gitMiners.ChangedFilesMiner
+import util.ProjectConfig
 
 class ChangedFilesMinerCLI : MultithreadedGitMinerCLI(
     InfoCLI(
         "ChangedFilesMiner",
-        "Mine the number of the common edited files in a project between developers"
+        "Mine set of changed files by each developer. Result is map of sets where key represents developer and " +
+                "set contains changed files. Output is JSON file named as ${ProjectConfig.USER_FILES_IDS}"
     )
 ) {
     override fun run() {
