@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-./build/install/technical-connections/bin/technical-connections "$@"
+ java -jar build/libs/shadow-*.jar "$@"
