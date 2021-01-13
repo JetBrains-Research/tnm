@@ -29,7 +29,7 @@ application {
     mainClassName = "cli.CLIKt"
 }
 
-group = "me.nikolaisv"
+group = "me.xxx"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -57,28 +57,4 @@ tasks.withType<KotlinCompile>() {
 tasks.test {
     useJUnit()
     maxHeapSize = "1G"
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = "tcd"
-            artifactId = "technical-connections"
-            version = "0.2"
-
-            from(components["java"])
-        }
-    }
-    val spaceUsername: String by project
-    val spacePassword: String by project
-
-    repositories {
-        maven {
-            url = uri("https://packages.jetbrains.team/maven/p/tcd/maven")
-            credentials {
-                username = spaceUsername
-                password = spacePassword
-            }
-        }
-    }
 }

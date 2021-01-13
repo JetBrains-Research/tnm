@@ -15,9 +15,6 @@ import java.io.File
 
 /**
  * Page rank miner
- * Class based on paper:
- * "An Application of the PageRank Algorithm"
- * https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8051375&tag=1
  *
  * @property repository working repository
  * @constructor Create Page rank miner for [repository] and store the results

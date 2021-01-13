@@ -29,9 +29,3 @@ class SimpleGraphHTML(
     }
 
 }
-
-fun main() {
-    val nodes = setOf(GraphHTML.NodeInfo("1"), GraphHTML.NodeInfo("2"), GraphHTML.NodeInfo("3"))
-    val edges = setOf(GraphHTML.EdgeInfo("1", "2"), GraphHTML.EdgeInfo("1", "3"))
-    SimpleGraphHTML(nodes, edges).draw("HelloGraph", File("out.html"))
-}

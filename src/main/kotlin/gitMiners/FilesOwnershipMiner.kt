@@ -12,11 +12,6 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.math.pow
 
-// Class based on paper:
-// "Engaging developers in open source software projects: harnessing social and technical data
-// mining to improve software development"
-// https://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=5670&context=etd
-// TODO: Double, Float?
 class FilesOwnershipMiner(
     repository: FileRepository,
     neededBranches: Set<String> = ProjectConfig.neededBranches
