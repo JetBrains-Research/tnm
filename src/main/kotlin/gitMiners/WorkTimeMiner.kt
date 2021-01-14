@@ -11,15 +11,6 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.Locale
-
-import java.util.Calendar
-
-import org.joda.time.format.ISODateTimeFormat.hour
-
-import java.util.GregorianCalendar
-
-import java.util.TimeZone
 
 
 /**
@@ -48,8 +39,8 @@ class WorkTimeMiner(
         calendar.time = date
 
         val time = (TimeUnit.DAYS.toMinutes(calendar[Calendar.DAY_OF_WEEK].toLong()) +
-                    TimeUnit.HOURS.toMinutes(calendar[Calendar.HOUR_OF_DAY].toLong()) +
-                    calendar[Calendar.MINUTE]).toInt()
+                TimeUnit.HOURS.toMinutes(calendar[Calendar.HOUR_OF_DAY].toLong()) +
+                calendar[Calendar.MINUTE]).toInt()
 
         workTimeDistribution
             .computeIfAbsent(userId) { ConcurrentHashMap() }
