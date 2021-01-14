@@ -7,8 +7,8 @@ import util.ProjectConfig
 class ChangedFilesMinerCLI : MultithreadedGitMinerCLI(
     InfoCLI(
         "ChangedFilesMiner",
-        "Mine set of changed files by each developer. Result is map of sets where key represents developer and " +
-                "set contains changed files. Output is JSON file named as ${ProjectConfig.USER_FILES_IDS}"
+        "Miner yields a JSON file ${ProjectConfig.USER_FILES_IDS} with a map, where key is the user id of " +
+                "a developer, and value is the list of file ids for the files edited by a developer."
     )
 ) {
     override fun run() {

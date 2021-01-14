@@ -2,13 +2,13 @@ package cli.gitMinersCLI
 
 import cli.InfoCLI
 import gitMiners.FilesOwnershipMiner
+import util.ProjectConfig
 
 class FilesOwnershipMinerCLI : GitMinerCLI(
     InfoCLI(
         "FilesOwnershipMiner",
-        "Mine developers knowledge for each file based on Degree of knowledge algorithm. Result is " +
-                "2 matrices of FileOwnership[fileId][userId], DeveloperKnowledge[userId][fileId] and " +
-                "list of PotentialAuthorship[fileId] for each file. Output is JSON files."
+        "Miner yields JSON file ${ProjectConfig.FILES_OWNERSHIP} with map of maps, where the outer " +
+                "key is the user id, the inner key is the file id and the value is the developer knowledge about the file."
     )
 ) {
     override fun run() {

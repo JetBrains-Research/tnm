@@ -10,9 +10,9 @@ import util.ProjectConfig
 class PageRankCalculationCLI : CalculationCLI(
     InfoCLI(
         "PageRankCalculation",
-        "Calculation of ranks of bug-fixing commits based on the Google's PageRank algorithm. " +
-                "Needs results from PageRankMiner in resource directory. Output is vector of PageRank values for each " +
-                "commit in JSON file named as ${ProjectConfig.PAGERANK_MATRIX}"
+        "Computes PageRank vector which contains importance rankings (in the bug-fixing and bug creation context) " +
+                "for each commit. The computation results are saved to a JSON file ${ProjectConfig.PAGERANK_MATRIX} as " +
+                "a vector, where j-th entry corresponds to the importance of a commit."
     )
 ) {
     private val alpha by option("-a", "--alpha", help = "Scalar parameter in [0, 1]. By default 0.85").float()

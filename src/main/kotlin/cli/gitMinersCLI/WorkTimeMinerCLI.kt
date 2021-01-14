@@ -7,8 +7,9 @@ import util.ProjectConfig
 class WorkTimeMinerCLI : MultithreadedGitMinerCLI(
     InfoCLI(
         "WorkTimeMiner",
-        "Mine commits time distribution for each developer. Result is matrix where row represents user, column " +
-                "represents minute in week and value in cell represent number of commits. Output is JSON file named as ${ProjectConfig.WORKTIME_DISTRIBUTION}"
+        "Miner yields a JSON file ${ProjectConfig.WORKTIME_DISTRIBUTION} with a map of maps, where the outer " +
+                "key is user id, the inner key is the minutes passed from the beginning of the week, and the value is " +
+                "the number of commits made by user at that minute in week. The first day of the week is SUNDAY."
     )
 ) {
     override fun run() {

@@ -8,9 +8,8 @@ class FileDependencyMatrixMinerCLI :
     MultithreadedGitMinerCLI(
         InfoCLI(
             "FileDependencyMatrixMiner",
-            "Mine technical dependencies based on commits. Result is matrix where row, column " +
-                    "represents file and value in cell represents how many times files occur in same changed files " +
-                    "set of commit. Output is JSON file named as ${ProjectConfig.FILE_DEPENDENCY}"
+            "Miner yields a JSON file ${ProjectConfig.FILE_DEPENDENCY} with map of maps, where both inner and outer " +
+                    "keys are file ids and the value is the number of times both file has been edited in the same commit."
         )
     ) {
 

@@ -9,9 +9,8 @@ class AssignmentMatrixMinerCLI :
         (
         InfoCLI(
             "AssignmentMatrixMiner",
-            "Mine the assignments of people to a technical entities. Result is matrix " +
-                    "where row represents developer, column represents file and value in cell represents how many " +
-                    "times developer changed file. Output is JSON file named as ${ProjectConfig.ASSIGNMENT_MATRIX}"
+            "Miner yields a JSON file ${ProjectConfig.ASSIGNMENT_MATRIX} with map of maps, where outer " +
+                    "key is the user id, inner key is the file id and the value is the number of times the user has edited the file."
         )
     ) {
 

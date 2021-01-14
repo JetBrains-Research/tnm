@@ -7,9 +7,8 @@ import util.ProjectConfig
 class PageRankMinerCLI : MultithreadedGitMinerCLI(
     InfoCLI(
         "PageRankMiner",
-        "Mine data for calculating ranks of bug-fixing commits based on the Google's PageRank algorithm. " +
-                "Result is Adjacency Map of bug-fixing commits and bug-creating commits. " +
-                "Output is JSON file ${ProjectConfig.COMMITS_GRAPH}"
+        "Miner yields the JSON file ${ProjectConfig.COMMITS_GRAPH} with a map of lists, with key corresponding to the fixing " +
+                "commit id and value corresponding to the commits with lines changed by fixes."
     )
 ) {
     override fun run() {
