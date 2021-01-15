@@ -21,7 +21,7 @@ object ProjectConfig {
     const val ID_COMMIT = "idToCommit"
 
     // PageRankMiner
-    const val COMMITS_GRAPH = "CommitsGraphForPageRank"
+    const val COMMITS_GRAPH = "CommitInfluenceGraph"
 
     // FilesOwnershipMiner
     const val FILES_OWNERSHIP = "FilesOwnership"
