@@ -107,12 +107,12 @@ object UtilVisualisation {
             appendHTML().head {
                 link {
                     rel = "stylesheet"
-                    href = "https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.css"
+                    href = "https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.css"
                     type = "text/css"
                 }
                 script {
                     type = "text/javascript"
-                    src = "https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis-network.min.js"
+                    src = "https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis-network.min.js"
                 }
                 style {
                     unsafe {

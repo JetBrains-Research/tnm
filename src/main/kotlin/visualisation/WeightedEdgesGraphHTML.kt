@@ -5,7 +5,7 @@ import kotlinx.html.stream.appendHTML
 import kotlinx.html.unsafe
 import java.io.File
 
-class SimpleGraphHTML(
+class WeightedEdgesGraphHTML(
     private val nodes: Set<GraphHTML.NodeInfo>,
     private val edges: Set<GraphHTML.EdgeInfo>
 ) : GraphHTML {
