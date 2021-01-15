@@ -110,7 +110,10 @@ class CommitInfluenceGraphMiner(
     }
 
     private fun isBugFix(commit: RevCommit): Boolean {
-        return "fix" in commit.shortMessage.toLowerCase()
+        val regex = "\\bfix:?\\b".toRegex()
+        val shortMsgContains = regex.find(commit.shortMessage) != null
+        val fullMsgContains = regex.find(commit.fullMessage) != null
+        return shortMsgContains || fullMsgContains
     }
 
     override fun saveToJson(resourceDirectory: File) {
