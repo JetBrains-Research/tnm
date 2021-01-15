@@ -56,5 +56,5 @@ tasks.withType<KotlinCompile>() {
 
 tasks.test {
     useJUnit()
-    maxHeapSize = "1G"
+    maxHeapSize = "2G"
 }
