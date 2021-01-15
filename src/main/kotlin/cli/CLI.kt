@@ -16,7 +16,7 @@ fun main(args: Array<String>) = CLI().subcommands(
     ChangedFilesMinerCLI(),
     FileDependencyMatrixMinerCLI(),
     FilesOwnershipMinerCLI(),
-    PageRankMinerCLI(),
+    CommitInfluenceGraphMinerCLI(),
     WorkTimeMinerCLI(),
     PageRankCalculationCLI(),
     CoordinationNeedsMatrixCalculationCLI(),

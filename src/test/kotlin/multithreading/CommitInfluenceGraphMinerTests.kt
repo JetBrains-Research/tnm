@@ -4,7 +4,7 @@ import GitMinerTest
 import GitMinerTest.Companion.repositoryDir
 import GitMinerTest.Companion.resourcesMultithreadingDir
 import GitMinerTest.Companion.resourcesOneThreadDir
-import gitMiners.PageRankMiner
+import gitMiners.CommitInfluenceGraphMiner
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.eclipse.jgit.internal.storage.file.FileRepository
@@ -14,7 +14,7 @@ import java.io.File
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class PageRankMinerTests : GitMinerTest {
+class CommitInfluenceGraphMinerTests : GitMinerTest {
     @Test
     fun `test one thread and multithreading`() {
         runMiner(resourcesOneThreadDir, 1)
@@ -28,7 +28,7 @@ class PageRankMinerTests : GitMinerTest {
 
     private fun runMiner(resources: File, numThreads: Int = ProjectConfig.numThreads) {
         val repository = FileRepository(File(repositoryDir, ".git"))
-        val miner = PageRankMiner(repository, numThreads = numThreads)
+        val miner = CommitInfluenceGraphMiner(repository, numThreads = numThreads)
         miner.run()
         miner.saveToJson(resources)
     }

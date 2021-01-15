@@ -19,7 +19,7 @@ import java.io.File
  * @property repository working repository
  * @constructor Create Page rank miner for [repository] and store the results
  */
-class PageRankMiner(
+class CommitInfluenceGraphMiner(
     repository: FileRepository,
     neededBranches: Set<String> = ProjectConfig.neededBranches,
     numThreads: Int = ProjectConfig.numThreads
