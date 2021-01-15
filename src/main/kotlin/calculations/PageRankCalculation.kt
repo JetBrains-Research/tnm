@@ -32,12 +32,15 @@ class PageRankCalculation(resourceDirectory: File, private val alpha: Float = 0.
         I.put(0, 0, 1F)
 
         // must be between 50-100 iterations
-        for (i in 0 until 60) {
+        for (i in 0 until 75) {
             I = G.mmul(I)
         }
 
-        // TODO: do we really need?
-        UtilFunctions.normalizeMax(I)
+        val maxValue = I.max().toFloatVector()[0]
+        if (maxValue > 1.0f) {
+            throw Exception("PageRankCalculation according to algorithm of Suzuki et al. is not supported for this repository.")
+        }
+
         result = I
     }
 
