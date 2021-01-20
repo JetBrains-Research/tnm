@@ -8,7 +8,6 @@ import util.ProjectConfig
 import util.UtilFunctions
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Class for mining  file dependency matrix
@@ -23,7 +22,7 @@ class FileDependencyMatrixMiner(
     numThreads: Int = ProjectConfig.numThreads
 ) : GitMiner(repository, neededBranches, numThreads = numThreads) {
 
-    private val fileDependencyMatrix: ConcurrentHashMap<Int, ConcurrentHashMap<Int, AtomicInteger>> =
+    private val fileDependencyMatrix: ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>> =
         ConcurrentHashMap()
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
@@ -44,15 +43,13 @@ class FileDependencyMatrixMiner(
     private fun increment(fileId1: Int, fileId2: Int) {
         fileDependencyMatrix
             .computeIfAbsent(fileId1) { ConcurrentHashMap() }
-            .computeIfAbsent(fileId2) { AtomicInteger(0) }
-            .incrementAndGet()
-
+            .compute(fileId2) { _, v -> if (v == null) 1 else v + 1 }
     }
 
     override fun saveToJson(resourceDirectory: File) {
         UtilFunctions.saveToJson(
             File(resourceDirectory, ProjectConfig.FILE_DEPENDENCY),
-            UtilFunctions.convertConcurrentMapOfConcurrentMaps(fileDependencyMatrix)
+            UtilFunctions.convertConcurrentMapOfConcurrentMapsInt(fileDependencyMatrix)
         )
         Mapper.saveAll(resourceDirectory)
     }

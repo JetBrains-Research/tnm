@@ -8,7 +8,6 @@ import org.nd4j.linalg.dataset.api.preprocessor.NormalizerMinMaxScaler
 import org.nd4j.linalg.factory.Nd4j
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
 
 object UtilFunctions {
     // TODO: try catch logic for encode and file
@@ -47,13 +46,10 @@ object UtilFunctions {
         scaler.transform(matrix)
     }
 
-    fun convertConcurrentMapOfConcurrentMaps(map: ConcurrentHashMap<Int, ConcurrentHashMap<Int, AtomicInteger>>): HashMap<Int, HashMap<Int, Int>> {
-        val newMap = HashMap<Int, HashMap<Int, Int>>()
+    fun convertConcurrentMapOfConcurrentMapsInt(map: ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>>): Map<Int, Map<Int, Int>> {
+        val newMap = HashMap<Int, Map<Int, Int>>()
         for (entry in map.entries) {
-            for (entry2 in entry.value.entries) {
-                newMap.computeIfAbsent(entry.key) { HashMap() }
-                    .computeIfAbsent(entry2.key) { entry2.value.get() }
-            }
+            newMap[entry.key] = entry.value
         }
         return newMap
     }

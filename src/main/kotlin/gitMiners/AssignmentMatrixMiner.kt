@@ -9,7 +9,7 @@ import util.UserMapper
 import util.UtilFunctions
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
+
 
 /**
  * Assignment matrix miner
@@ -23,7 +23,7 @@ class AssignmentMatrixMiner(
     numThreads: Int = ProjectConfig.numThreads
 ) : GitMiner(repository, neededBranches, numThreads = numThreads) {
 
-    private val assignmentMatrix: ConcurrentHashMap<Int, ConcurrentHashMap<Int, AtomicInteger>> = ConcurrentHashMap()
+    private val assignmentMatrix: ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>> = ConcurrentHashMap()
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
         val git = Git(repository)
@@ -34,15 +34,14 @@ class AssignmentMatrixMiner(
         for (fileId in changedFiles) {
             assignmentMatrix
                 .computeIfAbsent(userId) { ConcurrentHashMap() }
-                .computeIfAbsent(fileId) { AtomicInteger(0) }
-                .incrementAndGet()
+                .compute(fileId) { _, v -> if (v == null) 1 else v + 1 }
         }
     }
 
     override fun saveToJson(resourceDirectory: File) {
         UtilFunctions.saveToJson(
             File(resourceDirectory, ProjectConfig.ASSIGNMENT_MATRIX),
-            UtilFunctions.convertConcurrentMapOfConcurrentMaps(assignmentMatrix)
+            UtilFunctions.convertConcurrentMapOfConcurrentMapsInt(assignmentMatrix)
         )
         Mapper.saveAll(resourceDirectory)
     }

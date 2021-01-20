@@ -10,7 +10,6 @@ import java.io.File
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
 
 
 /**
@@ -28,7 +27,7 @@ class WorkTimeMiner(
 ) : GitMiner(repository, neededBranches, numThreads = numThreads) {
 
     // [user][minuteInWeek] = numOfCommits
-    private val workTimeDistribution = ConcurrentHashMap<Int, ConcurrentHashMap<Int, AtomicInteger>>()
+    private val workTimeDistribution = ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>>()
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
         val email = currCommit.authorIdent.emailAddress
@@ -44,14 +43,13 @@ class WorkTimeMiner(
 
         workTimeDistribution
             .computeIfAbsent(userId) { ConcurrentHashMap() }
-            .computeIfAbsent(time) { AtomicInteger(0) }
-            .incrementAndGet()
+            .compute(time) { _, v -> if (v == null) 1 else v + 1 }
     }
 
     override fun saveToJson(resourceDirectory: File) {
         UtilFunctions.saveToJson(
             File(resourceDirectory, ProjectConfig.WORKTIME_DISTRIBUTION),
-            UtilFunctions.convertConcurrentMapOfConcurrentMaps(workTimeDistribution)
+            UtilFunctions.convertConcurrentMapOfConcurrentMapsInt(workTimeDistribution)
         )
         Mapper.saveAll(resourceDirectory)
     }
