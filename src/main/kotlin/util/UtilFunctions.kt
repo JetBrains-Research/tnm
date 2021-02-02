@@ -8,6 +8,7 @@ import org.nd4j.linalg.dataset.api.preprocessor.NormalizerMinMaxScaler
 import org.nd4j.linalg.factory.Nd4j
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.log2
 
 object UtilFunctions {
     // TODO: try catch logic for encode and file
@@ -53,4 +54,32 @@ object UtilFunctions {
         }
         return newMap
     }
+
+    fun entropy(distribution: Collection<Int>): Double {
+        var result = 0.0
+        for (value in distribution) {
+            result += value * log2(value.toDouble())
+        }
+        return -result
+    }
+
+    fun levenshtein(str1: String, str2: String): Int {
+        val Di_1 = IntArray(str2.length + 1)
+        val Di = IntArray(str2.length + 1)
+        for (j in 0..str2.length) {
+            Di[j] = j // (i == 0)
+        }
+        for (i in 1..str1.length) {
+            System.arraycopy(Di, 0, Di_1, 0, Di_1.size)
+            Di[0] = i // (j == 0)
+            for (j in 1..str2.length) {
+                val cost = if (str1[i - 1] != str2[j - 1]) 1 else 0
+                Di[j] = (Di_1[j] + 1)
+                    .coerceAtMost(Di[j - 1] + 1)
+                    .coerceAtMost(Di_1[j - 1] + cost)
+            }
+        }
+        return Di[Di.size - 1]
+    }
+
 }

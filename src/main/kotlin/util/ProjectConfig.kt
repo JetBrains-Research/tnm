@@ -49,6 +49,9 @@ object ProjectConfig {
     // MirrorCongruence
     const val MIRROR_CONGRUENCE = "MirrorCongruence"
 
+    // CO_EDIT
+    const val CO_EDIT = "co_edit"
+
     val REPOSITORY = FileRepository("${REPO_DIR}/.git")
     val neededBranches = setOf("origin/master")
 }
