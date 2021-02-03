@@ -7,7 +7,6 @@ import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.CommitMapper
 import util.ProjectConfig
-import util.UserMapper
 import util.UtilFunctions
 import util.UtilFunctions.entropy
 import util.UtilFunctions.levenshtein
@@ -20,18 +19,15 @@ class CoEditNetworksMiner(
     neededBranches: Set<String> = ProjectConfig.neededBranches,
 ) : GitMiner(repository, neededBranches, numThreads = 1) {
     companion object {
-        //        private const val NOT_NEWLINE = "\\ No newline at end of file"
-        private const val NOT_NEWLINE = "\\"
         private const val ADD_MARK = '+'
         private const val DELETE_MARK = '-'
-        private const val NO_MARK = ' '
         private const val DIFF_MARK = '@'
         private val regex = Regex("@@ -(\\d+)(,\\d+)? \\+(\\d+)(,\\d+)? @@")
     }
 
     private val out = ByteArrayOutputStream()
     private val diffFormatter = DiffFormatter(out)
-    private val result = mutableSetOf<List<Edit>>()
+    private val result = mutableSetOf<CommitResult>()
 
 
     init {
@@ -45,6 +41,14 @@ class CoEditNetworksMiner(
         ADD, DELETE, REPLACE, EMPTY
     }
 
+    // TODO: add commit_info
+    @Serializable
+    data class CommitResult(
+        val id: Int,
+        val edits: List<Edit>
+    )
+
+    // TODO: old_path, new_path
     @Serializable
     data class Edit(
         val preStartLineNum: Int,
@@ -62,11 +66,7 @@ class CoEditNetworksMiner(
     //    TODO: file_renaming and binary_file_change
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
         val diffs = UtilGitMiner.getDiffs(currCommit, prevCommit, reader, git)
-        val email = currCommit.authorIdent.emailAddress
-
-        val userId = UserMapper.add(email)
         val currCommitId = CommitMapper.add(currCommit.name)
-        val prevCommitId = CommitMapper.add(prevCommit.name)
 
         val deleteBlock = mutableListOf<String>()
         val addBlock = mutableListOf<String>()
@@ -108,7 +108,7 @@ class CoEditNetworksMiner(
             out.reset()
         }
         out.reset()
-        result.add(edits)
+        result.add(CommitResult(currCommitId, edits))
     }
 
 
@@ -196,12 +196,4 @@ class CoEditNetworksMiner(
         )
     }
 
-}
-
-
-fun main() {
-    val repo = FileRepository("../test_repo_1/.git")
-    val miner = CoEditNetworksMiner(repo, setOf("master"))
-    miner.run()
-    miner.saveToJson(File("./resources"))
 }
