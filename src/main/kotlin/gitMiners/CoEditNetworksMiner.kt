@@ -1,13 +1,12 @@
 package gitMiners
 
 import kotlinx.serialization.Serializable
+import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
-import util.CommitMapper
-import util.ProjectConfig
-import util.UtilFunctions
+import util.*
 import util.UtilFunctions.entropy
 import util.UtilFunctions.levenshtein
 import java.io.ByteArrayOutputStream
@@ -22,13 +21,14 @@ class CoEditNetworksMiner(
         private const val ADD_MARK = '+'
         private const val DELETE_MARK = '-'
         private const val DIFF_MARK = '@'
+        private const val OLD_PATH_MARK = "---"
+        private const val NEW_PATH_MARK = "+++"
         private val regex = Regex("@@ -(\\d+)(,\\d+)? \\+(\\d+)(,\\d+)? @@")
     }
 
     private val out = ByteArrayOutputStream()
     private val diffFormatter = DiffFormatter(out)
     private val result = mutableSetOf<CommitResult>()
-
 
     init {
         diffFormatter.setRepository(repository)
@@ -41,16 +41,18 @@ class CoEditNetworksMiner(
         ADD, DELETE, REPLACE, EMPTY
     }
 
-    // TODO: add commit_info
     @Serializable
     data class CommitResult(
         val id: Int,
+        val info: CommitInfo,
         val edits: List<Edit>
     )
 
-    // TODO: old_path, new_path
+    // TODO: rename
     @Serializable
     data class Edit(
+        val oldPath: Int,
+        val newPath: Int,
         val preStartLineNum: Int,
         val postStartLineNum: Int,
         val preLenInLines: Int,
@@ -63,21 +65,34 @@ class CoEditNetworksMiner(
         val type: ChangeType
     )
 
+    @Serializable
+    data class CommitInfo(
+        val author: Int,
+        val date: Long
+    ) {
+        constructor(commit: RevCommit)
+                : this(
+            UserMapper.add(commit.authorIdent.emailAddress),
+            commit.commitTime * 1000L
+        )
+    }
+
     //    TODO: file_renaming and binary_file_change
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
         val diffs = UtilGitMiner.getDiffs(currCommit, prevCommit, reader, git)
-        val currCommitId = CommitMapper.add(currCommit.name)
 
         val deleteBlock = mutableListOf<String>()
         val addBlock = mutableListOf<String>()
         val edits = mutableListOf<Edit>()
         for (diff in diffs) {
             var start = false
-            // TODO: find better solution inside format method
             diffFormatter.format(diff)
             val diffText = out.toString("UTF-8").split("\n")
+
             var preStartLineNum = 0
             var postStartLineNum = 0
+            var oldPathId = -1
+            var newPathId = -1
 
             for (line in diffText) {
                 if (line.isEmpty()) continue
@@ -87,13 +102,33 @@ class CoEditNetworksMiner(
                 if (!start && mark == DIFF_MARK) {
                     start = true
                 }
-                if (!start) continue
+//                if (!start) continue
 
                 when (mark) {
-                    ADD_MARK -> addBlock.add(line.substring(1))
-                    DELETE_MARK -> deleteBlock.add(line.substring(1))
+                    ADD_MARK -> {
+                        if (start) {
+                            addBlock.add(line.substring(1))
+                        } else {
+                            newPathId = getFileId(line, NEW_PATH_MARK)
+                        }
+                    }
+                    DELETE_MARK -> {
+                        if (start) {
+                            deleteBlock.add(line.substring(1))
+                        } else {
+                            oldPathId = getFileId(line, OLD_PATH_MARK)
+                        }
+                    }
                     DIFF_MARK -> {
-                        processBlocks(addBlock, deleteBlock, edits, preStartLineNum, postStartLineNum)
+                        processBlocks(
+                            addBlock,
+                            deleteBlock,
+                            edits,
+                            preStartLineNum,
+                            postStartLineNum,
+                            oldPathId,
+                            newPathId
+                        )
                         val match = regex.find(line)
                         preStartLineNum = match!!.groupValues[1].toInt()
                         postStartLineNum = match.groupValues[3].toInt()
@@ -103,14 +138,25 @@ class CoEditNetworksMiner(
 
             }
 
-            processBlocks(addBlock, deleteBlock, edits, preStartLineNum, postStartLineNum)
+            processBlocks(addBlock, deleteBlock, edits, preStartLineNum, postStartLineNum, oldPathId, newPathId)
 
             out.reset()
         }
         out.reset()
-        result.add(CommitResult(currCommitId, edits))
+
+        val info = CommitInfo(currCommit)
+
+        val currCommitId = CommitMapper.add(currCommit.name)
+        result.add(CommitResult(currCommitId, info, edits))
     }
 
+
+    private fun getFileId(line: String, mark: String): Int {
+        val path = line.substring(mark.length + 1)
+        if (path == DiffEntry.DEV_NULL) return -1
+//        delete prefixes a/, b/ of DiffFormatter
+        return FileMapper.add(path.substring(2))
+    }
 
     private fun getType(
         addBlock: List<String>,
@@ -129,7 +175,9 @@ class CoEditNetworksMiner(
         deleteBlock: MutableList<String>,
         edits: MutableList<Edit>,
         preStartLineNum: Int,
-        postStartLineNum: Int
+        postStartLineNum: Int,
+        oldPath: Int,
+        newPath: Int
     ) {
 
         val type = getType(addBlock, deleteBlock)
@@ -157,6 +205,8 @@ class CoEditNetworksMiner(
             else -> 0
         }
         val edit = Edit(
+            oldPath,
+            newPath,
             preStartLineNum,
             postStartLineNum,
             preLenInLines,
