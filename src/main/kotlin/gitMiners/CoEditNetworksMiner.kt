@@ -257,11 +257,3 @@ class CoEditNetworksMiner(
     }
 
 }
-
-fun main() {
-//    val repo = FileRepository("../test_repo_1/.git")
-    val repo = FileRepository("../react/.git")
-    val miner = CoEditNetworksMiner(repo, setOf("master"))
-    miner.run()
-    miner.saveToJson(File("./resources"))
-}
