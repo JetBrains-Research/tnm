@@ -1,6 +1,7 @@
 package gitMiners
 
 import kotlinx.serialization.Serializable
+import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
@@ -11,12 +12,14 @@ import util.UtilFunctions.entropy
 import util.UtilFunctions.levenshtein
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.util.concurrent.ConcurrentSkipListSet
 
 
 class CoEditNetworksMiner(
     repository: FileRepository,
     neededBranches: Set<String> = ProjectConfig.neededBranches,
-) : GitMiner(repository, neededBranches, numThreads = 1) {
+    numThreads: Int = ProjectConfig.numThreads
+) : GitMiner(repository, neededBranches, numThreads = numThreads) {
     companion object {
         private const val ADD_MARK = '+'
         private const val DELETE_MARK = '-'
@@ -26,16 +29,7 @@ class CoEditNetworksMiner(
         private val regex = Regex("@@ -(\\d+)(,\\d+)? \\+(\\d+)(,\\d+)? @@")
     }
 
-    private val out = ByteArrayOutputStream()
-    private val diffFormatter = DiffFormatter(out)
-    private val result = mutableSetOf<CommitResult>()
-
-    init {
-        diffFormatter.setRepository(repository)
-        diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
-        diffFormatter.isDetectRenames = true
-        diffFormatter.setContext(0)
-    }
+    private val result = ConcurrentSkipListSet<CommitResult>()
 
     enum class ChangeType {
         ADD, DELETE, REPLACE, EMPTY
@@ -46,7 +40,12 @@ class CoEditNetworksMiner(
         val id: Int,
         val info: CommitInfo,
         val edits: List<Edit>
-    )
+    ) : Comparable<CommitResult> {
+        override fun compareTo(other: CommitResult): Int {
+            return id.compareTo(other.id)
+        }
+
+    }
 
     // TODO: rename
     @Serializable
@@ -79,11 +78,22 @@ class CoEditNetworksMiner(
 
     //    TODO: file_renaming and binary_file_change
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
+        val git = Git(repository)
+        val reader = repository.newObjectReader()
         val diffs = UtilGitMiner.getDiffs(currCommit, prevCommit, reader, git)
+//        TODO: make thread local?
+        val out = ByteArrayOutputStream()
 
         val deleteBlock = mutableListOf<String>()
         val addBlock = mutableListOf<String>()
         val edits = mutableListOf<Edit>()
+
+        val diffFormatter = DiffFormatter(out)
+        diffFormatter.setRepository(repository)
+        diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
+        diffFormatter.isDetectRenames = true
+        diffFormatter.setContext(0)
+
         for (diff in diffs) {
             var start = false
             diffFormatter.format(diff)
@@ -242,8 +252,16 @@ class CoEditNetworksMiner(
     override fun saveToJson(resourceDirectory: File) {
         UtilFunctions.saveToJson(
             File(resourceDirectory, ProjectConfig.CO_EDIT),
-            result
+            result.toSet()
         )
     }
 
+}
+
+fun main() {
+//    val repo = FileRepository("../test_repo_1/.git")
+    val repo = FileRepository("../react/.git")
+    val miner = CoEditNetworksMiner(repo, setOf("master"))
+    miner.run()
+    miner.saveToJson(File("./resources"))
 }
