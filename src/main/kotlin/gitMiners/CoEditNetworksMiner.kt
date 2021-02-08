@@ -7,11 +7,14 @@ import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
+import org.nd4j.shade.protobuf.compiler.PluginProtos
 import util.*
 import util.UtilFunctions.entropy
 import util.UtilFunctions.levenshtein
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.IOException
+import java.io.OutputStream
 import java.util.concurrent.ConcurrentSkipListSet
 
 
@@ -24,8 +27,6 @@ class CoEditNetworksMiner(
         private const val ADD_MARK = '+'
         private const val DELETE_MARK = '-'
         private const val DIFF_MARK = '@'
-        private const val OLD_PATH_MARK = "---"
-        private const val NEW_PATH_MARK = "+++"
         private val regex = Regex("@@ -(\\d+)(,\\d+)? \\+(\\d+)(,\\d+)? @@")
     }
 
@@ -101,8 +102,8 @@ class CoEditNetworksMiner(
 
             var preStartLineNum = 0
             var postStartLineNum = 0
-            var oldPathId = -1
-            var newPathId = -1
+            val oldPathId = getFileId(diff.oldPath)
+            val newPathId = getFileId(diff.newPath)
 
             for (line in diffText) {
                 if (line.isEmpty()) continue
@@ -112,21 +113,16 @@ class CoEditNetworksMiner(
                 if (!start && mark == DIFF_MARK) {
                     start = true
                 }
-//                if (!start) continue
 
                 when (mark) {
                     ADD_MARK -> {
                         if (start) {
                             addBlock.add(line.substring(1))
-                        } else {
-                            newPathId = getFileId(line, NEW_PATH_MARK)
                         }
                     }
                     DELETE_MARK -> {
                         if (start) {
                             deleteBlock.add(line.substring(1))
-                        } else {
-                            oldPathId = getFileId(line, OLD_PATH_MARK)
                         }
                     }
                     DIFF_MARK -> {
@@ -161,8 +157,7 @@ class CoEditNetworksMiner(
     }
 
 
-    private fun getFileId(line: String, mark: String): Int {
-        val path = line.substring(mark.length + 1)
+    private fun getFileId(path: String): Int {
         if (path == DiffEntry.DEV_NULL) return -1
 //        delete prefixes a/, b/ of DiffFormatter
         return FileMapper.add(path.substring(2))
@@ -256,4 +251,12 @@ class CoEditNetworksMiner(
         )
     }
 
+}
+
+fun main() {
+    val repo = FileRepository("../test_repo_1/.git")
+//    val repo = FileRepository("../react/.git")
+    val miner = CoEditNetworksMiner(repo, setOf("master"), numThreads = 1)
+    miner.run()
+    miner.saveToJson(File("./resources"))
 }
