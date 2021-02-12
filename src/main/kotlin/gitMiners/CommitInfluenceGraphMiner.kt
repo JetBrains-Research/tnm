@@ -42,7 +42,7 @@ class CommitInfluenceGraphMiner(
             commitsGraph.addNode(currCommitId)
             commitsGraph.addNode(prevCommitId)
 
-            val diffs = UtilGitMiner.getDiffs(currCommit, prevCommit, reader, git)
+            val diffs = UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, reader, git)
 
             val commitsAdj = getCommitsAdj(diffs, prevCommit)
             for (commitId in commitsAdj) {

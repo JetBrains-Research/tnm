@@ -22,7 +22,12 @@ object UtilGitMiner {
      * @param git must be created from the same Repository as [reader]
      * @return List of DiffEntry's between [commit1] and [commit2].
      */
-    fun getDiffs(commit1: RevCommit, commit2: RevCommit, reader: ObjectReader, git: Git): List<DiffEntry> {
+    fun getDiffsWithoutText(
+        commit1: RevCommit,
+        commit2: RevCommit,
+        reader: ObjectReader,
+        git: Git
+    ): List<DiffEntry> {
         val oldTreeIter = CanonicalTreeParser()
         oldTreeIter.reset(reader, commit2.tree)
 
@@ -32,6 +37,7 @@ object UtilGitMiner {
         return git.diff()
             .setNewTree(newTreeIter)
             .setOldTree(oldTreeIter)
+            .setShowNameAndStatusOnly(true)
             .call()
     }
 
@@ -46,7 +52,7 @@ object UtilGitMiner {
      */
     fun getChangedFiles(commit1: RevCommit, commit2: RevCommit, reader: ObjectReader, git: Git): Set<Int> {
         val result = mutableSetOf<Int>()
-        val diffs = getDiffs(commit1, commit2, reader, git)
+        val diffs = getDiffsWithoutText(commit1, commit2, reader, git)
         val userEmail = commit1.authorIdent.emailAddress
         UserMapper.add(userEmail)
 
