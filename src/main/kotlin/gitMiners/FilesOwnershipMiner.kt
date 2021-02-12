@@ -74,7 +74,7 @@ class FilesOwnershipMiner(
     }
 
     override fun run() {
-//        processHead()
+        processHead()
         super.run()
         calculatePotentialAuthorship()
         calculateDeveloperKnowledge()

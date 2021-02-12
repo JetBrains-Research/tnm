@@ -43,11 +43,16 @@ abstract class GitMiner(
 
             val commitsInBranch = getUnprocessedCommits(branch.name)
 
-            val commitsCount = commitsInBranch.size - 1
+            val commitsPairsCount = commitsInBranch.size - 1
+            if (commitsPairsCount == 0 || commitsPairsCount == -1) {
+                println("Nothing to proceed in branch $branch")
+                continue
+            }
+
             val proceedCommits = AtomicInteger(0)
             val logFrequency = 100
 
-            val latch = CountDownLatch(commitsCount)
+            val latch = CountDownLatch(commitsPairsCount)
 
             for ((currCommit, prevCommit) in commitsInBranch.windowed(2)) {
                 if (!addProceedCommits(currCommit, prevCommit)) continue
@@ -59,8 +64,8 @@ abstract class GitMiner(
                         e.printStackTrace()
                     } finally {
                         val num = proceedCommits.incrementAndGet()
-                        if (num % logFrequency == 0 || num == commitsCount) {
-                            println("Processed $num commits of $commitsCount")
+                        if (num % logFrequency == 0 || num == commitsPairsCount) {
+                            println("Processed $num commits of $commitsPairsCount")
                         }
 
                         latch.countDown()
