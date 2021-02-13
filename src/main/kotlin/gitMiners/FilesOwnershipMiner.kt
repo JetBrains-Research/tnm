@@ -81,6 +81,7 @@ class FilesOwnershipMiner(
     }
 
     private fun processHead() {
+        println("Start processing Head")
         val treeWalk = TreeWalk(repository)
         treeWalk.addTree(latestCommit.tree)
         treeWalk.isRecursive = false
@@ -112,6 +113,7 @@ class FilesOwnershipMiner(
                 addAuthorsForLines(line..line, fileId, userId)
             }
         }
+        println("End processing Head")
     }
 
     override fun saveToJson(resourceDirectory: File) {
@@ -131,6 +133,7 @@ class FilesOwnershipMiner(
     }
 
     private fun calculatePotentialAuthorship() {
+        println("Start calculating potential authorship")
         for (fileEntry in authorsForLine) {
             val fileId = fileEntry.key
             var potentialAuthorshipForFile = 0
@@ -139,9 +142,11 @@ class FilesOwnershipMiner(
             }
             potentialAuthorship[fileId] = potentialAuthorshipForFile
         }
+        println("End calculating potential authorship")
     }
 
     private fun calculateDeveloperKnowledge() {
+        println("Start calculating developer knowledge")
         for (entryOwnership in filesOwnership) {
             val fileId = entryOwnership.key
             for (entryUserData in entryOwnership.value) {
@@ -151,6 +156,7 @@ class FilesOwnershipMiner(
                     .computeIfAbsent(userId) { HashMap() }[fileId] = userData.authorship / potentialAuthorship[fileId]!!
             }
         }
+        println("End calculating developer knowledge")
     }
 
     @Serializable
