@@ -6,8 +6,8 @@ import kotlinx.html.unsafe
 import java.io.File
 
 class WeightedEdgesGraphHTML(
-    private val nodes: Set<GraphHTML.NodeInfo>,
-    private val edges: Set<GraphHTML.EdgeInfo>
+    private val nodes: Set<NodeInfo>,
+    private val edges: Set<EdgeInfo>
 ) : GraphHTML {
 
     override fun draw(graphName: String, fileForSave: File) {

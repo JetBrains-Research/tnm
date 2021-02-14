@@ -86,11 +86,11 @@ object UtilVisualisation {
         """
     const val defaultDrawFunctionName = "drawGraph"
 
-    fun edgesToVis(edges: Set<GraphHTML.EdgeInfo>): String {
+    fun edgesToVis(edges: Set<EdgeInfo>): String {
         return "edges = new vis.DataSet([ ${edges.joinToString(", ") { it.generateVis() }} ]);"
     }
 
-    fun nodesToVis(nodes: Set<GraphHTML.NodeInfo>): String {
+    fun nodesToVis(nodes: Set<NodeInfo>): String {
         return "nodes = new vis.DataSet([ ${nodes.joinToString(", ") { it.generateVis() }} ]);"
     }
 
@@ -128,7 +128,7 @@ object UtilVisualisation {
         }
     }
 
-    fun defaultScriptVis(nodes: Set<GraphHTML.NodeInfo>, edges: Set<GraphHTML.EdgeInfo>): String {
+    fun defaultScriptVis(nodes: Set<NodeInfo>, edges: Set<EdgeInfo>): String {
         return """
             var edges;
             var nodes;
@@ -203,7 +203,7 @@ object UtilVisualisation {
     }
 
     fun defaultBody(
-        nodes: Set<GraphHTML.NodeInfo>, edges: Set<GraphHTML.EdgeInfo>,
+        nodes: Set<NodeInfo>, edges: Set<EdgeInfo>,
         script: String = defaultScriptVis(nodes, edges)
     ): String {
         return buildString {

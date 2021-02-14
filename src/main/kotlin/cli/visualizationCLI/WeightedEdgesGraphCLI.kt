@@ -4,11 +4,13 @@ import cli.InfoCLI
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.int
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import visualisation.GraphHTML.EdgeInfo
-import visualisation.GraphHTML.NodeInfo
+import visualisation.EdgeInfo
+import visualisation.NodeInfo
 import visualisation.WeightedEdgesGraphHTML
 import java.io.File
 import java.util.*
@@ -23,6 +25,9 @@ class WeightedEdgesGraphCLI : VisualizationCLI(InfoCLI("WeightedEdgesGraph",
     private val numberOfEdges by option("-n", "--max-number-of-edges", help = "Max number of edges.")
         .int()
         .default(Int.MAX_VALUE)
+    private val graph by option("-g", "--graph", help = "JSON file containing adjacency map. Map of maps.")
+        .file(mustExist = true, canBeDir = false, canBeFile = true)
+        .required()
 
     override fun run() {
         val (priorityQueue, max) = storeNEdgesAndMax(graph, numberOfEdges, reverse)

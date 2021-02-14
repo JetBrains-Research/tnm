@@ -10,7 +10,5 @@ abstract class VisualizationCLI(infoCLI: InfoCLI) :
     CliktCommand(name = infoCLI.name, help = infoCLI.help) {
     protected val name by option("--name", help = "Name of graph")
         .required()
-    protected val graph by option("-g", "--graph", help = "JSON file containing adjacency map. Map of maps.")
-        .file(mustExist = true, canBeDir = false, canBeFile = true)
-        .required()
+
 }
