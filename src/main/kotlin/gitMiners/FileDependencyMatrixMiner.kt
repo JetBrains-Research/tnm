@@ -1,11 +1,13 @@
 package gitMiners
 
+import kotlinx.serialization.builtins.serializer
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.Mapper
 import util.ProjectConfig
 import util.UtilFunctions
+import util.serialization.ConcurrentHashMapSerializer
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
@@ -24,6 +26,10 @@ class FileDependencyMatrixMiner(
 
     private val fileDependencyMatrix: ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>> =
         ConcurrentHashMap()
+    private val serializer = ConcurrentHashMapSerializer(
+        Int.serializer(),
+        ConcurrentHashMapSerializer(Int.serializer(), Int.serializer())
+    )
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
         val git = Git(repository)
@@ -49,7 +55,7 @@ class FileDependencyMatrixMiner(
     override fun saveToJson(resourceDirectory: File) {
         UtilFunctions.saveToJson(
             File(resourceDirectory, ProjectConfig.FILE_DEPENDENCY),
-            UtilFunctions.convertConcurrentMapOfConcurrentMapsInt(fileDependencyMatrix)
+            fileDependencyMatrix, serializer
         )
         Mapper.saveAll(resourceDirectory)
     }

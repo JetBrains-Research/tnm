@@ -1,5 +1,6 @@
 package util
 
+import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -8,11 +9,17 @@ import org.nd4j.linalg.dataset.api.preprocessor.NormalizerMinMaxScaler
 import org.nd4j.linalg.factory.Nd4j
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentSkipListSet
 
 object UtilFunctions {
     // TODO: try catch logic for encode and file
     inline fun <reified T> saveToJson(file: File, data: T) {
         val jsonString = Json.encodeToString(data)
+        file.writeText(jsonString)
+    }
+
+    inline fun <reified T> saveToJson(file: File, data: T, serializer: SerializationStrategy<T>) {
+        val jsonString = Json.encodeToString(serializer, data)
         file.writeText(jsonString)
     }
 
@@ -46,11 +53,5 @@ object UtilFunctions {
         scaler.transform(matrix)
     }
 
-    fun convertConcurrentMapOfConcurrentMapsInt(map: ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>>): Map<Int, Map<Int, Int>> {
-        val newMap = HashMap<Int, Map<Int, Int>>()
-        for (entry in map.entries) {
-            newMap[entry.key] = entry.value
-        }
-        return newMap
-    }
 }
+
