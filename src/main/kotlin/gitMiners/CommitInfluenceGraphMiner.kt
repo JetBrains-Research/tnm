@@ -24,8 +24,8 @@ import java.io.File
  */
 class CommitInfluenceGraphMiner(
     repository: FileRepository,
-    neededBranches: Set<String> = ProjectConfig.neededBranches,
-    numThreads: Int = ProjectConfig.numThreads
+    neededBranches: Set<String> = ProjectConfig.DEFAULT_NEEDED_BRANCHES,
+    numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner(repository, neededBranches, numThreads = numThreads, reversed = true) {
 
     // H is the transition probability matrix whose (i, j)

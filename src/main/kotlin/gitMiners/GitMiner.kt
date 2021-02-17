@@ -17,12 +17,13 @@ import java.util.concurrent.atomic.AtomicInteger
 abstract class GitMiner(
     protected val repository: FileRepository, val neededBranches: Set<String>,
     protected val reversed: Boolean = false,
-    protected val numThreads: Int = ProjectConfig.numThreads
+    protected val numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) {
     // TODO: add thread local and make lazy?
     protected val git = Git(repository)
     protected val reader: ObjectReader = repository.newObjectReader()
     private val comparedCommits = HashMap<Int, MutableSet<Int>>()
+    protected val logFrequency = 100
 
     /**
      * Mine all needed data from pair of commits.
@@ -63,7 +64,6 @@ abstract class GitMiner(
             }
 
             val proceedCommits = AtomicInteger(0)
-            val logFrequency = 100
 
             val latch = CountDownLatch(commitsPairsCount)
 

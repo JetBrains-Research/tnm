@@ -27,7 +27,7 @@ internal class FileDependencyMatrixMinerTests : GitMinerTest {
         compare(mapOneThread, mapMultithreading)
     }
 
-    private fun runMiner(resources: File, numThreads: Int = ProjectConfig.numThreads) {
+    private fun runMiner(resources: File, numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS) {
         val repository = FileRepository(File(repositoryDir, ".git"))
         val miner = FileDependencyMatrixMiner(repository, numThreads = numThreads)
         miner.run()

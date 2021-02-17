@@ -27,7 +27,7 @@ internal class ChangedFilesMinerTests : GitMinerTest {
 
     }
 
-    private fun runMiner(resources: File, numThreads: Int = ProjectConfig.numThreads) {
+    private fun runMiner(resources: File, numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS) {
         val repository = FileRepository(File(repositoryDir, ".git"))
         val miner = ChangedFilesMiner(repository, numThreads = numThreads)
         miner.run()
@@ -68,7 +68,7 @@ internal class ChangedFilesMinerTests : GitMinerTest {
             assertTrue(
                 v1.size == v2.size && v1.containsAll(v2) && v2.containsAll(v1),
                 "Not equal $v1 != $v2"
-            );
+            )
         }
     }
 }

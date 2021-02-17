@@ -10,5 +10,5 @@ import util.ProjectConfig
 abstract class MultithreadedGitMinerCLI(infoCLI: InfoCLI) : GitMinerCLI(infoCLI) {
     protected val numThreads by option("-n", "--num-threads", help = UtilCLI.helpNumThreads)
         .int()
-        .default(ProjectConfig.numThreads)
+        .default(ProjectConfig.DEFAULT_NUM_THREADS)
 }

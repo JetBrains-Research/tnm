@@ -8,7 +8,8 @@ import util.ProjectConfig
 object UtilCLI {
 
     const val helpResourcesOpt = "Directory where to store all results"
-    const val helpNumThreads = "Number of working threads for task. By default ${ProjectConfig.numThreads}"
+    val helpNumThreads =
+        "Number of working threads for task. By default number of cores of your processor. Found: ${ProjectConfig.DEFAULT_NUM_THREADS}"
 
     fun checkBranchesArgsMsg(repository: FileRepository?): String {
         repository ?: return ""

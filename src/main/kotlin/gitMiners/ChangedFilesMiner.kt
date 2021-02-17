@@ -16,12 +16,12 @@ import java.util.concurrent.ConcurrentSkipListSet
 
 class ChangedFilesMiner(
     repository: FileRepository,
-    neededBranches: Set<String> = ProjectConfig.neededBranches,
-    numThreads: Int = ProjectConfig.numThreads
+    neededBranches: Set<String> = ProjectConfig.DEFAULT_NEEDED_BRANCHES,
+    numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner(repository, neededBranches, numThreads = numThreads) {
 
     private val userFilesIds = ConcurrentHashMap<Int, ConcurrentSkipListSet<Int>>()
-    private val serializer  = ConcurrentHashMapSerializer(
+    private val serializer = ConcurrentHashMapSerializer(
         Int.serializer(),
         ConcurrentSkipListSetSerializer(Int.serializer())
     )

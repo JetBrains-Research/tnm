@@ -12,8 +12,8 @@ class FilesOwnershipMinerCLI : GitMinerCLI(
     )
 ) {
     override fun run() {
-        val miner = FilesOwnershipMiner(repository, branches)
-        miner.run()
-        miner.saveToJson(resources)
+//        val miner = FilesOwnershipMiner(repository, branches)
+//        miner.run()
+//        miner.saveToJson(resources)
     }
 }

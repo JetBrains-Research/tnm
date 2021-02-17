@@ -1,7 +1,9 @@
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.Git
 import org.junit.After
+import org.junit.AfterClass
 import org.junit.Before
+import org.junit.BeforeClass
 import java.io.File
 
 internal interface  GitMinerTest {
@@ -13,25 +15,30 @@ internal interface  GitMinerTest {
 
     @Before
     fun `load repository`() {
+        val repoURI = "https://github.com/facebook/react.git"
+        println("Loading repository for tests $repoURI")
         deleteAll()
         repositoryDir.mkdirs()
         resourcesOneThreadDir.mkdirs()
         resourcesMultithreadingDir.mkdirs()
 
         Git.cloneRepository()
-            .setURI("https://github.com/facebook/react.git")
+            .setURI(repoURI)
             .setDirectory(repositoryDir)
             .setNoCheckout(true)
             .call().use { result ->
-                println("Having repository: " + result.repository.directory)
+                println("Finish loading repo $repoURI")
+                println("Repository inside: " + result.repository.directory)
             }
     }
 
-    @After
+        @After
     fun deleteAll() {
+        println("Start cleaning results and loaded repository")
         deleteDir(resourcesOneThreadDir)
         deleteDir(resourcesMultithreadingDir)
         deleteDir(repositoryDir)
+        println("End cleaning results and loaded repository")
     }
 
     fun deleteDir(directory: File) {

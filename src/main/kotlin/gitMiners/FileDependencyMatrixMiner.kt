@@ -20,8 +20,8 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class FileDependencyMatrixMiner(
     repository: FileRepository,
-    neededBranches: Set<String> = ProjectConfig.neededBranches,
-    numThreads: Int = ProjectConfig.numThreads
+    neededBranches: Set<String> = ProjectConfig.DEFAULT_NEEDED_BRANCHES,
+    numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner(repository, neededBranches, numThreads = numThreads) {
 
     private val fileDependencyMatrix: ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>> =

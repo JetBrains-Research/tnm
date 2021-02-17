@@ -24,8 +24,8 @@ import java.util.concurrent.TimeUnit
  */
 class WorkTimeMiner(
     repository: FileRepository,
-    neededBranches: Set<String> = ProjectConfig.neededBranches,
-    numThreads: Int = ProjectConfig.numThreads
+    neededBranches: Set<String> = ProjectConfig.DEFAULT_NEEDED_BRANCHES,
+    numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner(repository, neededBranches, numThreads = numThreads) {
 
     // [user][minuteInWeek] = numOfCommits
