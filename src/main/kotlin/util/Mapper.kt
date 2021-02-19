@@ -1,5 +1,7 @@
 package util
 
+import kotlinx.serialization.builtins.serializer
+import util.serialization.ConcurrentHashMapSerializer
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
@@ -25,7 +27,10 @@ abstract class Mapper(private val entityToIdFileName: String, private val idToEn
     }
 
     fun saveToJson(resourceDirectory: File) {
-        UtilFunctions.saveToJson(File(resourceDirectory, entityToIdFileName), entityToId.toMap())
-        UtilFunctions.saveToJson(File(resourceDirectory, idToEntityFileName), idToEntity.toMap())
+        val serializerEntityToId = ConcurrentHashMapSerializer(String.serializer(), Int.serializer())
+        UtilFunctions.saveToJson(File(resourceDirectory, entityToIdFileName), entityToId, serializerEntityToId)
+
+        val serializerIdToEntity = ConcurrentHashMapSerializer(Int.serializer(), String.serializer())
+        UtilFunctions.saveToJson(File(resourceDirectory, idToEntityFileName), idToEntity, serializerIdToEntity)
     }
 }
