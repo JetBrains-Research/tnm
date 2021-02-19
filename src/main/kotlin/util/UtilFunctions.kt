@@ -8,17 +8,22 @@ import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerMinMaxScaler
 import org.nd4j.linalg.factory.Nd4j
 import java.io.File
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentSkipListSet
 
 object UtilFunctions {
+    fun createParentFolder(file: File) {
+        val folder = File(file.parent)
+        folder.mkdirs()
+    }
+
     // TODO: try catch logic for encode and file
     inline fun <reified T> saveToJson(file: File, data: T) {
+        createParentFolder(file)
         val jsonString = Json.encodeToString(data)
         file.writeText(jsonString)
     }
 
     inline fun <reified T> saveToJson(file: File, data: T, serializer: SerializationStrategy<T>) {
+        createParentFolder(file)
         val jsonString = Json.encodeToString(serializer, data)
         file.writeText(jsonString)
     }
