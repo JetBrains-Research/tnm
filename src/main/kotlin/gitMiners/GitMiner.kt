@@ -3,22 +3,27 @@ package gitMiners
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.ObjectReader
+import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.revwalk.RevCommit
 import util.CommitMapper
 import util.ProjectConfig
 import java.io.File
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 
+// TODO: replace print stack trace
 abstract class GitMiner(
     protected val repository: FileRepository, val neededBranches: Set<String>,
     protected val reversed: Boolean = false,
-    protected val numThreads: Int = ProjectConfig.numThreads
+    protected val numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) {
+    // TODO: add thread local and make lazy?
     protected val git = Git(repository)
     protected val reader: ObjectReader = repository.newObjectReader()
     private val comparedCommits = HashMap<Int, MutableSet<Int>>()
+    protected val logFrequency = 100
 
     /**
      * Mine all needed data from pair of commits.
@@ -37,7 +42,16 @@ abstract class GitMiner(
     open fun run() {
         val branches = UtilGitMiner.findNeededBranchesOrNull(git, neededBranches) ?: return
         val threadPool = Executors.newFixedThreadPool(numThreads)
+        processAllCommitsInThreadPool(branches, threadPool)
+        threadPool.shutdown()
+    }
 
+    protected fun runWithSpecifiedThreadPool(threadPool: ExecutorService) {
+        val branches = UtilGitMiner.findNeededBranchesOrNull(git, neededBranches) ?: return
+        processAllCommitsInThreadPool(branches, threadPool)
+    }
+
+    private fun processAllCommitsInThreadPool(branches: Set<Ref>, threadPool: ExecutorService) {
         for (branch in branches) {
             println("Start mining for branch ${UtilGitMiner.getShortBranchName(branch.name)}")
 
@@ -50,7 +64,6 @@ abstract class GitMiner(
             }
 
             val proceedCommits = AtomicInteger(0)
-            val logFrequency = 100
 
             val latch = CountDownLatch(commitsPairsCount)
 
@@ -75,7 +88,6 @@ abstract class GitMiner(
             latch.await()
             println("End mining for branch ${UtilGitMiner.getShortBranchName(branch.name)}")
         }
-        threadPool.shutdown()
     }
 
     /**

@@ -116,6 +116,21 @@ object UtilGitMiner {
         return result
     }
 
+    fun findNeededBranchOrNull(git: Git, neededBranch: String): Ref? {
+        val allBranches = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call()
+        for (branch in allBranches) {
+            val shortBranchName = getShortBranchName(branch.name)
+            if (shortBranchName == neededBranch) {
+                return branch
+            }
+        }
+
+        println("Couldn't find branch: $neededBranch")
+        println("Known branches:")
+        allBranches.forEach { println(getShortBranchName(it.name)) }
+        return null
+    }
+
     fun getCommits(
         git: Git,
         repository: FileRepository,

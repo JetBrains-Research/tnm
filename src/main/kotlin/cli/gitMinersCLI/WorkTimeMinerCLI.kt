@@ -1,10 +1,11 @@
 package cli.gitMinersCLI
 
 import cli.InfoCLI
+import cli.gitMinersCLI.base.GitMinerMultithreadedMultipleBranchesCLI
 import gitMiners.WorkTimeMiner
 import util.ProjectConfig
 
-class WorkTimeMinerCLI : MultithreadedGitMinerCLI(
+class WorkTimeMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
     InfoCLI(
         "WorkTimeMiner",
         "Miner yields a JSON file ${ProjectConfig.WORKTIME_DISTRIBUTION} with a map of maps, where the outer " +

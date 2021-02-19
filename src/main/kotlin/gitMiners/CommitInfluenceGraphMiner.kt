@@ -1,5 +1,6 @@
 package gitMiners
 
+import kotlinx.serialization.builtins.serializer
 import org.eclipse.jgit.api.BlameCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffEntry
@@ -10,6 +11,8 @@ import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.util.io.DisabledOutputStream
 import util.*
+import util.serialization.ConcurrentHashMapSerializer
+import util.serialization.ConcurrentSkipListSetSerializer
 import java.io.File
 
 
@@ -21,8 +24,8 @@ import java.io.File
  */
 class CommitInfluenceGraphMiner(
     repository: FileRepository,
-    neededBranches: Set<String> = ProjectConfig.neededBranches,
-    numThreads: Int = ProjectConfig.numThreads
+    neededBranches: Set<String> = ProjectConfig.DEFAULT_NEEDED_BRANCHES,
+    numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner(repository, neededBranches, numThreads = numThreads, reversed = true) {
 
     // H is the transition probability matrix whose (i, j)
@@ -30,6 +33,10 @@ class CommitInfluenceGraphMiner(
     // pages - commits
     // TODO: probability == 1 ?
     private val commitsGraph = Graph<Int>()
+    private val serializer = ConcurrentHashMapSerializer(
+        Int.serializer(),
+        ConcurrentSkipListSetSerializer(Int.serializer())
+    )
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
         val git = Git(repository)
@@ -117,12 +124,10 @@ class CommitInfluenceGraphMiner(
     }
 
     override fun saveToJson(resourceDirectory: File) {
-        val map = hashMapOf<Int, MutableSet<Int>>()
-        for (entry in commitsGraph.adjacencyMap.entries) {
-            map[entry.key] = entry.value
-        }
-
-        UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.COMMITS_GRAPH), map)
+        UtilFunctions.saveToJson(
+            File(resourceDirectory, ProjectConfig.COMMITS_GRAPH),
+            commitsGraph.adjacencyMap, serializer
+        )
         Mapper.saveAll(resourceDirectory)
     }
 
