@@ -1,11 +1,12 @@
 package cli.gitMinersCLI
 
 import cli.InfoCLI
+import cli.gitMinersCLI.base.GitMinerMultithreadedMultipleBranchesCLI
 import gitMiners.FileDependencyMatrixMiner
 import util.ProjectConfig
 
 class FileDependencyMatrixMinerCLI :
-    MultithreadedGitMinerCLI(
+    GitMinerMultithreadedMultipleBranchesCLI(
         InfoCLI(
             "FileDependencyMatrixMiner",
             "Miner yields a JSON file ${ProjectConfig.FILE_DEPENDENCY} with map of maps, where both inner and outer " +

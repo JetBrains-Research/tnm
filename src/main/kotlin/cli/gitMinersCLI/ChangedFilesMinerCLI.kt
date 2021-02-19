@@ -1,10 +1,11 @@
 package cli.gitMinersCLI
 
 import cli.InfoCLI
+import cli.gitMinersCLI.base.GitMinerMultithreadedMultipleBranchesCLI
 import gitMiners.ChangedFilesMiner
 import util.ProjectConfig
 
-class ChangedFilesMinerCLI : MultithreadedGitMinerCLI(
+class ChangedFilesMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
     InfoCLI(
         "ChangedFilesMiner",
         "Miner yields a JSON file ${ProjectConfig.USER_FILES_IDS} with a map, where key is the user id of " +
