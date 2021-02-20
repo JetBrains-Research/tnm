@@ -1,10 +1,11 @@
 package cli.gitMinersCLI
 
 import cli.InfoCLI
+import cli.gitMinersCLI.base.GitMinerMultithreadedMultipleBranchesCLI
 import gitMiners.CommitInfluenceGraphMiner
 import util.ProjectConfig
 
-class CommitInfluenceGraphMinerCLI : MultithreadedGitMinerCLI(
+class CommitInfluenceGraphMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
     InfoCLI(
         "CommitInfluenceGraphMiner",
         "Miner yields the JSON file ${ProjectConfig.COMMITS_GRAPH} with a map of lists, with key corresponding to the fixing " +
