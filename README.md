@@ -1,7 +1,6 @@
 # XXX
 A library for mining several types of data from git
-repositories. The value of tool is in the reduction of the development
-effort for extracting socio-technical data for the further analysis.
+repositories. 
 Instead of implementing their own mining pipeline researchers can use
 our tool or integrate it in their own mining pipelines.
 
