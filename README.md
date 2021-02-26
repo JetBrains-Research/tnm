@@ -1,5 +1,5 @@
-# XXX
-A library for mining several types of data from git
+# TNM
+A tool and library for mining several types of data from git
 repositories. 
 Instead of implementing their own mining pipeline researchers can use
 our tool or integrate it in their own mining pipelines.
