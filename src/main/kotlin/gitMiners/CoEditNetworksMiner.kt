@@ -46,7 +46,6 @@ class CoEditNetworksMiner(
         }
     }
 
-    // TODO: rename
     @Serializable
     data class Edit(
         val oldPath: Int,
@@ -75,7 +74,7 @@ class CoEditNetworksMiner(
         )
     }
 
-    // TODO: file_renaming and binary_file_change
+    // TODO: file_renaming, binary_file_change, cyclomatic_complexity
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
         val git = Git(repository)
         val reader = repository.newObjectReader()

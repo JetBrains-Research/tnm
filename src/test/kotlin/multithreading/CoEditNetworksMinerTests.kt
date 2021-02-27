@@ -5,33 +5,27 @@ import GitMinerTest.Companion.repositoryDir
 import GitMinerTest.Companion.resourcesMultithreadingDir
 import GitMinerTest.Companion.resourcesOneThreadDir
 import gitMiners.CoEditNetworksMiner
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.junit.Test
 import util.ProjectConfig
-import util.UtilFunctions
 import java.io.File
-import kotlin.test.assertTrue
 
-// TODO: implement
 class CoEditNetworksMinerTests : GitMinerTest {
     @Test
     fun `test one thread and multithreading`() {
-        runMiner(resourcesOneThreadDir)
-//        runMiner(resourcesOneThreadDir, 1)
+        runMiner(resourcesOneThreadDir, 1)
         runMiner(resourcesMultithreadingDir)
 
         val resultOneThread = replaceIds(loadCoEditNetwork(resourcesOneThreadDir), resourcesOneThreadDir)
         val resultMultithreading = replaceIds(loadCoEditNetwork(resourcesMultithreadingDir), resourcesMultithreadingDir)
 
-        compare(resultOneThread, resultMultithreading)
+        compareSets(resultOneThread, resultMultithreading)
     }
 
     private fun runMiner(resources: File, numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS) {
         val repository = FileRepository(File(repositoryDir, ".git"))
-//        val repository = FileRepository(File("../test_repo_1/", ".git"))
         val miner = CoEditNetworksMiner(repository, numThreads = numThreads)
         miner.run()
         miner.saveToJson(resources)
@@ -113,17 +107,5 @@ class CoEditNetworksMinerTests : GitMinerTest {
         }
 
         return result
-    }
-
-    private fun compare(
-        resultOneThread: Set<CommitResultWithoutId>,
-        resultMultithreading: Set<CommitResultWithoutId>
-    ) {
-        assertTrue(
-            resultOneThread.size == resultMultithreading.size &&
-                    resultOneThread.containsAll(resultMultithreading) &&
-                    resultMultithreading.containsAll(resultOneThread),
-            "Not equal $resultOneThread != $resultMultithreading"
-        )
     }
 }
