@@ -7,21 +7,19 @@ import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
-import org.nd4j.shade.protobuf.compiler.PluginProtos
 import util.*
 import util.UtilFunctions.entropy
 import util.UtilFunctions.levenshtein
+import util.serialization.ConcurrentSkipListSetSerializer
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.IOException
-import java.io.OutputStream
 import java.util.concurrent.ConcurrentSkipListSet
 
-
+// TODO: hot spots: read line, levenshtein
 class CoEditNetworksMiner(
     repository: FileRepository,
-    neededBranches: Set<String> = ProjectConfig.neededBranches,
-    numThreads: Int = ProjectConfig.numThreads
+    neededBranches: Set<String> = ProjectConfig.DEFAULT_NEEDED_BRANCHES,
+    numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner(repository, neededBranches, numThreads = numThreads) {
     companion object {
         private const val ADD_MARK = '+'
@@ -31,13 +29,14 @@ class CoEditNetworksMiner(
     }
 
     private val result = ConcurrentSkipListSet<CommitResult>()
+    private val serializer = ConcurrentSkipListSetSerializer(CommitResult.serializer())
 
     enum class ChangeType {
         ADD, DELETE, REPLACE, EMPTY
     }
 
     @Serializable
-    data class CommitResult(
+    class CommitResult(
         val id: Int,
         val info: CommitInfo,
         val edits: List<Edit>
@@ -45,7 +44,6 @@ class CoEditNetworksMiner(
         override fun compareTo(other: CommitResult): Int {
             return id.compareTo(other.id)
         }
-
     }
 
     // TODO: rename
@@ -77,12 +75,12 @@ class CoEditNetworksMiner(
         )
     }
 
-    //    TODO: file_renaming and binary_file_change
+    // TODO: file_renaming and binary_file_change
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
         val git = Git(repository)
         val reader = repository.newObjectReader()
-        val diffs = UtilGitMiner.getDiffs(currCommit, prevCommit, reader, git)
-//        TODO: make thread local?
+        // get all diffs and then proceed separately
+        val diffs = UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, reader, git)
         val out = ByteArrayOutputStream()
 
         val deleteBlock = mutableListOf<String>()
@@ -126,15 +124,15 @@ class CoEditNetworksMiner(
                         }
                     }
                     DIFF_MARK -> {
-                        processBlocks(
-                            addBlock,
-                            deleteBlock,
-                            edits,
-                            preStartLineNum,
-                            postStartLineNum,
-                            oldPathId,
-                            newPathId
-                        )
+                        generateEdit(
+                            addBlock, deleteBlock, preStartLineNum,
+                            postStartLineNum, oldPathId, newPathId
+                        )?.let {
+                            edits.add(it)
+                            addBlock.clear()
+                            deleteBlock.clear()
+                        }
+
                         val match = regex.find(line)
                         preStartLineNum = match!!.groupValues[1].toInt()
                         postStartLineNum = match.groupValues[3].toInt()
@@ -144,7 +142,16 @@ class CoEditNetworksMiner(
 
             }
 
-            processBlocks(addBlock, deleteBlock, edits, preStartLineNum, postStartLineNum, oldPathId, newPathId)
+
+            generateEdit(
+                addBlock, deleteBlock, preStartLineNum,
+                postStartLineNum, oldPathId, newPathId
+            )?.let {
+                edits.add(it)
+                addBlock.clear()
+                deleteBlock.clear()
+            }
+
 
             out.reset()
         }
@@ -159,7 +166,7 @@ class CoEditNetworksMiner(
 
     private fun getFileId(path: String): Int {
         if (path == DiffEntry.DEV_NULL) return -1
-//        delete prefixes a/, b/ of DiffFormatter
+        // delete prefixes a/, b/ of DiffFormatter
         return FileMapper.add(path.substring(2))
     }
 
@@ -168,25 +175,26 @@ class CoEditNetworksMiner(
         deleteBlock: List<String>
     ): ChangeType {
 
-        if (addBlock.isNotEmpty() && deleteBlock.isEmpty()) return ChangeType.ADD
-        if (addBlock.isEmpty() && deleteBlock.isNotEmpty()) return ChangeType.DELETE
-        if (addBlock.isNotEmpty() && deleteBlock.isNotEmpty()) return ChangeType.REPLACE
+        when {
+            addBlock.isNotEmpty() && deleteBlock.isEmpty() -> return ChangeType.ADD
+            addBlock.isEmpty() && deleteBlock.isNotEmpty() -> return ChangeType.DELETE
+            addBlock.isNotEmpty() && deleteBlock.isNotEmpty() -> return ChangeType.REPLACE
+        }
 
         return ChangeType.EMPTY
     }
 
-    private fun processBlocks(
-        addBlock: MutableList<String>,
-        deleteBlock: MutableList<String>,
-        edits: MutableList<Edit>,
+    private fun generateEdit(
+        addBlock: List<String>,
+        deleteBlock: List<String>,
         preStartLineNum: Int,
         postStartLineNum: Int,
         oldPath: Int,
         newPath: Int
-    ) {
+    ): Edit? {
 
         val type = getType(addBlock, deleteBlock)
-        if (type == ChangeType.EMPTY) return
+        if (type == ChangeType.EMPTY) return null
 
         val deleteString = deleteBlock.joinToString("")
         val addString = addBlock.joinToString("")
@@ -209,7 +217,7 @@ class CoEditNetworksMiner(
             }
             else -> 0
         }
-        val edit = Edit(
+        return Edit(
             oldPath,
             newPath,
             preStartLineNum,
@@ -223,10 +231,7 @@ class CoEditNetworksMiner(
             levenshtein,
             type
         )
-        edits.add(edit)
 
-        addBlock.clear()
-        deleteBlock.clear()
     }
 
     private fun countUTF8(block: List<String>): Collection<Int> {
@@ -247,16 +252,17 @@ class CoEditNetworksMiner(
     override fun saveToJson(resourceDirectory: File) {
         UtilFunctions.saveToJson(
             File(resourceDirectory, ProjectConfig.CO_EDIT),
-            result.toSet()
+            result, serializer
         )
+        Mapper.saveAll(resourceDirectory)
     }
 
 }
 
 fun main() {
-    val repo = FileRepository("../test_repo_1/.git")
-//    val repo = FileRepository("../react/.git")
-    val miner = CoEditNetworksMiner(repo, setOf("master"), numThreads = 1)
+//    val repo = FileRepository("../test_repo_1/.git")
+    val repo = FileRepository("../repos/react/.git")
+    val miner = CoEditNetworksMiner(repo, setOf("master"), numThreads = 6)
     miner.run()
     miner.saveToJson(File("./resources"))
 }
