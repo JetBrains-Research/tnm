@@ -7,7 +7,7 @@ import cli.visualizationCLI.WeightedEdgesGraphCLI
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
 
-class CLI : CliktCommand(name = "run.sh") {
+class CLI : CliktCommand() {
     override fun run() {}
 }
 

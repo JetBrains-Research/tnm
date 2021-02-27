@@ -1,5 +1,6 @@
 package util
 
+import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -7,13 +8,24 @@ import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerMinMaxScaler
 import org.nd4j.linalg.factory.Nd4j
 import java.io.File
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.log2
 
 object UtilFunctions {
+    fun createParentFolder(file: File) {
+        val folder = File(file.parent)
+        folder.mkdirs()
+    }
+
     // TODO: try catch logic for encode and file
     inline fun <reified T> saveToJson(file: File, data: T) {
+        createParentFolder(file)
         val jsonString = Json.encodeToString(data)
+        file.writeText(jsonString)
+    }
+
+    inline fun <reified T> saveToJson(file: File, data: T, serializer: SerializationStrategy<T>) {
+        createParentFolder(file)
+        val jsonString = Json.encodeToString(serializer, data)
         file.writeText(jsonString)
     }
 
@@ -45,14 +57,6 @@ object UtilFunctions {
         val scaler = NormalizerMinMaxScaler()
         scaler.setFeatureStats(Nd4j.create(1).add(matrix.min()), Nd4j.create(1).add(matrix.max()))
         scaler.transform(matrix)
-    }
-
-    fun convertConcurrentMapOfConcurrentMapsInt(map: ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>>): Map<Int, Map<Int, Int>> {
-        val newMap = HashMap<Int, Map<Int, Int>>()
-        for (entry in map.entries) {
-            newMap[entry.key] = entry.value
-        }
-        return newMap
     }
 
     fun entropy(distribution: Collection<Int>): Double {

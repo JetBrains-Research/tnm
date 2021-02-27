@@ -9,7 +9,7 @@ import com.github.ajalt.clikt.parameters.types.file
 
 abstract class CalculationCLI(infoCLI: InfoCLI) :
     CliktCommand(name = infoCLI.name, help = infoCLI.help) {
-    protected val resources by option("--resources", help = UtilCLI.helpResourcesOpt)
+    protected val resources by option(UtilCLI.LONGNAME_RESOURCES, help = UtilCLI.HELP_RESOURCES_OPT)
         .file(mustExist = true, canBeDir = true, canBeFile = false)
         .required()
 }

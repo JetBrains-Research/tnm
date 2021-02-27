@@ -1,11 +1,13 @@
 package gitMiners
 
+import kotlinx.serialization.builtins.serializer
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.Mapper
 import util.ProjectConfig
 import util.UserMapper
 import util.UtilFunctions
+import util.serialization.ConcurrentHashMapSerializer
 import java.io.File
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -22,12 +24,16 @@ import java.util.concurrent.TimeUnit
  */
 class WorkTimeMiner(
     repository: FileRepository,
-    neededBranches: Set<String> = ProjectConfig.neededBranches,
-    numThreads: Int = ProjectConfig.numThreads
+    neededBranches: Set<String> = ProjectConfig.DEFAULT_NEEDED_BRANCHES,
+    numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner(repository, neededBranches, numThreads = numThreads) {
 
     // [user][minuteInWeek] = numOfCommits
     private val workTimeDistribution = ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>>()
+    private val serializer = ConcurrentHashMapSerializer(
+        Int.serializer(),
+        ConcurrentHashMapSerializer(Int.serializer(), Int.serializer())
+    )
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
         val email = currCommit.authorIdent.emailAddress
@@ -49,7 +55,7 @@ class WorkTimeMiner(
     override fun saveToJson(resourceDirectory: File) {
         UtilFunctions.saveToJson(
             File(resourceDirectory, ProjectConfig.WORKTIME_DISTRIBUTION),
-            UtilFunctions.convertConcurrentMapOfConcurrentMapsInt(workTimeDistribution)
+            workTimeDistribution, serializer
         )
         Mapper.saveAll(resourceDirectory)
     }

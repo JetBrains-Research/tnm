@@ -1,12 +1,7 @@
 package util
 
-import org.eclipse.jgit.internal.storage.file.FileRepository
-
 object ProjectConfig {
-    private const val URI = "https://github.com/facebook/react.git"
-    private const val REPO_DIR = "./local_repository/"
-    const val RESOURCES_PATH = "./resources"
-    const val numThreads = 4
+    val DEFAULT_NUM_THREADS = Runtime.getRuntime().availableProcessors()
 
     // UserMapper
     const val USER_ID = "userToId"
@@ -49,9 +44,6 @@ object ProjectConfig {
     // MirrorCongruence
     const val MIRROR_CONGRUENCE = "MirrorCongruence"
 
-    // CO_EDIT
-    const val CO_EDIT = "co_edit"
-
-    val REPOSITORY = FileRepository("${REPO_DIR}/.git")
-    val neededBranches = setOf("origin/master")
+    const val DEFAULT_BRANCH = "origin/master"
+    val DEFAULT_NEEDED_BRANCHES = setOf(DEFAULT_BRANCH)
 }
