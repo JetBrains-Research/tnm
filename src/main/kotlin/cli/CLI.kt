@@ -15,6 +15,7 @@ class CLI : CliktCommand() {
 fun main(args: Array<String>) = CLI().subcommands(
     AssignmentMatrixMinerCLI(),
     ChangedFilesMinerCLI(),
+    CoEditNetworksMinerCLI(),
     FileDependencyMatrixMinerCLI(),
     FilesOwnershipMinerCLI(),
     CommitInfluenceGraphMinerCLI(),
