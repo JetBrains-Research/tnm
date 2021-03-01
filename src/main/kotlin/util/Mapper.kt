@@ -15,8 +15,8 @@ abstract class Mapper(private val entityToIdFileName: String, private val idToEn
             CommitMapper.saveToJson(resourceDirectory)
         }
 
-        private const val EMPTY_VALUE = ""
-        private const val EMPTY_VALUE_ID = -1
+        const val EMPTY_VALUE = ""
+        const val EMPTY_VALUE_ID = -1
     }
 
     private val entityToId = ConcurrentHashMap<String, Int>()

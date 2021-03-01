@@ -13,14 +13,15 @@ import util.UtilFunctions.levenshtein
 import util.serialization.ConcurrentSkipListSetSerializer
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListSet
 
 // TODO: hot spots: read line, levenshtein
 class CoEditNetworksMiner(
     repository: FileRepository,
-    neededBranches: Set<String> = ProjectConfig.DEFAULT_NEEDED_BRANCHES,
+    private val neededBranch: String = ProjectConfig.DEFAULT_BRANCH,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
-) : GitMiner(repository, neededBranches, numThreads = numThreads) {
+) : GitMiner(repository, setOf(neededBranch), numThreads = numThreads) {
     companion object {
         private const val ADD_MARK = '+'
         private const val DELETE_MARK = '-'
@@ -30,6 +31,7 @@ class CoEditNetworksMiner(
 
     private val result = ConcurrentSkipListSet<CommitResult>()
     private val serializer = ConcurrentSkipListSetSerializer(CommitResult.serializer())
+    private val prevAndNextCommit: ConcurrentHashMap<Int, Pair<CommitInfo, CommitInfo>> = ConcurrentHashMap()
 
     enum class ChangeType {
         ADD, DELETE, REPLACE, EMPTY
@@ -37,12 +39,13 @@ class CoEditNetworksMiner(
 
     @Serializable
     class CommitResult(
-        val id: Int,
-        val info: CommitInfo,
+        val prevCommitInfo: CommitInfo,
+        val commitInfo: CommitInfo,
+        val nextCommitInfo: CommitInfo,
         val edits: List<Edit>
     ) : Comparable<CommitResult> {
         override fun compareTo(other: CommitResult): Int {
-            return id.compareTo(other.id)
+            return commitInfo.id.compareTo(other.commitInfo.id)
         }
     }
 
@@ -64,14 +67,18 @@ class CoEditNetworksMiner(
 
     @Serializable
     data class CommitInfo(
+        val id: Int,
         val author: Int,
         val date: Long
     ) {
         constructor(commit: RevCommit)
                 : this(
+            CommitMapper.add(commit.name),
             UserMapper.add(commit.authorIdent.emailAddress),
             commit.commitTime * 1000L
         )
+
+        constructor() : this(Mapper.EMPTY_VALUE_ID, Mapper.EMPTY_VALUE_ID, -1)
     }
 
     // TODO: file_renaming, binary_file_change, cyclomatic_complexity
@@ -156,10 +163,46 @@ class CoEditNetworksMiner(
         }
         out.reset()
 
-        val info = CommitInfo(currCommit)
-
         val currCommitId = CommitMapper.add(currCommit.name)
-        result.add(CommitResult(currCommitId, info, edits))
+
+        val (prevCommitInfo, nextCommitInfo) = prevAndNextCommit.computeIfAbsent(currCommitId) { CommitInfo() to CommitInfo() }
+        val commitInfo = CommitInfo(currCommit)
+
+        result.add(CommitResult(prevCommitInfo, commitInfo, nextCommitInfo, edits))
+    }
+
+    override fun run() {
+        if (!getPrevAndNextCommits()) return
+        super.run()
+    }
+
+    private fun getPrevAndNextCommits(): Boolean {
+        val branch = UtilGitMiner.findNeededBranchOrNull(git, neededBranch) ?: return false
+
+        val commitsInBranch = getUnprocessedCommits(branch.name)
+        for ((next, curr, prev) in commitsInBranch.windowed(3)) {
+            val currId = CommitMapper.add(curr.name)
+            prevAndNextCommit[currId] = CommitInfo(prev) to CommitInfo(next)
+        }
+
+        when {
+            commitsInBranch.size > 1 -> {
+                val (first, second) = commitsInBranch.take(2)
+                val firstId = CommitMapper.add(first.name)
+                prevAndNextCommit[firstId] = CommitInfo() to CommitInfo(second)
+
+                val (preLast, last) = commitsInBranch.takeLast(2)
+                val lastId = CommitMapper.add(last.name)
+                prevAndNextCommit[lastId] = CommitInfo(preLast) to CommitInfo()
+            }
+            commitsInBranch.size == 1 -> {
+                val commit = commitsInBranch.first()
+                val commitId = CommitMapper.add(commit.name)
+                prevAndNextCommit[commitId] = CommitInfo() to CommitInfo()
+            }
+        }
+
+        return true
     }
 
 
@@ -256,12 +299,4 @@ class CoEditNetworksMiner(
         Mapper.saveAll(resourceDirectory)
     }
 
-}
-
-fun main() {
-//    val repo = FileRepository("../test_repo_1/.git")
-    val repo = FileRepository("../repos/react/.git")
-    val miner = CoEditNetworksMiner(repo, setOf("master"), numThreads = 6)
-    miner.run()
-    miner.saveToJson(File("./resources"))
 }

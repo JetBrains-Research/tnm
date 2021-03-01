@@ -70,7 +70,7 @@ class FilesOwnershipMiner(
     }
 
     private fun getListOfFutures(
-        commitsInBranch: Set<RevCommit>,
+        commitsInBranch: List<RevCommit>,
         latestCommitDate: Date,
         threadPool: ExecutorService
     ): List<Future<FutureResult>> {

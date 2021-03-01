@@ -45,15 +45,28 @@ class CoEditNetworksMinerTests : GitMinerTest {
     }
 
     data class CommitResultWithoutId(
-        val hash: String,
-        val info: CommitInfoWithoutId,
+        val prevCommitInfo: CommitInfoWithoutId,
+        val commitInfo: CommitInfoWithoutId,
+        val nextCommitInfo: CommitInfoWithoutId,
         val edits: List<EditWithoutId>
     )
 
     data class CommitInfoWithoutId(
+        val hash: String,
         val author: String,
         val date: Long
-    )
+    ) {
+        constructor(
+            commitInfo: CoEditNetworksMiner.CommitInfo,
+            idToCommit: HashMap<Int, String>,
+            idToUser: HashMap<Int, String>
+        ) :
+                this(
+                    idToCommit[commitInfo.id]!!,
+                    idToUser[commitInfo.author]!!,
+                    commitInfo.date
+                )
+    }
 
     data class EditWithoutId(
         val oldPath: String,
@@ -73,18 +86,13 @@ class CoEditNetworksMinerTests : GitMinerTest {
     // TODO: better exceptions
     private fun replaceIds(set: Set<CoEditNetworksMiner.CommitResult>, resources: File): Set<CommitResultWithoutId> {
         val result = mutableSetOf<CommitResultWithoutId>()
-        val (idToUserOne, idToFileOne, idToCommitOne) = loadMappers(resources)
+        val (idToUser, idToFile, idToCommit) = loadMappers(resources)
         for (commitResult in set) {
-            val commitId = commitResult.id
-            val commitHash = idToCommitOne[commitId]!!
-
-            val authorId = commitResult.info.author
-            val author = idToUserOne[authorId]!!
 
             val edits = mutableListOf<EditWithoutId>()
             for (edit in commitResult.edits) {
-                val oldPath = idToFileOne[edit.oldPath]!!
-                val newPath = idToFileOne[edit.newPath]!!
+                val oldPath = idToFile[edit.oldPath]!!
+                val newPath = idToFile[edit.newPath]!!
 
                 edits.add(
                     EditWithoutId(
@@ -103,7 +111,16 @@ class CoEditNetworksMinerTests : GitMinerTest {
                     )
                 )
             }
-            result.add(CommitResultWithoutId(commitHash, CommitInfoWithoutId(author, commitResult.info.date), edits))
+
+            result.add(
+                CommitResultWithoutId(
+                    CommitInfoWithoutId(commitResult.prevCommitInfo, idToCommit, idToUser),
+                    CommitInfoWithoutId(commitResult.commitInfo, idToCommit, idToUser),
+                    CommitInfoWithoutId(commitResult.nextCommitInfo, idToCommit, idToUser),
+                    edits
+                )
+            )
+
         }
 
         return result
