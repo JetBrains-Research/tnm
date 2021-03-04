@@ -11,9 +11,11 @@ class CLI : CliktCommand() {
     override fun run() {}
 }
 
+// TODO: add CoEditNetworkMiner
 fun main(args: Array<String>) = CLI().subcommands(
     AssignmentMatrixMinerCLI(),
     ChangedFilesMinerCLI(),
+    CoEditNetworksMinerCLI(),
     FileDependencyMatrixMinerCLI(),
     FilesOwnershipMinerCLI(),
     CommitInfluenceGraphMinerCLI(),

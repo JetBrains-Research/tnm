@@ -25,6 +25,11 @@ class FilesOwnershipMiner(
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner(repository, setOf(neededBranch), numThreads = numThreads) {
 
+    private val serializer = ConcurrentHashMapSerializer(
+        Int.serializer(),
+        ConcurrentHashMapSerializer(Int.serializer(), UserData.serializer())
+    )
+
     // [fileId][userId]
     private val filesOwnership: ConcurrentHashMap<Int, ConcurrentHashMap<Int, UserData>> = ConcurrentHashMap()
 
@@ -65,7 +70,7 @@ class FilesOwnershipMiner(
     }
 
     private fun getListOfFutures(
-        commitsInBranch: Set<RevCommit>,
+        commitsInBranch: List<RevCommit>,
         latestCommitDate: Date,
         threadPool: ExecutorService
     ): List<Future<FutureResult>> {
@@ -225,11 +230,6 @@ class FilesOwnershipMiner(
     }
 
     override fun saveToJson(resourceDirectory: File) {
-        val serializer = ConcurrentHashMapSerializer(
-            Int.serializer(),
-            ConcurrentHashMapSerializer(Int.serializer(), UserData.serializer())
-        )
-
         UtilFunctions.saveToJson(
             File(resourceDirectory, ProjectConfig.FILES_OWNERSHIP),
             filesOwnership, serializer
