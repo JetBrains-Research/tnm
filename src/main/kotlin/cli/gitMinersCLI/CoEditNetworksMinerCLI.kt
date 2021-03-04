@@ -5,7 +5,7 @@ import cli.gitMinersCLI.base.GitMinerMultithreadedOneBranchCLI
 import gitMiners.CoEditNetworksMiner
 import util.ProjectConfig
 
-class CoEditNetworksMinerCLI: GitMinerMultithreadedOneBranchCLI(
+class CoEditNetworksMinerCLI : GitMinerMultithreadedOneBranchCLI(
     InfoCLI(
         "CoEditNetworksMiner",
         "Miner yields JSON file ${ProjectConfig.CO_EDIT} with dict of commits information and list of edits. " +

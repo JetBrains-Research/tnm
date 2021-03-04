@@ -6,14 +6,14 @@ class PageRankTests {
     @Test
     fun `Example from paper`() {
         val arrayH = arrayOf(
-            doubleArrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0/3, 0.0),
-            doubleArrayOf(1.0/2, 0.0, 1.0/2, 1.0/3, 0.0, 0.0, 0.0, 0.0),
-            doubleArrayOf(1.0/2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+            doubleArrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 / 3, 0.0),
+            doubleArrayOf(1.0 / 2, 0.0, 1.0 / 2, 1.0 / 3, 0.0, 0.0, 0.0, 0.0),
+            doubleArrayOf(1.0 / 2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
             doubleArrayOf(0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
-            doubleArrayOf(0.0, 0.0, 1.0/2, 1.0/3, 0.0, 0.0, 1.0/3, 0.0 ),
-            doubleArrayOf(0.0, 0.0, 0.0, 1.0/3, 1.0/3, 0.0, 0.0, 1.0/2 ),
-            doubleArrayOf(0.0, 0.0, 0.0, 0.0, 1.0/3, 0.0, 0.0, 1.0/2 ),
-            doubleArrayOf(0.0, 0.0, 0.0, 0.0, 1.0/3, 1.0, 1.0/3, 0.0  )
+            doubleArrayOf(0.0, 0.0, 1.0 / 2, 1.0 / 3, 0.0, 0.0, 1.0 / 3, 0.0),
+            doubleArrayOf(0.0, 0.0, 0.0, 1.0 / 3, 1.0 / 3, 0.0, 0.0, 1.0 / 2),
+            doubleArrayOf(0.0, 0.0, 0.0, 0.0, 1.0 / 3, 0.0, 0.0, 1.0 / 2),
+            doubleArrayOf(0.0, 0.0, 0.0, 0.0, 1.0 / 3, 1.0, 1.0 / 3, 0.0)
         )
 
         val arrayI = arrayOf(
