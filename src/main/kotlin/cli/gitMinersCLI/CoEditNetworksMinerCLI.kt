@@ -10,7 +10,7 @@ class CoEditNetworksMinerCLI: GitMinerMultithreadedOneBranchCLI(
         "CoEditNetworksMiner",
         "Miner yields JSON file ${ProjectConfig.CO_EDIT} with dict of commits information and list of edits. " +
                 "Each edit includes pre/post file path, start line, length, number of chars, " +
-                "entropy of changed block of code, levenshtein distance between previous and new block of code, type of edit."
+                "entropy of changed block of code, Levenshtein distance between previous and new block of code, type of edit."
     )
 ) {
     override fun run() {
