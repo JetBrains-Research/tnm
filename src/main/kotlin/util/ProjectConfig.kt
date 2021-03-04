@@ -44,6 +44,9 @@ object ProjectConfig {
     // MirrorCongruence
     const val MIRROR_CONGRUENCE = "MirrorCongruence"
 
+    // CoEditNetworks
+    const val CO_EDIT = "CoEdit"
+
     const val DEFAULT_BRANCH = "origin/master"
     val DEFAULT_NEEDED_BRANCHES = setOf(DEFAULT_BRANCH)
 }

@@ -15,8 +15,11 @@ import java.util.*
 import kotlin.collections.HashMap
 
 
-class WeightedEdgesGraphCLI : VisualizationCLI(InfoCLI("WeightedEdgesGraph",
-    "Create graph with weighted edges in html format")
+class WeightedEdgesGraphCLI : VisualizationCLI(
+    InfoCLI(
+        "WeightedEdgesGraph",
+        "Create graph with weighted edges in html format"
+    )
 ) {
     private val reverse by option("-r", "--reverse", help = "Store edges from min to max.")
         .flag(default = false)

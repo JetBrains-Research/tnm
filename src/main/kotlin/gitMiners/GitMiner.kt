@@ -113,7 +113,7 @@ abstract class GitMiner(
                 comparedCommits.computeIfAbsent(prevCommitId) { mutableSetOf() }.contains(currCommitId)
     }
 
-    protected fun getUnprocessedCommits(branchName: String): Set<RevCommit> {
+    protected fun getUnprocessedCommits(branchName: String): List<RevCommit> {
         val result = linkedSetOf<RevCommit>()
         val commitsInBranch = UtilGitMiner.getCommits(git, repository, branchName, reversed)
         for ((currCommit, prevCommit) in commitsInBranch.windowed(2)) {
@@ -121,6 +121,6 @@ abstract class GitMiner(
             result.add(currCommit)
             result.add(prevCommit)
         }
-        return result
+        return result.toList()
     }
 }

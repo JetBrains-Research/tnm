@@ -21,7 +21,7 @@ Currently, tool got 4 types of classes:
 **Git miners** are classes implementing the mining tasks. 
 All miners use a local git repository for data extraction and extend abstract class 
 `GitMiner` with two functions to  process  commit history  in  chosen  branches  and  save  the results. 
-The current  version  of TNM  includes six  `GitMiner` implementations:
+The current  version  of TNM  includes following `GitMiner` implementations:
 * `FilesOwnershipMiner` is based on Degree of Knowledge (DOK) 
   ([paper](https://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=5670&context=etd)). 
   DOK quantifies the knowledge of a   developer or set of developers about a particular section of code.
@@ -45,6 +45,11 @@ The current  version  of TNM  includes six  `GitMiner` implementations:
   This data can be utilized to build the edges of the socio-tecnhical software network based on Conway's law
   ([paper](https://ieeexplore.ieee.org/abstract/document/4228662)) and calculation of socio-technical congruence.
   ([paper](https://ieeexplore.ieee.org/abstract/document/5740929)).
+
+* `CoEditNetworksMiner` is based on git2net ([github](https://github.com/gotec/git2net), 
+  [paper](https://dl.acm.org/doi/10.1109/MSR.2019.00070)). Yields JSON file with dict of commits information and list of edits.
+  Each edit includes pre/post file path, start line, length, number of chars, entropy of changed block of code, 
+  Levenshtein distance between previous and new block of code, type of edit.
   
 * `WorkTimeMiner` is a simple miner for mining the distribution of commits over time in the week.
   This data can be used to ***e.g.*** improve work scheduling by finding intersections in the time distributions 

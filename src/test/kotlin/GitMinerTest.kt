@@ -118,6 +118,15 @@ internal interface GitMinerTest {
         }
     }
 
+    fun <T> compareSets(set1: Set<T>, set2: Set<T>) {
+        assertTrue(
+            set1.size == set2.size &&
+                    set1.containsAll(set2) &&
+                    set2.containsAll(set1),
+            "Not equal $set1 != $set2"
+        )
+    }
+
     fun compareMapOfSets(
         mapOneThread: HashMap<String, Set<String>>,
         mapMultithreading: HashMap<String, Set<String>>
@@ -127,12 +136,7 @@ internal interface GitMinerTest {
             val valuesOneThread = entry.value
             val valuesMultithreading = mapMultithreading[userName]
             assertNotNull(valuesMultithreading, "got null in v2 for user $userName")
-            assertTrue(
-                valuesOneThread.size == valuesMultithreading.size && valuesOneThread.containsAll(valuesMultithreading) && valuesMultithreading.containsAll(
-                    valuesOneThread
-                ),
-                "Not equal $valuesOneThread != $valuesMultithreading"
-            )
+            compareSets(valuesOneThread, valuesMultithreading)
         }
     }
 }
