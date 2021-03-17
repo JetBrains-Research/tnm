@@ -146,11 +146,7 @@ class FilesOwnershipMiner(
             for ((editList, fileId) in listsToFileId) {
                 for (edit in editList) {
                     // TODO: what about deleted lines?
-                    filesOwnership
-                        .computeIfAbsent(fileId) { ConcurrentHashMap() }
-                        .computeIfAbsent(userId) { UserData() }
-                        .calculateAuthorship(edit.beginB..edit.endB, decay)
-
+                    calculateAuthorshipForLines(edit.beginB..edit.endB, fileId, userId, decay)
                     addAuthorsForLines(edit.beginB..edit.endB, fileId, userId)
                 }
             }
@@ -208,12 +204,8 @@ class FilesOwnershipMiner(
                         val sourceAuthor = blameResult.getSourceAuthor(lineNumber)
                         val userId = UserMapper.add(sourceAuthor.emailAddress)
 
-
                         // Each file only one time
-                        filesOwnership
-                            .computeIfAbsent(fileId) { ConcurrentHashMap() }
-                            .computeIfAbsent(userId) { UserData() }
-                            .calculateAuthorship(lineNumber..lineNumber, 1.0)
+                        calculateAuthorshipForLines(lineNumber..lineNumber, fileId, userId, 1.0)
                         addAuthorsForLines(lineNumber..lineNumber, fileId, userId)
                     }
                 } catch (e: Exception) {
@@ -240,12 +232,17 @@ class FilesOwnershipMiner(
     }
 
     private fun addAuthorsForLines(lines: IntRange, fileId: Int, userId: Int) {
-        for (line in lines) {
-            authorsForLine
-                .computeIfAbsent(fileId) { ConcurrentHashMap() }
-                .computeIfAbsent(userId) { ConcurrentSkipListSet() }
-                .add(line)
-        }
+        authorsForLine
+            .computeIfAbsent(fileId) { ConcurrentHashMap() }
+            .computeIfAbsent(userId) { ConcurrentSkipListSet() }
+            .addAll(lines)
+    }
+
+    private fun calculateAuthorshipForLines(lines: IntRange, fileId: Int, userId: Int, decay: Double) {
+        filesOwnership
+            .computeIfAbsent(fileId) { ConcurrentHashMap() }
+            .computeIfAbsent(userId) { UserData() }
+            .calculateAuthorship(lines, decay)
     }
 
     private fun calculatePotentialAuthorship() {
