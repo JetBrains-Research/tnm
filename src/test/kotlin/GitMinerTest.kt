@@ -1,6 +1,7 @@
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.Git
 import org.junit.After
+import org.junit.Assert
 import org.junit.Before
 import java.io.File
 import kotlin.test.assertEquals
@@ -114,6 +115,27 @@ internal interface GitMinerTest {
                 assertNotNull(v2, "got null in v2 : [$k1][$k2]")
 
                 assertEquals(v1, v2, "Found non equal values in [$k1][$k2]: $v1 != $v2")
+            }
+        }
+    }
+
+    fun compareMapsOfMapsDouble(
+        mapOneThread: HashMap<String, HashMap<String, Double>>,
+        mapMultithreading: HashMap<String, HashMap<String, Double>>
+    ) {
+
+        for (entry1 in mapOneThread.entries) {
+            for (entry2 in entry1.value.entries) {
+                val k1 = entry1.key
+                val k2 = entry2.key
+
+                val v1 = mapOneThread[k1]?.get(k2)
+                assertNotNull(v1, "got null in v1 : [$k1][$k2]")
+
+                val v2 = mapMultithreading[k1]?.get(k2)
+                assertNotNull(v2, "got null in v2 : [$k1][$k2]")
+
+                Assert.assertEquals(v1, v2, 0.0001)
             }
         }
     }
