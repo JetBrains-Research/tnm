@@ -57,13 +57,13 @@ class ComplexityCodeChangesTests : GitMinerTest {
 
                 Assert.assertEquals(fileStatOneThread.entropy, fileStatMultiThread.entropy, 0.0001)
                 Assert.assertEquals(
-                    fileStatOneThread.factorDistribution,
-                    fileStatMultiThread.factorDistribution,
+                    fileStatOneThread.HCPF3,
+                    fileStatMultiThread.HCPF3,
                     0.0001
                 )
                 Assert.assertEquals(
-                    fileStatOneThread.factorPercentageComplexity,
-                    fileStatMultiThread.factorPercentageComplexity,
+                    fileStatOneThread.HCPF2,
+                    fileStatMultiThread.HCPF2,
                     0.0001
                 )
             }

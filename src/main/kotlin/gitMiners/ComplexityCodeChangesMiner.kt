@@ -1,6 +1,5 @@
 package gitMiners
 
-import gitMiners.ComplexityCodeChangesMiner.PeriodType
 import gitMiners.UtilGitMiner.isBugFixCommit
 import kotlinx.serialization.Serializable
 import org.eclipse.jgit.api.Git
@@ -20,12 +19,19 @@ import kotlin.math.log2
 class ComplexityCodeChangesMiner(
     repository: FileRepository,
     private val neededBranch: String = ProjectConfig.DEFAULT_BRANCH,
-    private val periodType: PeriodType = PeriodType.MODIFICATION_LIMIT,
-    private val changeType: ChangeType = ChangeType.LINES,
+    private val periodType: PeriodType = DEFAULT_PERIOD_TYPE,
+    private val changeType: ChangeType = DEFAULT_CHANGE_TYPE,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS,
-    private val numOfCommitsInPeriod: Int = 500,
-    private val numOfMonthInPeriod: Int = 1
+    private val numOfCommitsInPeriod: Int = DEFAULT_NUM_COMMITS,
+    private val numOfMonthInPeriod: Int = DEFAULT_NUM_MONTH
 ) : GitMiner(repository, setOf(neededBranch), numThreads = numThreads) {
+
+    companion object {
+        const val DEFAULT_NUM_MONTH = 1
+        const val DEFAULT_NUM_COMMITS = 500
+        val DEFAULT_PERIOD_TYPE = PeriodType.MODIFICATION_LIMIT
+        val DEFAULT_CHANGE_TYPE = ChangeType.LINES
+    }
 
     enum class PeriodType { TIME_BASED, MODIFICATION_LIMIT }
     enum class ChangeType { FILE, LINES }
@@ -44,8 +50,8 @@ class ComplexityCodeChangesMiner(
     @Serializable
     data class FileStats(
         val entropy: Double,
-        val factorPercentageComplexity: Double,
-        val factorDistribution: Double
+        val HCPF2: Double,
+        val HCPF3: Double
     )
 
     @Serializable
