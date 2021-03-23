@@ -14,7 +14,7 @@ class CoEditNetworksMinerCLI : GitMinerMultithreadedOneBranchCLI(
     )
 ) {
     override fun run() {
-        val miner = CoEditNetworksMiner(repository, numThreads = numThreads)
+        val miner = CoEditNetworksMiner(repository, branch, numThreads = numThreads)
         miner.run()
         miner.saveToJson(resources)
     }
