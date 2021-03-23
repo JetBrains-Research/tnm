@@ -131,6 +131,14 @@ object UtilGitMiner {
         return null
     }
 
+    fun isBugFixCommit(commit: RevCommit): Boolean {
+        val regex = "\\bfix:?\\b".toRegex()
+        val shortMsgContains = regex.find(commit.shortMessage) != null
+        val fullMsgContains = regex.find(commit.fullMessage) != null
+        return shortMsgContains || fullMsgContains
+    }
+
+    // TODO: is unsave needs change
     fun getCommits(
         git: Git,
         repository: FileRepository,

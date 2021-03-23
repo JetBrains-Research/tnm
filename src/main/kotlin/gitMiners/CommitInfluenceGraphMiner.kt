@@ -1,5 +1,6 @@
 package gitMiners
 
+import gitMiners.UtilGitMiner.isBugFixCommit
 import kotlinx.serialization.builtins.serializer
 import org.eclipse.jgit.api.BlameCommand
 import org.eclipse.jgit.api.Git
@@ -45,7 +46,7 @@ class CommitInfluenceGraphMiner(
         val currCommitId = CommitMapper.add(currCommit.name)
         val prevCommitId = CommitMapper.add(prevCommit.name)
 
-        if (isBugFix(currCommit)) {
+        if (isBugFixCommit(currCommit)) {
             commitsGraph.addNode(currCommitId)
             commitsGraph.addNode(prevCommitId)
 
@@ -116,12 +117,6 @@ class CommitInfluenceGraphMiner(
         return commitsAdj
     }
 
-    private fun isBugFix(commit: RevCommit): Boolean {
-        val regex = "\\bfix:?\\b".toRegex()
-        val shortMsgContains = regex.find(commit.shortMessage) != null
-        val fullMsgContains = regex.find(commit.fullMessage) != null
-        return shortMsgContains || fullMsgContains
-    }
 
     override fun saveToJson(resourceDirectory: File) {
         UtilFunctions.saveToJson(
