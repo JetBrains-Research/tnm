@@ -22,7 +22,7 @@ internal class FilesOwnershipMinerTests : GitMinerTest {
         val mapOneThread = load(resourcesOneThreadDir)
         val mapMultithreading = load(resourcesMultithreadingDir)
 
-        compareMapsOfMaps(mapOneThread, mapMultithreading)
+        compareMapsOfMapsDouble(mapOneThread, mapMultithreading)
     }
 
     private fun runMiner(resources: File, numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS) {
