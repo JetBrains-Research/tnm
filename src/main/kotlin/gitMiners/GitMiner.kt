@@ -19,9 +19,18 @@ abstract class GitMiner(
     protected val reversed: Boolean = false,
     protected val numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) {
-    // TODO: add thread local and make lazy?
-    protected val git = Git(repository)
-    protected val reader: ObjectReader = repository.newObjectReader()
+    protected val threadLocalGit = object : ThreadLocal<Git>() {
+        override fun initialValue(): Git {
+            return Git(repository)
+        }
+    }
+
+    protected val threadLocalReader = object : ThreadLocal<ObjectReader>() {
+        override fun initialValue(): ObjectReader {
+            return repository.newObjectReader()
+        }
+    }
+
     private val comparedCommits = HashMap<Int, MutableSet<Int>>()
     protected val logFrequency = 100
 
@@ -40,14 +49,14 @@ abstract class GitMiner(
      *
      */
     open fun run() {
-        val branches = UtilGitMiner.findNeededBranchesOrNull(git, neededBranches) ?: return
+        val branches = UtilGitMiner.findNeededBranchesOrNull(threadLocalGit.get(), neededBranches) ?: return
         val threadPool = Executors.newFixedThreadPool(numThreads)
         processAllCommitsInThreadPool(branches, threadPool)
         threadPool.shutdown()
     }
 
     protected fun runWithSpecifiedThreadPool(threadPool: ExecutorService) {
-        val branches = UtilGitMiner.findNeededBranchesOrNull(git, neededBranches) ?: return
+        val branches = UtilGitMiner.findNeededBranchesOrNull(threadLocalGit.get(), neededBranches) ?: return
         processAllCommitsInThreadPool(branches, threadPool)
     }
 
@@ -115,7 +124,7 @@ abstract class GitMiner(
 
     protected fun getUnprocessedCommits(branchName: String): List<RevCommit> {
         val result = linkedSetOf<RevCommit>()
-        val commitsInBranch = UtilGitMiner.getCommits(git, repository, branchName, reversed)
+        val commitsInBranch = UtilGitMiner.getCommits(threadLocalGit.get(), repository, branchName, reversed)
         for ((currCommit, prevCommit) in commitsInBranch.windowed(2)) {
             if (checkProceedCommits(currCommit, prevCommit)) continue
             result.add(currCommit)

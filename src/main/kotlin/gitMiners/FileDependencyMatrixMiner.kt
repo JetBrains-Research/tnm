@@ -1,7 +1,6 @@
 package gitMiners
 
 import kotlinx.serialization.builtins.serializer
-import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.Mapper
@@ -32,7 +31,7 @@ class FileDependencyMatrixMiner(
     )
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
-        val git = Git(repository)
+        val git = threadLocalGit.get()
         val reader = repository.newObjectReader()
 
         val listOfChangedFiles = UtilGitMiner.getChangedFiles(currCommit, prevCommit, reader, git).toList()

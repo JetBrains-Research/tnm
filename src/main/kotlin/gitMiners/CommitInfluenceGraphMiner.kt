@@ -3,7 +3,6 @@ package gitMiners
 import gitMiners.UtilGitMiner.isBugFixCommit
 import kotlinx.serialization.builtins.serializer
 import org.eclipse.jgit.api.BlameCommand
-import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.Edit
@@ -40,8 +39,8 @@ class CommitInfluenceGraphMiner(
     )
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
-        val git = Git(repository)
-        val reader = repository.newObjectReader()
+        val git = threadLocalGit.get()
+        val reader = threadLocalReader.get()
 
         val currCommitId = CommitMapper.add(currCommit.name)
         val prevCommitId = CommitMapper.add(prevCommit.name)
@@ -50,7 +49,8 @@ class CommitInfluenceGraphMiner(
             commitsGraph.addNode(currCommitId)
             commitsGraph.addNode(prevCommitId)
 
-            val diffs = UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, reader, git)
+            val diffs =
+                reader.use { UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, it, git) }
 
             val commitsAdj = getCommitsAdj(diffs, prevCommit)
             for (commitId in commitsAdj) {

@@ -2,7 +2,6 @@ package gitMiners
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.serializer
-import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.EditList
 import org.eclipse.jgit.diff.RawTextComparator
@@ -24,6 +23,16 @@ class FilesOwnershipMiner(
     private val neededBranch: String = ProjectConfig.DEFAULT_BRANCH,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner(repository, setOf(neededBranch), numThreads = numThreads) {
+
+    private val threadLocalDiffFormatter = object : ThreadLocal<DiffFormatter>() {
+        override fun initialValue(): DiffFormatter {
+            val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
+            diffFormatter.setRepository(repository)
+            diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
+            diffFormatter.isDetectRenames = true
+            return diffFormatter
+        }
+    }
 
     private val serializer = ConcurrentHashMapSerializer(
         Int.serializer(),
@@ -81,15 +90,11 @@ class FilesOwnershipMiner(
 
             val callable = Callable {
                 try {
-                    val git = Git(repository)
-                    val reader = repository.newObjectReader()
+                    val git = threadLocalGit.get()
+                    val reader = threadLocalReader.get()
+                    val diffFormatter = threadLocalDiffFormatter.get()
 
-                    val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
-                    diffFormatter.setRepository(repository)
-                    diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
-                    diffFormatter.isDetectRenames = true
-
-                    val diffs = UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, reader, git)
+                    val diffs = reader.use { UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, it, git) }
                     val email = currCommit.authorIdent.emailAddress
 
                     val userId = UserMapper.add(email)
@@ -124,7 +129,9 @@ class FilesOwnershipMiner(
     }
 
     override fun run() {
+        val git = threadLocalGit.get()
         val branch = UtilGitMiner.findNeededBranchOrNull(git, neededBranch) ?: return
+
         val commitsInBranch = getUnprocessedCommits(branch.name)
         val commitsPairsCount = commitsInBranch.size - 1
         if (commitsPairsCount == 0 || commitsPairsCount == -1) {
@@ -189,7 +196,7 @@ class FilesOwnershipMiner(
         for ((fileId, filePath) in idToFileList) {
             threadPool.execute {
                 try {
-                    val git = Git(repository)
+                    val git = threadLocalGit.get()
 
                     val blameResult = git
                         .blame()

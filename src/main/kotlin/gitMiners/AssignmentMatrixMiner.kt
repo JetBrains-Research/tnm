@@ -1,7 +1,6 @@
 package gitMiners
 
 import kotlinx.serialization.builtins.serializer
-import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.Mapper
@@ -32,16 +31,19 @@ class AssignmentMatrixMiner(
     )
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
-        val git = Git(repository)
-        val reader = repository.newObjectReader()
+        val git = threadLocalGit.get()
+        val reader = threadLocalReader.get()
 
-        val changedFiles = UtilGitMiner.getChangedFiles(currCommit, prevCommit, reader, git)
-        val userId = UserMapper.add(currCommit.authorIdent.emailAddress)
-        for (fileId in changedFiles) {
-            assignmentMatrix
-                .computeIfAbsent(userId) { ConcurrentHashMap() }
-                .compute(fileId) { _, v -> if (v == null) 1 else v + 1 }
+        reader.use {
+            val changedFiles = UtilGitMiner.getChangedFiles(currCommit, prevCommit, it, git)
+            val userId = UserMapper.add(currCommit.authorIdent.emailAddress)
+            for (fileId in changedFiles) {
+                assignmentMatrix
+                    .computeIfAbsent(userId) { ConcurrentHashMap() }
+                    .compute(fileId) { _, v -> if (v == null) 1 else v + 1 }
+            }
         }
+
     }
 
     override fun saveToJson(resourceDirectory: File) {

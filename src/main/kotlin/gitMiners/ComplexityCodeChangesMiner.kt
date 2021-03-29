@@ -2,7 +2,6 @@ package gitMiners
 
 import gitMiners.UtilGitMiner.isBugFixCommit
 import kotlinx.serialization.Serializable
-import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.internal.storage.file.FileRepository
@@ -60,15 +59,15 @@ class ComplexityCodeChangesMiner(
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
         if (!isFeatureIntroductionCommit(currCommit)) return
 
-        val git = Git(repository)
-        val reader = repository.newObjectReader()
+        val git = threadLocalGit.get()
+        val reader = threadLocalReader.get()
 
         val currCommitId = CommitMapper.add(currCommit.name)
         val periodId = markedCommits[currCommitId]!!
 
         when (changeType) {
             ChangeType.LINES -> {
-                val diffs = UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, reader, git)
+                val diffs = reader.use { UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, it, git) }
                 val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
                 diffFormatter.setRepository(repository)
                 diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
@@ -92,7 +91,7 @@ class ComplexityCodeChangesMiner(
             }
 
             ChangeType.FILE -> {
-                val changedFiles = UtilGitMiner.getChangedFiles(currCommit, prevCommit, reader, git)
+                val changedFiles = reader.use { UtilGitMiner.getChangedFiles(currCommit, prevCommit, it, git) }
                 for (fileId in changedFiles) {
                     periodToFileChanges
                         .computeIfAbsent(periodId) { ConcurrentHashMap() }
@@ -104,7 +103,7 @@ class ComplexityCodeChangesMiner(
     }
 
     override fun run() {
-        UtilGitMiner.findNeededBranchesOrNull(git, neededBranches) ?: return
+        UtilGitMiner.findNeededBranchesOrNull(threadLocalGit.get(), neededBranches) ?: return
         markCommits()
         super.run()
         calculateFactors()
@@ -124,6 +123,7 @@ class ComplexityCodeChangesMiner(
     }
 
     private fun splitInPeriods(): List<List<RevCommit>> {
+        val git = threadLocalGit.get()
         val commitsInBranch = UtilGitMiner.getCommits(git, repository, neededBranch, reversed)
         if (commitsInBranch.isEmpty()) return listOf()
 

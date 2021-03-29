@@ -1,7 +1,6 @@
 package gitMiners
 
 import kotlinx.serialization.Serializable
-import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
@@ -29,7 +28,25 @@ class CoEditNetworksMiner(
         private val regex = Regex("@@ -(\\d+)(,\\d+)? \\+(\\d+)(,\\d+)? @@")
     }
 
-    private val result = ConcurrentSkipListSet<CommitResult>()
+    private val threadLocalByteArrayOutputStream =  object : ThreadLocal<ByteArrayOutputStream>() {
+        override fun initialValue(): ByteArrayOutputStream {
+            return ByteArrayOutputStream()
+        }
+    }
+
+    private val threadLocalDiffFormatter = object : ThreadLocal<DiffFormatter>() {
+        override fun initialValue(): DiffFormatter {
+            val diffFormatter = DiffFormatter(threadLocalByteArrayOutputStream.get())
+            diffFormatter.setRepository(repository)
+            diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
+            diffFormatter.isDetectRenames = true
+            diffFormatter.setContext(0)
+            return diffFormatter
+        }
+    }
+
+
+    val result = ConcurrentSkipListSet<CommitResult>()
     private val serializer = ConcurrentSkipListSetSerializer(CommitResult.serializer())
     private val prevAndNextCommit: ConcurrentHashMap<Int, Pair<CommitInfo, CommitInfo>> = ConcurrentHashMap()
 
@@ -83,21 +100,20 @@ class CoEditNetworksMiner(
 
     // TODO: file_renaming, binary_file_change, cyclomatic_complexity
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
-        val git = Git(repository)
-        val reader = repository.newObjectReader()
+        val git = threadLocalGit.get()
+        val reader = threadLocalReader.get()
+
         // get all diffs and then proceed separately
-        val diffs = UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, reader, git)
-        val out = ByteArrayOutputStream()
+        val diffs = reader.let {
+            UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, it, git)
+        }
 
         val deleteBlock = mutableListOf<String>()
         val addBlock = mutableListOf<String>()
         val edits = mutableListOf<Edit>()
 
-        val diffFormatter = DiffFormatter(out)
-        diffFormatter.setRepository(repository)
-        diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
-        diffFormatter.isDetectRenames = true
-        diffFormatter.setContext(0)
+        val out = threadLocalByteArrayOutputStream.get()
+        val diffFormatter = threadLocalDiffFormatter.get()
 
         for (diff in diffs) {
             var start = false
@@ -158,10 +174,8 @@ class CoEditNetworksMiner(
                 deleteBlock.clear()
             }
 
-
             out.reset()
         }
-        out.reset()
 
         val currCommitId = CommitMapper.add(currCommit.name)
 
@@ -177,6 +191,7 @@ class CoEditNetworksMiner(
     }
 
     private fun getPrevAndNextCommits(): Boolean {
+        val git = threadLocalGit.get()
         val branch = UtilGitMiner.findNeededBranchOrNull(git, neededBranch) ?: return false
 
         val commitsInBranch = getUnprocessedCommits(branch.name)
