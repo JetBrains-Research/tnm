@@ -14,7 +14,7 @@ import util.ProjectConfig
 class ComplexityCodeChangesCLI : GitMinerMultithreadedOneBranchCLI(
     InfoCLI(
         "ComplexityCodeChangesMiner",
-        "Miner yields JSON file ${ProjectConfig.COMPLEXITY_CODE} with dict of periods, which got period entropy and " +
+        "Miner yields JSON file ${ProjectConfig.COMPLEXITY_CODE} with dict of periods, which got period's entropy and " +
                 "files (changed in that period) stats. Each file stat includes entropy and History Complexity Period Factors, such as " +
                 "HCPF2 and HCPF3."
     )
