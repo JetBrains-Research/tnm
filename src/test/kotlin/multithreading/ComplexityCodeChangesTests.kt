@@ -43,7 +43,12 @@ class ComplexityCodeChangesTests : GitMinerTest {
         val idToFileOneThread =
             Json.decodeFromString<HashMap<Int, String>>(File(resourcesOneThreadDir, ProjectConfig.ID_FILE).readText())
         val fileToIdMultiThread =
-            Json.decodeFromString<HashMap<String, Int>>(File(resourcesOneThreadDir, ProjectConfig.FILE_ID).readText())
+            Json.decodeFromString<HashMap<String, Int>>(
+                File(
+                    resourcesMultithreadingDir,
+                    ProjectConfig.FILE_ID
+                ).readText()
+            )
 
         for ((periodId, statsOneThread) in oneThreadResult) {
             val statsMultiThread = multiThreadResult[periodId]!!
