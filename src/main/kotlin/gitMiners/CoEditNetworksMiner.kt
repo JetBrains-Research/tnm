@@ -26,6 +26,9 @@ class CoEditNetworksMiner(
         private const val DELETE_MARK = '-'
         private const val DIFF_MARK = '@'
         private val regex = Regex("@@ -(\\d+)(,\\d+)? \\+(\\d+)(,\\d+)? @@")
+
+        const val EMPTY_VALUE = ""
+        const val EMPTY_VALUE_ID = -1
     }
 
     private val threadLocalByteArrayOutputStream =  object : ThreadLocal<ByteArrayOutputStream>() {
@@ -95,7 +98,7 @@ class CoEditNetworksMiner(
             commit.commitTime * 1000L
         )
 
-        constructor() : this(Mapper.EMPTY_VALUE_ID, Mapper.EMPTY_VALUE_ID, -1)
+        constructor() : this(EMPTY_VALUE_ID, EMPTY_VALUE_ID, -1)
     }
 
     // TODO: file_renaming, binary_file_change, cyclomatic_complexity

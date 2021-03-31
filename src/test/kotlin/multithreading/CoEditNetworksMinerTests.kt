@@ -5,6 +5,8 @@ import GitMinerTest.Companion.repositoryDir
 import GitMinerTest.Companion.resourcesMultithreadingDir
 import GitMinerTest.Companion.resourcesOneThreadDir
 import gitMiners.CoEditNetworksMiner
+import gitMiners.CoEditNetworksMiner.Companion.EMPTY_VALUE
+import gitMiners.CoEditNetworksMiner.Companion.EMPTY_VALUE_ID
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.eclipse.jgit.internal.storage.file.FileRepository
@@ -41,6 +43,11 @@ class CoEditNetworksMinerTests : GitMinerTest {
         val idToFile = Json.decodeFromString<HashMap<Int, String>>(File(resources, ProjectConfig.ID_FILE).readText())
         val idToCommit =
             Json.decodeFromString<HashMap<Int, String>>(File(resources, ProjectConfig.ID_COMMIT).readText())
+
+        idToUser[EMPTY_VALUE_ID] = EMPTY_VALUE
+        idToFile[EMPTY_VALUE_ID] = EMPTY_VALUE
+        idToCommit[EMPTY_VALUE_ID] = EMPTY_VALUE
+
         return Triple(idToUser, idToFile, idToCommit)
     }
 
@@ -87,6 +94,7 @@ class CoEditNetworksMinerTests : GitMinerTest {
     private fun replaceIds(set: Set<CoEditNetworksMiner.CommitResult>, resources: File): Set<CommitResultWithoutId> {
         val result = mutableSetOf<CommitResultWithoutId>()
         val (idToUser, idToFile, idToCommit) = loadMappers(resources)
+
         for (commitResult in set) {
 
             val edits = mutableListOf<EditWithoutId>()
