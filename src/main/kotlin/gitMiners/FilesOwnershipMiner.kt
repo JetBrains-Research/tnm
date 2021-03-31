@@ -2,7 +2,6 @@ package gitMiners
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.serializer
-import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.EditList
 import org.eclipse.jgit.diff.RawTextComparator
@@ -10,7 +9,8 @@ import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.treewalk.TreeWalk
 import org.eclipse.jgit.util.io.DisabledOutputStream
-import util.*
+import util.ProjectConfig
+import util.UtilFunctions
 import util.serialization.ConcurrentHashMapSerializer
 import java.io.File
 import java.util.*
@@ -24,6 +24,16 @@ class FilesOwnershipMiner(
     private val neededBranch: String = ProjectConfig.DEFAULT_BRANCH,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner(repository, setOf(neededBranch), numThreads = numThreads) {
+
+    private val threadLocalDiffFormatter = object : ThreadLocal<DiffFormatter>() {
+        override fun initialValue(): DiffFormatter {
+            val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
+            diffFormatter.setRepository(repository)
+            diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
+            diffFormatter.isDetectRenames = true
+            return diffFormatter
+        }
+    }
 
     private val serializer = ConcurrentHashMapSerializer(
         Int.serializer(),
@@ -81,18 +91,14 @@ class FilesOwnershipMiner(
 
             val callable = Callable {
                 try {
-                    val git = Git(repository)
-                    val reader = repository.newObjectReader()
+                    val git = threadLocalGit.get()
+                    val reader = threadLocalReader.get()
+                    val diffFormatter = threadLocalDiffFormatter.get()
 
-                    val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
-                    diffFormatter.setRepository(repository)
-                    diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
-                    diffFormatter.isDetectRenames = true
-
-                    val diffs = UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, reader, git)
+                    val diffs = reader.use { UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, it, git) }
                     val email = currCommit.authorIdent.emailAddress
 
-                    val userId = UserMapper.add(email)
+                    val userId = userMapper.add(email)
                     val date = currCommit.authorIdent.getWhen()
                     val diffDays: Int = TimeUnit.DAYS.convert(
                         latestCommitDate.time - date.time,
@@ -105,7 +111,7 @@ class FilesOwnershipMiner(
                     val list = mutableListOf<Pair<EditList, Int>>()
                     for (diff in diffs) {
                         val editList = diffFormatter.toFileHeader(diff).toEditList()
-                        val fileId = FileMapper.add(diff.oldPath)
+                        val fileId = fileMapper.add(diff.oldPath)
                         list.add(editList to fileId)
                     }
 
@@ -124,7 +130,9 @@ class FilesOwnershipMiner(
     }
 
     override fun run() {
+        val git = threadLocalGit.get()
         val branch = UtilGitMiner.findNeededBranchOrNull(git, neededBranch) ?: return
+
         val commitsInBranch = getUnprocessedCommits(branch.name)
         val commitsPairsCount = commitsInBranch.size - 1
         if (commitsPairsCount == 0 || commitsPairsCount == -1) {
@@ -146,11 +154,7 @@ class FilesOwnershipMiner(
             for ((editList, fileId) in listsToFileId) {
                 for (edit in editList) {
                     // TODO: what about deleted lines?
-                    filesOwnership
-                        .computeIfAbsent(fileId) { ConcurrentHashMap() }
-                        .computeIfAbsent(userId) { UserData() }
-                        .calculateAuthorship(edit.beginB..edit.endB, decay)
-
+                    calculateAuthorshipForLines(edit.beginB..edit.endB, fileId, userId, decay)
                     addAuthorsForLines(edit.beginB..edit.endB, fileId, userId)
                 }
             }
@@ -182,7 +186,7 @@ class FilesOwnershipMiner(
                 continue
             }
             val filePath = treeWalk.pathString
-            val fileId = FileMapper.add(filePath)
+            val fileId = fileMapper.add(filePath)
             idToFileList.add(fileId to filePath)
         }
 
@@ -193,7 +197,7 @@ class FilesOwnershipMiner(
         for ((fileId, filePath) in idToFileList) {
             threadPool.execute {
                 try {
-                    val git = Git(repository)
+                    val git = threadLocalGit.get()
 
                     val blameResult = git
                         .blame()
@@ -206,14 +210,10 @@ class FilesOwnershipMiner(
 
                     for (lineNumber in 0 until rawText.size()) {
                         val sourceAuthor = blameResult.getSourceAuthor(lineNumber)
-                        val userId = UserMapper.add(sourceAuthor.emailAddress)
-
+                        val userId = userMapper.add(sourceAuthor.emailAddress)
 
                         // Each file only one time
-                        filesOwnership
-                            .computeIfAbsent(fileId) { ConcurrentHashMap() }
-                            .computeIfAbsent(userId) { UserData() }
-                            .calculateAuthorship(lineNumber..lineNumber, 1.0)
+                        calculateAuthorshipForLines(lineNumber..lineNumber, fileId, userId, 1.0)
                         addAuthorsForLines(lineNumber..lineNumber, fileId, userId)
                     }
                 } catch (e: Exception) {
@@ -236,16 +236,21 @@ class FilesOwnershipMiner(
         )
         UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.POTENTIAL_OWNERSHIP), potentialAuthorship)
         UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.DEVELOPER_KNOWLEDGE), developerKnowledge)
-        Mapper.saveAll(resourceDirectory)
+        saveMappers(resourceDirectory)
     }
 
     private fun addAuthorsForLines(lines: IntRange, fileId: Int, userId: Int) {
-        for (line in lines) {
-            authorsForLine
-                .computeIfAbsent(fileId) { ConcurrentHashMap() }
-                .computeIfAbsent(userId) { ConcurrentSkipListSet() }
-                .add(line)
-        }
+        authorsForLine
+            .computeIfAbsent(fileId) { ConcurrentHashMap() }
+            .computeIfAbsent(userId) { ConcurrentSkipListSet() }
+            .addAll(lines)
+    }
+
+    private fun calculateAuthorshipForLines(lines: IntRange, fileId: Int, userId: Int, decay: Double) {
+        filesOwnership
+            .computeIfAbsent(fileId) { ConcurrentHashMap() }
+            .computeIfAbsent(userId) { UserData() }
+            .calculateAuthorship(lines, decay)
     }
 
     private fun calculatePotentialAuthorship() {

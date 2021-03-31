@@ -3,9 +3,7 @@ package gitMiners
 import kotlinx.serialization.builtins.serializer
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
-import util.Mapper
 import util.ProjectConfig
-import util.UserMapper
 import util.UtilFunctions
 import util.serialization.ConcurrentHashMapSerializer
 import java.io.File
@@ -37,7 +35,7 @@ class WorkTimeMiner(
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
         val email = currCommit.authorIdent.emailAddress
-        val userId = UserMapper.add(email)
+        val userId = userMapper.add(email)
 
         val calendar: Calendar = GregorianCalendar.getInstance()
         val date = Date(currCommit.commitTime * 1000L)
@@ -57,6 +55,6 @@ class WorkTimeMiner(
             File(resourceDirectory, ProjectConfig.WORKTIME_DISTRIBUTION),
             workTimeDistribution, serializer
         )
-        Mapper.saveAll(resourceDirectory)
+        saveMappers(resourceDirectory)
     }
 }

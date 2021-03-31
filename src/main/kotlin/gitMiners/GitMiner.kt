@@ -6,7 +6,9 @@ import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.revwalk.RevCommit
 import util.CommitMapper
+import util.FileMapper
 import util.ProjectConfig
+import util.UserMapper
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
@@ -19,11 +21,25 @@ abstract class GitMiner(
     protected val reversed: Boolean = false,
     protected val numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) {
-    // TODO: add thread local and make lazy?
-    protected val git = Git(repository)
-    protected val reader: ObjectReader = repository.newObjectReader()
+    protected val threadLocalGit = object : ThreadLocal<Git>() {
+        override fun initialValue(): Git {
+            return Git(repository)
+        }
+    }
+
+    protected val threadLocalReader = object : ThreadLocal<ObjectReader>() {
+        override fun initialValue(): ObjectReader {
+            return repository.newObjectReader()
+        }
+    }
+
     private val comparedCommits = HashMap<Int, MutableSet<Int>>()
     protected val logFrequency = 100
+
+    val userMapper = UserMapper()
+    val fileMapper = FileMapper()
+    val commitMapper = CommitMapper()
+
 
     /**
      * Mine all needed data from pair of commits.
@@ -40,14 +56,14 @@ abstract class GitMiner(
      *
      */
     open fun run() {
-        val branches = UtilGitMiner.findNeededBranchesOrNull(git, neededBranches) ?: return
+        val branches = UtilGitMiner.findNeededBranchesOrNull(threadLocalGit.get(), neededBranches) ?: return
         val threadPool = Executors.newFixedThreadPool(numThreads)
         processAllCommitsInThreadPool(branches, threadPool)
         threadPool.shutdown()
     }
 
     protected fun runWithSpecifiedThreadPool(threadPool: ExecutorService) {
-        val branches = UtilGitMiner.findNeededBranchesOrNull(git, neededBranches) ?: return
+        val branches = UtilGitMiner.findNeededBranchesOrNull(threadLocalGit.get(), neededBranches) ?: return
         processAllCommitsInThreadPool(branches, threadPool)
     }
 
@@ -97,30 +113,34 @@ abstract class GitMiner(
     abstract fun saveToJson(resourceDirectory: File)
 
     protected fun addProceedCommits(currCommit: RevCommit, prevCommit: RevCommit): Boolean {
-        val currCommitId = CommitMapper.add(currCommit.name)
-        val prevCommitId = CommitMapper.add(prevCommit.name)
-        // TODO: better logic?
+        val currCommitId = commitMapper.add(currCommit.name)
+        val prevCommitId = commitMapper.add(prevCommit.name)
         val addForCurr = comparedCommits.computeIfAbsent(currCommitId) { mutableSetOf() }.add(prevCommitId)
         val addForPrev = comparedCommits.computeIfAbsent(prevCommitId) { mutableSetOf() }.add(currCommitId)
         return addForCurr || addForPrev
     }
 
     protected fun checkProceedCommits(currCommit: RevCommit, prevCommit: RevCommit): Boolean {
-        val currCommitId = CommitMapper.add(currCommit.name)
-        val prevCommitId = CommitMapper.add(prevCommit.name)
-        // TODO: better logic?
+        val currCommitId = commitMapper.add(currCommit.name)
+        val prevCommitId = commitMapper.add(prevCommit.name)
         return comparedCommits.computeIfAbsent(currCommitId) { mutableSetOf() }.contains(prevCommitId) ||
                 comparedCommits.computeIfAbsent(prevCommitId) { mutableSetOf() }.contains(currCommitId)
     }
 
     protected fun getUnprocessedCommits(branchName: String): List<RevCommit> {
         val result = linkedSetOf<RevCommit>()
-        val commitsInBranch = UtilGitMiner.getCommits(git, repository, branchName, reversed)
+        val commitsInBranch = UtilGitMiner.getCommits(threadLocalGit.get(), repository, branchName, reversed)
         for ((currCommit, prevCommit) in commitsInBranch.windowed(2)) {
             if (checkProceedCommits(currCommit, prevCommit)) continue
             result.add(currCommit)
             result.add(prevCommit)
         }
         return result.toList()
+    }
+
+    protected fun saveMappers(resourceDirectory: File) {
+        userMapper.saveToJson(resourceDirectory)
+        fileMapper.saveToJson(resourceDirectory)
+        commitMapper.saveToJson(resourceDirectory)
     }
 }

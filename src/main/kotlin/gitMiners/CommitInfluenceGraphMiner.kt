@@ -1,8 +1,8 @@
 package gitMiners
 
+import gitMiners.UtilGitMiner.isBugFixCommit
 import kotlinx.serialization.builtins.serializer
 import org.eclipse.jgit.api.BlameCommand
-import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.Edit
@@ -10,7 +10,9 @@ import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.util.io.DisabledOutputStream
-import util.*
+import util.Graph
+import util.ProjectConfig
+import util.UtilFunctions
 import util.serialization.ConcurrentHashMapSerializer
 import util.serialization.ConcurrentSkipListSetSerializer
 import java.io.File
@@ -31,7 +33,6 @@ class CommitInfluenceGraphMiner(
     // H is the transition probability matrix whose (i, j)
     // element signifies the probability of transition from the i-th page to the j-th page
     // pages - commits
-    // TODO: probability == 1 ?
     private val commitsGraph = Graph<Int>()
     private val serializer = ConcurrentHashMapSerializer(
         Int.serializer(),
@@ -39,17 +40,18 @@ class CommitInfluenceGraphMiner(
     )
 
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
-        val git = Git(repository)
-        val reader = repository.newObjectReader()
+        val git = threadLocalGit.get()
+        val reader = threadLocalReader.get()
 
-        val currCommitId = CommitMapper.add(currCommit.name)
-        val prevCommitId = CommitMapper.add(prevCommit.name)
+        val currCommitId = commitMapper.add(currCommit.name)
+        val prevCommitId = commitMapper.add(prevCommit.name)
 
-        if (isBugFix(currCommit)) {
+        if (isBugFixCommit(currCommit)) {
             commitsGraph.addNode(currCommitId)
             commitsGraph.addNode(prevCommitId)
 
-            val diffs = UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, reader, git)
+            val diffs =
+                reader.use { UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, it, git) }
 
             val commitsAdj = getCommitsAdj(diffs, prevCommit)
             for (commitId in commitsAdj) {
@@ -82,7 +84,7 @@ class CommitInfluenceGraphMiner(
         for (diff in diffs) {
             if (diff.changeType != DiffEntry.ChangeType.MODIFY) continue
             val fileName = diff.oldPath
-            val fileId = FileMapper.add(fileName)
+            val fileId = fileMapper.add(fileName)
 
             var prevCommitBlame = listOf<String>()
 
@@ -107,7 +109,7 @@ class CommitInfluenceGraphMiner(
                 val lines = edit.beginA until edit.endA
 
                 for (line in lines) {
-                    val commitId = CommitMapper.add(prevCommitBlame[line])
+                    val commitId = commitMapper.add(prevCommitBlame[line])
                     commitsAdj.add(commitId)
                 }
             }
@@ -116,19 +118,13 @@ class CommitInfluenceGraphMiner(
         return commitsAdj
     }
 
-    private fun isBugFix(commit: RevCommit): Boolean {
-        val regex = "\\bfix:?\\b".toRegex()
-        val shortMsgContains = regex.find(commit.shortMessage) != null
-        val fullMsgContains = regex.find(commit.fullMessage) != null
-        return shortMsgContains || fullMsgContains
-    }
 
     override fun saveToJson(resourceDirectory: File) {
         UtilFunctions.saveToJson(
             File(resourceDirectory, ProjectConfig.COMMITS_GRAPH),
             commitsGraph.adjacencyMap, serializer
         )
-        Mapper.saveAll(resourceDirectory)
+        saveMappers(resourceDirectory)
     }
 
 }

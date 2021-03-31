@@ -51,6 +51,10 @@ The current  version  of TNM  includes following `GitMiner` implementations:
   Each edit includes pre/post file path, start line, length, number of chars, entropy of changed block of code, 
   Levenshtein distance between previous and new block of code, type of edit.
   
+* `ComplexityCodeChangesMiner` is based on [paper](https://sail.cs.queensu.ca/Downloads/ICSE2009_PredictingFaultsUsingTheComplexityOfCodeChanges.pdf).
+  Yields JSON file with dict of periods, which got period's entropy and files (changed in that period) stats. 
+  Each file stat includes entropy and History Complexity Period Factors, such as HCPF2 and HCPF3.    
+
 * `WorkTimeMiner` is a simple miner for mining the distribution of commits over time in the week.
   This data can be used to ***e.g.*** improve work scheduling by finding intersections in the time distributions 
   between different developers.
