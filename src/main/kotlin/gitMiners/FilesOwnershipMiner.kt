@@ -9,7 +9,8 @@ import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.treewalk.TreeWalk
 import org.eclipse.jgit.util.io.DisabledOutputStream
-import util.*
+import util.ProjectConfig
+import util.UtilFunctions
 import util.serialization.ConcurrentHashMapSerializer
 import java.io.File
 import java.util.*
@@ -97,7 +98,7 @@ class FilesOwnershipMiner(
                     val diffs = reader.use { UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, it, git) }
                     val email = currCommit.authorIdent.emailAddress
 
-                    val userId = UserMapper.add(email)
+                    val userId = userMapper.add(email)
                     val date = currCommit.authorIdent.getWhen()
                     val diffDays: Int = TimeUnit.DAYS.convert(
                         latestCommitDate.time - date.time,
@@ -110,7 +111,7 @@ class FilesOwnershipMiner(
                     val list = mutableListOf<Pair<EditList, Int>>()
                     for (diff in diffs) {
                         val editList = diffFormatter.toFileHeader(diff).toEditList()
-                        val fileId = FileMapper.add(diff.oldPath)
+                        val fileId = fileMapper.add(diff.oldPath)
                         list.add(editList to fileId)
                     }
 
@@ -185,7 +186,7 @@ class FilesOwnershipMiner(
                 continue
             }
             val filePath = treeWalk.pathString
-            val fileId = FileMapper.add(filePath)
+            val fileId = fileMapper.add(filePath)
             idToFileList.add(fileId to filePath)
         }
 
@@ -209,7 +210,7 @@ class FilesOwnershipMiner(
 
                     for (lineNumber in 0 until rawText.size()) {
                         val sourceAuthor = blameResult.getSourceAuthor(lineNumber)
-                        val userId = UserMapper.add(sourceAuthor.emailAddress)
+                        val userId = userMapper.add(sourceAuthor.emailAddress)
 
                         // Each file only one time
                         calculateAuthorshipForLines(lineNumber..lineNumber, fileId, userId, 1.0)
@@ -235,7 +236,7 @@ class FilesOwnershipMiner(
         )
         UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.POTENTIAL_OWNERSHIP), potentialAuthorship)
         UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.DEVELOPER_KNOWLEDGE), developerKnowledge)
-        Mapper.saveAll(resourceDirectory)
+        saveMappers(resourceDirectory)
     }
 
     private fun addAuthorsForLines(lines: IntRange, fileId: Int, userId: Int) {

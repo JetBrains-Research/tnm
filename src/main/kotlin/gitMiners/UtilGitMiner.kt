@@ -12,7 +12,6 @@ import util.FileMapper
 import util.UserMapper
 
 object UtilGitMiner {
-    // TODO: mb change git, reader logic
     /**
      * Get diffs between [commit1] and [commit2].
      *
@@ -50,14 +49,21 @@ object UtilGitMiner {
      * @param git must be created from the same Repository as [reader]
      * @return set of changed files ids
      */
-    fun getChangedFiles(commit1: RevCommit, commit2: RevCommit, reader: ObjectReader, git: Git): Set<Int> {
+    fun getChangedFiles(
+        commit1: RevCommit,
+        commit2: RevCommit,
+        reader: ObjectReader,
+        git: Git,
+        userMapper: UserMapper,
+        fileMapper: FileMapper
+    ): Set<Int> {
         val result = mutableSetOf<Int>()
         val diffs = getDiffsWithoutText(commit1, commit2, reader, git)
         val userEmail = commit1.authorIdent.emailAddress
-        UserMapper.add(userEmail)
+        userMapper.add(userEmail)
 
         for (entry in diffs) {
-            val fileId = FileMapper.add(entry.oldPath)
+            val fileId = fileMapper.add(entry.oldPath)
             result.add(fileId)
         }
         return result

@@ -3,9 +3,7 @@ package gitMiners
 import kotlinx.serialization.builtins.serializer
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
-import util.Mapper
 import util.ProjectConfig
-import util.UserMapper
 import util.UtilFunctions
 import util.serialization.ConcurrentHashMapSerializer
 import util.serialization.ConcurrentSkipListSetSerializer
@@ -31,11 +29,11 @@ class ChangedFilesMiner(
         val reader = threadLocalReader.get()
 
         val userEmail = currCommit.authorIdent.emailAddress
-        val userId = UserMapper.add(userEmail)
+        val userId = userMapper.add(userEmail)
 
         val changedFiles =
             reader.use {
-                UtilGitMiner.getChangedFiles(currCommit, prevCommit, it, git)
+                UtilGitMiner.getChangedFiles(currCommit, prevCommit, it, git, userMapper, fileMapper)
             }
 
 
@@ -50,6 +48,6 @@ class ChangedFilesMiner(
             File(resourceDirectory, ProjectConfig.USER_FILES_IDS),
             userFilesIds, serializer
         )
-        Mapper.saveAll(resourceDirectory)
+        saveMappers(resourceDirectory)
     }
 }

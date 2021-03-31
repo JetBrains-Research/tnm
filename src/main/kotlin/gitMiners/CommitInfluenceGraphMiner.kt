@@ -10,7 +10,9 @@ import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.util.io.DisabledOutputStream
-import util.*
+import util.Graph
+import util.ProjectConfig
+import util.UtilFunctions
 import util.serialization.ConcurrentHashMapSerializer
 import util.serialization.ConcurrentSkipListSetSerializer
 import java.io.File
@@ -31,7 +33,6 @@ class CommitInfluenceGraphMiner(
     // H is the transition probability matrix whose (i, j)
     // element signifies the probability of transition from the i-th page to the j-th page
     // pages - commits
-    // TODO: probability == 1 ?
     private val commitsGraph = Graph<Int>()
     private val serializer = ConcurrentHashMapSerializer(
         Int.serializer(),
@@ -42,8 +43,8 @@ class CommitInfluenceGraphMiner(
         val git = threadLocalGit.get()
         val reader = threadLocalReader.get()
 
-        val currCommitId = CommitMapper.add(currCommit.name)
-        val prevCommitId = CommitMapper.add(prevCommit.name)
+        val currCommitId = commitMapper.add(currCommit.name)
+        val prevCommitId = commitMapper.add(prevCommit.name)
 
         if (isBugFixCommit(currCommit)) {
             commitsGraph.addNode(currCommitId)
@@ -83,7 +84,7 @@ class CommitInfluenceGraphMiner(
         for (diff in diffs) {
             if (diff.changeType != DiffEntry.ChangeType.MODIFY) continue
             val fileName = diff.oldPath
-            val fileId = FileMapper.add(fileName)
+            val fileId = fileMapper.add(fileName)
 
             var prevCommitBlame = listOf<String>()
 
@@ -108,7 +109,7 @@ class CommitInfluenceGraphMiner(
                 val lines = edit.beginA until edit.endA
 
                 for (line in lines) {
-                    val commitId = CommitMapper.add(prevCommitBlame[line])
+                    val commitId = commitMapper.add(prevCommitBlame[line])
                     commitsAdj.add(commitId)
                 }
             }
@@ -123,7 +124,7 @@ class CommitInfluenceGraphMiner(
             File(resourceDirectory, ProjectConfig.COMMITS_GRAPH),
             commitsGraph.adjacencyMap, serializer
         )
-        Mapper.saveAll(resourceDirectory)
+        saveMappers(resourceDirectory)
     }
 
 }

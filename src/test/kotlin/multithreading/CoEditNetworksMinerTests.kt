@@ -90,7 +90,6 @@ class CoEditNetworksMinerTests : GitMinerTest {
         val type: CoEditNetworksMiner.ChangeType
     )
 
-    // TODO: better exceptions
     private fun replaceIds(set: Set<CoEditNetworksMiner.CommitResult>, resources: File): Set<CommitResultWithoutId> {
         val result = mutableSetOf<CommitResultWithoutId>()
         val (idToUser, idToFile, idToCommit) = loadMappers(resources)

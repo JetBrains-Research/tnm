@@ -7,7 +7,8 @@ import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.util.io.DisabledOutputStream
-import util.*
+import util.ProjectConfig
+import util.UtilFunctions
 import java.io.File
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -62,7 +63,7 @@ class ComplexityCodeChangesMiner(
         val git = threadLocalGit.get()
         val reader = threadLocalReader.get()
 
-        val currCommitId = CommitMapper.add(currCommit.name)
+        val currCommitId = commitMapper.add(currCommit.name)
         val periodId = markedCommits[currCommitId]!!
 
         when (changeType) {
@@ -74,7 +75,7 @@ class ComplexityCodeChangesMiner(
                 diffFormatter.isDetectRenames = true
 
                 for (diff in diffs) {
-                    val fileId = FileMapper.add(diff.oldPath)
+                    val fileId = fileMapper.add(diff.oldPath)
 
                     val editList = diffFormatter.toFileHeader(diff).toEditList()
                     for (edit in editList) {
@@ -91,7 +92,12 @@ class ComplexityCodeChangesMiner(
             }
 
             ChangeType.FILE -> {
-                val changedFiles = reader.use { UtilGitMiner.getChangedFiles(currCommit, prevCommit, it, git) }
+                val changedFiles = reader.use {
+                    UtilGitMiner.getChangedFiles(
+                        currCommit, prevCommit, it, git, userMapper,
+                        fileMapper
+                    )
+                }
                 for (fileId in changedFiles) {
                     periodToFileChanges
                         .computeIfAbsent(periodId) { ConcurrentHashMap() }
@@ -114,10 +120,9 @@ class ComplexityCodeChangesMiner(
             File(resourceDirectory, ProjectConfig.COMPLEXITY_CODE),
             periodsToStats
         )
-        Mapper.saveAll(resourceDirectory)
+        saveMappers(resourceDirectory)
     }
 
-    // TODO: improve
     private fun isFeatureIntroductionCommit(commit: RevCommit): Boolean {
         return !isBugFixCommit(commit)
     }
@@ -177,7 +182,7 @@ class ComplexityCodeChangesMiner(
         val periods = splitInPeriods()
         for ((i, period) in periods.withIndex()) {
             for (commit in period) {
-                val commitId = CommitMapper.add(commit.name)
+                val commitId = commitMapper.add(commit.name)
                 markedCommits[commitId] = i
             }
         }

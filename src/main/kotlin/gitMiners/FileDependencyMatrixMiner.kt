@@ -3,7 +3,6 @@ package gitMiners
 import kotlinx.serialization.builtins.serializer
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
-import util.Mapper
 import util.ProjectConfig
 import util.UtilFunctions
 import util.serialization.ConcurrentHashMapSerializer
@@ -34,7 +33,8 @@ class FileDependencyMatrixMiner(
         val git = threadLocalGit.get()
         val reader = repository.newObjectReader()
 
-        val listOfChangedFiles = UtilGitMiner.getChangedFiles(currCommit, prevCommit, reader, git).toList()
+        val listOfChangedFiles =
+            UtilGitMiner.getChangedFiles(currCommit, prevCommit, reader, git, userMapper, fileMapper).toList()
         for ((index, currFile) in listOfChangedFiles.withIndex()) {
             for (otherFile in listOfChangedFiles.subList(index, listOfChangedFiles.lastIndex)) {
                 if (currFile == otherFile)
@@ -56,6 +56,6 @@ class FileDependencyMatrixMiner(
             File(resourceDirectory, ProjectConfig.FILE_DEPENDENCY),
             fileDependencyMatrix, serializer
         )
-        Mapper.saveAll(resourceDirectory)
+        saveMappers(resourceDirectory)
     }
 }

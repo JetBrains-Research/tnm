@@ -3,9 +3,7 @@ package gitMiners
 import kotlinx.serialization.builtins.serializer
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
-import util.Mapper
 import util.ProjectConfig
-import util.UserMapper
 import util.UtilFunctions
 import util.serialization.ConcurrentHashMapSerializer
 import java.io.File
@@ -24,19 +22,21 @@ class AssignmentMatrixMiner(
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner(repository, neededBranches, numThreads = numThreads) {
 
+
     private val assignmentMatrix: ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>> = ConcurrentHashMap()
     private val serializer = ConcurrentHashMapSerializer(
         Int.serializer(),
         ConcurrentHashMapSerializer(Int.serializer(), Int.serializer())
     )
 
+
     override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
         val git = threadLocalGit.get()
         val reader = threadLocalReader.get()
 
         reader.use {
-            val changedFiles = UtilGitMiner.getChangedFiles(currCommit, prevCommit, it, git)
-            val userId = UserMapper.add(currCommit.authorIdent.emailAddress)
+            val changedFiles = UtilGitMiner.getChangedFiles(currCommit, prevCommit, it, git, userMapper, fileMapper)
+            val userId = userMapper.add(currCommit.authorIdent.emailAddress)
             for (fileId in changedFiles) {
                 assignmentMatrix
                     .computeIfAbsent(userId) { ConcurrentHashMap() }
@@ -51,6 +51,6 @@ class AssignmentMatrixMiner(
             File(resourceDirectory, ProjectConfig.ASSIGNMENT_MATRIX),
             assignmentMatrix, serializer
         )
-        Mapper.saveAll(resourceDirectory)
+        saveMappers(resourceDirectory)
     }
 }

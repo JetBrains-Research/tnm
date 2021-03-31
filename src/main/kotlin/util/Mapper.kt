@@ -8,14 +8,6 @@ import java.util.concurrent.atomic.AtomicInteger
 
 // TODO: make generic, serialize error with generic Only KClass supported as classifier, got V
 abstract class Mapper(private val entityToIdFileName: String, private val idToEntityFileName: String) {
-    companion object {
-        fun saveAll(resourceDirectory: File) {
-            UserMapper.saveToJson(resourceDirectory)
-            FileMapper.saveToJson(resourceDirectory)
-            CommitMapper.saveToJson(resourceDirectory)
-        }
-    }
-
     private val entityToId = ConcurrentHashMap<String, Int>()
     private val idToEntity = ConcurrentHashMap<Int, String>()
     private var lastId = AtomicInteger(-1)

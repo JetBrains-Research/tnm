@@ -6,7 +6,9 @@ import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.revwalk.RevCommit
 import util.CommitMapper
+import util.FileMapper
 import util.ProjectConfig
+import util.UserMapper
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
@@ -33,6 +35,11 @@ abstract class GitMiner(
 
     private val comparedCommits = HashMap<Int, MutableSet<Int>>()
     protected val logFrequency = 100
+
+    val userMapper = UserMapper()
+    val fileMapper = FileMapper()
+    val commitMapper = CommitMapper()
+
 
     /**
      * Mine all needed data from pair of commits.
@@ -106,18 +113,16 @@ abstract class GitMiner(
     abstract fun saveToJson(resourceDirectory: File)
 
     protected fun addProceedCommits(currCommit: RevCommit, prevCommit: RevCommit): Boolean {
-        val currCommitId = CommitMapper.add(currCommit.name)
-        val prevCommitId = CommitMapper.add(prevCommit.name)
-        // TODO: better logic?
+        val currCommitId = commitMapper.add(currCommit.name)
+        val prevCommitId = commitMapper.add(prevCommit.name)
         val addForCurr = comparedCommits.computeIfAbsent(currCommitId) { mutableSetOf() }.add(prevCommitId)
         val addForPrev = comparedCommits.computeIfAbsent(prevCommitId) { mutableSetOf() }.add(currCommitId)
         return addForCurr || addForPrev
     }
 
     protected fun checkProceedCommits(currCommit: RevCommit, prevCommit: RevCommit): Boolean {
-        val currCommitId = CommitMapper.add(currCommit.name)
-        val prevCommitId = CommitMapper.add(prevCommit.name)
-        // TODO: better logic?
+        val currCommitId = commitMapper.add(currCommit.name)
+        val prevCommitId = commitMapper.add(prevCommit.name)
         return comparedCommits.computeIfAbsent(currCommitId) { mutableSetOf() }.contains(prevCommitId) ||
                 comparedCommits.computeIfAbsent(prevCommitId) { mutableSetOf() }.contains(currCommitId)
     }
@@ -131,5 +136,11 @@ abstract class GitMiner(
             result.add(prevCommit)
         }
         return result.toList()
+    }
+
+    protected fun saveMappers(resourceDirectory: File) {
+        userMapper.saveToJson(resourceDirectory)
+        fileMapper.saveToJson(resourceDirectory)
+        commitMapper.saveToJson(resourceDirectory)
     }
 }

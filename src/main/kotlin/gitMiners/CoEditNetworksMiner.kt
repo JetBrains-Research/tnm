@@ -6,7 +6,10 @@ import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
-import util.*
+import util.CommitMapper
+import util.ProjectConfig
+import util.UserMapper
+import util.UtilFunctions
 import util.UtilFunctions.entropy
 import util.UtilFunctions.levenshtein
 import util.serialization.ConcurrentSkipListSetSerializer
@@ -31,7 +34,7 @@ class CoEditNetworksMiner(
         const val EMPTY_VALUE_ID = -1
     }
 
-    private val threadLocalByteArrayOutputStream =  object : ThreadLocal<ByteArrayOutputStream>() {
+    private val threadLocalByteArrayOutputStream = object : ThreadLocal<ByteArrayOutputStream>() {
         override fun initialValue(): ByteArrayOutputStream {
             return ByteArrayOutputStream()
         }
@@ -91,10 +94,10 @@ class CoEditNetworksMiner(
         val author: Int,
         val date: Long
     ) {
-        constructor(commit: RevCommit)
+        constructor(commit: RevCommit, userMapper: UserMapper, commitMapper: CommitMapper)
                 : this(
-            CommitMapper.add(commit.name),
-            UserMapper.add(commit.authorIdent.emailAddress),
+            commitMapper.add(commit.name),
+            userMapper.add(commit.authorIdent.emailAddress),
             commit.commitTime * 1000L
         )
 
@@ -180,10 +183,10 @@ class CoEditNetworksMiner(
             out.reset()
         }
 
-        val currCommitId = CommitMapper.add(currCommit.name)
+        val currCommitId = commitMapper.add(currCommit.name)
 
         val (prevCommitInfo, nextCommitInfo) = prevAndNextCommit.computeIfAbsent(currCommitId) { CommitInfo() to CommitInfo() }
-        val commitInfo = CommitInfo(currCommit)
+        val commitInfo = CommitInfo(currCommit, userMapper, commitMapper)
 
         result.add(CommitResult(prevCommitInfo, commitInfo, nextCommitInfo, edits))
     }
@@ -199,23 +202,24 @@ class CoEditNetworksMiner(
 
         val commitsInBranch = getUnprocessedCommits(branch.name)
         for ((next, curr, prev) in commitsInBranch.windowed(3)) {
-            val currId = CommitMapper.add(curr.name)
-            prevAndNextCommit[currId] = CommitInfo(prev) to CommitInfo(next)
+            val currId = commitMapper.add(curr.name)
+            prevAndNextCommit[currId] =
+                CommitInfo(prev, userMapper, commitMapper) to CommitInfo(next, userMapper, commitMapper)
         }
 
         when {
             commitsInBranch.size > 1 -> {
                 val (first, second) = commitsInBranch.take(2)
-                val firstId = CommitMapper.add(first.name)
-                prevAndNextCommit[firstId] = CommitInfo() to CommitInfo(second)
+                val firstId = commitMapper.add(first.name)
+                prevAndNextCommit[firstId] = CommitInfo() to CommitInfo(second, userMapper, commitMapper)
 
                 val (preLast, last) = commitsInBranch.takeLast(2)
-                val lastId = CommitMapper.add(last.name)
-                prevAndNextCommit[lastId] = CommitInfo(preLast) to CommitInfo()
+                val lastId = commitMapper.add(last.name)
+                prevAndNextCommit[lastId] = CommitInfo(preLast, userMapper, commitMapper) to CommitInfo()
             }
             commitsInBranch.size == 1 -> {
                 val commit = commitsInBranch.first()
-                val commitId = CommitMapper.add(commit.name)
+                val commitId = commitMapper.add(commit.name)
                 prevAndNextCommit[commitId] = CommitInfo() to CommitInfo()
             }
         }
@@ -227,7 +231,7 @@ class CoEditNetworksMiner(
     private fun getFileId(path: String): Int {
         if (path == DiffEntry.DEV_NULL) return -1
         // delete prefixes a/, b/ of DiffFormatter
-        return FileMapper.add(path.substring(2))
+        return fileMapper.add(path.substring(2))
     }
 
     private fun getType(
@@ -314,7 +318,7 @@ class CoEditNetworksMiner(
             File(resourceDirectory, ProjectConfig.CO_EDIT),
             result, serializer
         )
-        Mapper.saveAll(resourceDirectory)
+        saveMappers(resourceDirectory)
     }
 
 }

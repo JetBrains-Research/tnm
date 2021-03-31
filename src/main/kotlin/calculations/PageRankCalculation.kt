@@ -16,7 +16,6 @@ class PageRankCalculation(resourceDirectory: File, private val alpha: Float = 0.
     private val commitsGraphFile = File(resourceDirectory, ProjectConfig.COMMITS_GRAPH)
 
     init {
-        // TODO: change size?
         val jsonCommitsMapper = File(resourceDirectory, ProjectConfig.COMMIT_ID).readText()
         val commitsMap = Json.decodeFromString<HashMap<String, Int>>(jsonCommitsMapper)
         size = commitsMap.size
@@ -53,7 +52,6 @@ class PageRankCalculation(resourceDirectory: File, private val alpha: Float = 0.
         }
     }
 
-    // TODO: find set to 0
     private fun loadMatrixA(file: File, size: Int): INDArray {
         val coefficient = 1F / size
         val result = Nd4j.create(Array(size) { FloatArray(size) { coefficient } })
