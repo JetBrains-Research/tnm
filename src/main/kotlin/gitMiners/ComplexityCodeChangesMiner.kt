@@ -109,7 +109,7 @@ class ComplexityCodeChangesMiner(
     }
 
     override fun run() {
-        UtilGitMiner.findNeededBranchesOrNull(threadLocalGit.get(), neededBranches) ?: return
+        UtilGitMiner.findNeededBranches(threadLocalGit.get(), neededBranches)
         markCommits()
         super.run()
         calculateFactors()

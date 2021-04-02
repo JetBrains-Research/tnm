@@ -15,7 +15,8 @@ class FilesOwnershipMinerCLI : GitMinerMultithreadedOneBranchCLI(
 
     override fun run() {
         val miner = FilesOwnershipMiner(repository, numThreads = numThreads)
-        miner.run()
-        miner.saveToJson(resources)
+        // TODO: implement
+//        miner.run()
+//        miner.saveToJson(resources)
     }
 }

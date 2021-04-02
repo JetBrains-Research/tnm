@@ -192,13 +192,13 @@ class CoEditNetworksMiner(
     }
 
     override fun run() {
-        if (!getPrevAndNextCommits()) return
+        getPrevAndNextCommits()
         super.run()
     }
 
-    private fun getPrevAndNextCommits(): Boolean {
+    private fun getPrevAndNextCommits() {
         val git = threadLocalGit.get()
-        val branch = UtilGitMiner.findNeededBranchOrNull(git, neededBranch) ?: return false
+        val branch = UtilGitMiner.findNeededBranch(git, neededBranch)
 
         val commitsInBranch = getUnprocessedCommits(branch.name)
         for ((next, curr, prev) in commitsInBranch.windowed(3)) {
@@ -223,8 +223,6 @@ class CoEditNetworksMiner(
                 prevAndNextCommit[commitId] = CommitInfo() to CommitInfo()
             }
         }
-
-        return true
     }
 
 

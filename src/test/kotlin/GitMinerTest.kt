@@ -15,7 +15,7 @@ internal interface GitMinerTest {
         val resourcesMultithreadingDir = File("src/test/resultsMultithreading")
     }
 
-    @Before
+//    @Before
     fun `load repository`() {
         deleteAll()
         val repoURI = "https://github.com/facebook/react.git"
@@ -34,7 +34,7 @@ internal interface GitMinerTest {
             }
     }
 
-    @After
+//    @After
     fun deleteAll() {
         println("Start cleaning results and loaded repository")
         deleteDir(resourcesOneThreadDir)

@@ -8,6 +8,8 @@ import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerMinMaxScaler
 import org.nd4j.linalg.factory.Nd4j
 import java.io.File
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Future
 import kotlin.math.log2
 
 object UtilFunctions {
@@ -86,4 +88,20 @@ object UtilFunctions {
         return Di[Di.size - 1]
     }
 
+    // TODO: move from UtilGit
+    fun runInThreadPoolWithExceptionHandle(threadPool: ExecutorService, tasks: List<Runnable>) {
+        val futures = mutableListOf<Future<*>>()
+        for (task in tasks) {
+            futures.add(threadPool.submit(task))
+        }
+
+        for (future in futures) {
+            try {
+                future.get()
+            } catch (e: Exception) {
+                threadPool.shutdownNow()
+                throw e
+            }
+        }
+    }
 }

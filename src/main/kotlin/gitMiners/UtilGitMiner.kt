@@ -1,5 +1,6 @@
 package gitMiners
 
+import gitMiners.exceptions.BranchNotExistsException
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.ListBranchCommand
 import org.eclipse.jgit.diff.DiffEntry
@@ -8,8 +9,11 @@ import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.treewalk.CanonicalTreeParser
+import org.eclipse.jgit.treewalk.TreeWalk
 import util.FileMapper
 import util.UserMapper
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Future
 
 object UtilGitMiner {
     /**
@@ -100,29 +104,27 @@ object UtilGitMiner {
      * @param neededBranches set of needed branches
      * @return set of Refs for needed branches or null
      */
-    fun findNeededBranchesOrNull(git: Git, neededBranches: Set<String>): Set<Ref>? {
+    fun findNeededBranches(git: Git, neededBranches: Set<String>): Set<Ref> {
         val result = mutableSetOf<Ref>()
-        val needed = neededBranches.toMutableSet()
+        val neededBranchesMutable = neededBranches.toMutableSet()
         val allBranches = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call()
         for (branch in allBranches) {
             val shortBranchName = getShortBranchName(branch.name)
-            if (shortBranchName in needed) {
-                needed.remove(shortBranchName)
+            if (shortBranchName in neededBranchesMutable) {
+                neededBranchesMutable.remove(shortBranchName)
                 result.add(branch)
             }
         }
 
-        if (needed.isNotEmpty()) {
-            println("Couldn't find branches:")
-            needed.forEach { println(it) }
-            println("Known branches:")
-            allBranches.forEach { println(getShortBranchName(it.name)) }
-            return null
+        if (neededBranchesMutable.isNotEmpty()) {
+            val allShortBranches = allBranches.map { getShortBranchName(it.name) }
+            throw BranchNotExistsException(neededBranchesMutable.toList(), allShortBranches)
         }
+
         return result
     }
 
-    fun findNeededBranchOrNull(git: Git, neededBranch: String): Ref? {
+    fun findNeededBranch(git: Git, neededBranch: String): Ref {
         val allBranches = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call()
         for (branch in allBranches) {
             val shortBranchName = getShortBranchName(branch.name)
@@ -131,11 +133,10 @@ object UtilGitMiner {
             }
         }
 
-        println("Couldn't find branch: $neededBranch")
-        println("Known branches:")
-        allBranches.forEach { println(getShortBranchName(it.name)) }
-        return null
+        val allShortBranches = allBranches.map { getShortBranchName(it.name) }
+        throw BranchNotExistsException(listOf(neededBranch), allShortBranches)
     }
+
 
     fun isBugFixCommit(commit: RevCommit): Boolean {
         val regex = "\\bfix:?\\b".toRegex()
@@ -144,7 +145,6 @@ object UtilGitMiner {
         return shortMsgContains || fullMsgContains
     }
 
-    // TODO: is unsave needs change
     fun getCommits(
         git: Git,
         repository: FileRepository,
@@ -157,4 +157,24 @@ object UtilGitMiner {
             git.log().add(repository.resolve(branchName)).call().toList()
         }
     }
+
+    fun getAllFilePathsOnCommit(repository: FileRepository, commit: RevCommit): List<String> {
+        val filePaths = mutableListOf<String>()
+
+        val treeWalk = TreeWalk(repository)
+        treeWalk.addTree(commit.tree)
+        treeWalk.isRecursive = false
+
+        while (treeWalk.next()) {
+            if (treeWalk.isSubtree) {
+                treeWalk.enterSubtree()
+                continue
+            }
+            val filePath = treeWalk.pathString
+            filePaths.add(filePath)
+        }
+
+        return filePaths
+    }
+
 }
