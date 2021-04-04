@@ -8,26 +8,30 @@ import util.UtilFunctions
 import java.io.File
 
 
-class CoordinationNeedsMatrixCalculation(resourceDirectory: File) : Calculation {
+class CoordinationNeedsMatrixCalculation(resourceDirA: File, resourceDirD: File) : Calculation {
     val D: INDArray
     val A: INDArray
     var CN: INDArray? = null
         private set
 
     init {
-        val jsonFileMapper = File(resourceDirectory, ProjectConfig.FILE_ID).readText()
-        val fileMap = Json.decodeFromString<HashMap<String, Int>>(jsonFileMapper)
-        val numOfFiles = fileMap.size
+        val jsonFileMapperA = File(resourceDirA, ProjectConfig.FILE_ID).readText()
+        val fileToIdA = Json.decodeFromString<HashMap<String, Int>>(jsonFileMapperA)
 
-        val jsonUserMapper = File(resourceDirectory, ProjectConfig.USER_ID).readText()
-        val userMap = Json.decodeFromString<HashMap<String, Int>>(jsonUserMapper)
-        val numOfUsers = userMap.size
+        val jsonFileMapperD = File(resourceDirD, ProjectConfig.ID_FILE).readText()
+        val idToFileD = Json.decodeFromString<HashMap<Int, String>>(jsonFileMapperD)
 
-        val fileD = File(resourceDirectory, ProjectConfig.FILE_DEPENDENCY)
-        D = UtilFunctions.loadArray(fileD, numOfFiles, numOfFiles)
+        val jsonUserMapperA = File(resourceDirA, ProjectConfig.USER_ID).readText()
+        val userMapA = Json.decodeFromString<HashMap<String, Int>>(jsonUserMapperA)
 
-        val fileA = File(resourceDirectory, ProjectConfig.ASSIGNMENT_MATRIX)
+        val numOfFiles = fileToIdA.size
+        val numOfUsers = userMapA.size
+
+        val fileA = File(resourceDirA, ProjectConfig.ASSIGNMENT_MATRIX)
         A = UtilFunctions.loadArray(fileA, numOfUsers, numOfFiles)
+
+        val fileD = File(resourceDirD, ProjectConfig.FILE_DEPENDENCY)
+        D = UtilFunctions.loadArray(fileD, numOfFiles, numOfFiles, idToFileD, fileToIdA)
     }
 
     override fun run() {

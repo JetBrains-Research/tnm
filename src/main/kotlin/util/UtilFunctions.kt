@@ -40,6 +40,25 @@ object UtilFunctions {
         return Nd4j.create(result)
     }
 
+    fun loadArray(
+        file: File,
+        rows: Int,
+        columns: Int,
+        idToEntity: Map<Int, String>,
+        entityToId: Map<String, Int>
+    ): INDArray {
+        val result = Array(rows) { FloatArray(columns) }
+        val adjacencyMap = Json.decodeFromString<HashMap<Int, HashMap<Int, Int>>>(file.readText())
+        for ((x, innerMap) in adjacencyMap) {
+            for ((y, value) in innerMap) {
+                val neededX = entityToId[idToEntity[x]!!]!!
+                val neededY = entityToId[idToEntity[y]!!]!!
+                result[neededX][neededY] = value.toFloat()
+            }
+        }
+        return Nd4j.create(result)
+    }
+
     fun loadGraph(file: File, size: Int): INDArray {
         val result = Array(size) { FloatArray(size) }
         val adjacencyMap = Json.decodeFromString<HashMap<Int, HashSet<Int>>>(file.readText())
