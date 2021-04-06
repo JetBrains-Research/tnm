@@ -1,5 +1,6 @@
 package multithreading
 
+import GitMinerNewTest
 import GitMinerTest
 import GitMinerTest.Companion.repositoryDir
 import GitMinerTest.Companion.resourcesMultithreadingDir
@@ -16,16 +17,16 @@ import util.ProjectConfig
 import java.io.File
 import kotlin.test.assertTrue
 
-class ComplexityCodeChangesTests : GitMinerTest {
+class ComplexityCodeChangesTests : GitMinerNewTest {
     @Test
     fun `test one thread and multithreading`() {
-        val dataProcessorOneThread = runMiner(resourcesOneThreadDir, 1)
-        val dataProcessorMultithreading = runMiner(resourcesMultithreadingDir)
+        val dataProcessorOneThread = runMiner(1)
+        val dataProcessorMultithreading = runMiner()
 
         compare(dataProcessorOneThread, dataProcessorMultithreading)
     }
 
-    private fun runMiner(resources: File, numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): ComplexityCodeChangesDataProcessor {
+    private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): ComplexityCodeChangesDataProcessor {
         val dataProcessor = ComplexityCodeChangesDataProcessor()
         val repository = FileRepository(File(repositoryDir, ".git"))
         val miner = ComplexityCodeChangesMiner(repository, numThreads = numThreads)

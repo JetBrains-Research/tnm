@@ -3,10 +3,13 @@ package gitMiners
 import dataProcessor.DataProcessor
 import gitMiners.exceptions.ProcessInThreadPoolException
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.diff.DiffFormatter
+import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.revwalk.RevCommit
+import org.eclipse.jgit.util.io.DisabledOutputStream
 import util.ProjectConfig
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -27,6 +30,16 @@ abstract class GitMinerNew <T>(
     protected val threadLocalReader = object : ThreadLocal<ObjectReader>() {
         override fun initialValue(): ObjectReader {
             return repository.newObjectReader()
+        }
+    }
+
+    protected val threadLocalDiffFormatter = object : ThreadLocal<DiffFormatter>() {
+        override fun initialValue(): DiffFormatter {
+            val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
+            diffFormatter.setRepository(repository)
+            diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
+            diffFormatter.isDetectRenames = true
+            return diffFormatter
         }
     }
 

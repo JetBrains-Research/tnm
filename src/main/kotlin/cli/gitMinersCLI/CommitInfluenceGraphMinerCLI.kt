@@ -13,8 +13,8 @@ class CommitInfluenceGraphMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
     )
 ) {
     override fun run() {
-        val miner = CommitInfluenceGraphMiner(repository, branches, numThreads = numThreads)
-        miner.run()
-        miner.saveToJson(resources)
+//        val miner = CommitInfluenceGraphMiner(repository, branches, numThreads = numThreads)
+//        miner.run()
+//        miner.saveToJson(resources)
     }
 }

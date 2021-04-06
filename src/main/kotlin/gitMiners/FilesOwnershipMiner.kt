@@ -21,16 +21,6 @@ class FilesOwnershipMiner(
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMinerNew<FilesOwnershipDataProcessor>(repository, setOf(neededBranch), numThreads = numThreads) {
 
-    private val threadLocalDiffFormatter = object : ThreadLocal<DiffFormatter>() {
-        override fun initialValue(): DiffFormatter {
-            val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
-            diffFormatter.setRepository(repository)
-            diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
-            diffFormatter.isDetectRenames = true
-            return diffFormatter
-        }
-    }
-
     private data class FutureResult(val listOfEditsToFile: List<Pair<EditList, String>>, val commitDate: Date, val user: String)
 
     private fun getListOfFutures(

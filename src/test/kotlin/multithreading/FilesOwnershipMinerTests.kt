@@ -17,7 +17,6 @@ internal class FilesOwnershipMinerTests : GitMinerNewTest {
     fun `test one thread and multithreading`() {
         val mapOneThread = runMiner()
         val mapMultithreading = runMiner()
-
         compareMapsOfMapsDouble(mapOneThread, mapMultithreading)
     }
 
