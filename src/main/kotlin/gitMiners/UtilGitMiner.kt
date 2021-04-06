@@ -73,6 +73,21 @@ object UtilGitMiner {
         return result
     }
 
+    fun getChangedFiles(
+        commit1: RevCommit,
+        commit2: RevCommit,
+        reader: ObjectReader,
+        git: Git
+    ): Set<String> {
+        val result = mutableSetOf<String>()
+        val diffs = getDiffsWithoutText(commit1, commit2, reader, git)
+
+        for (entry in diffs) {
+            result.add(entry.oldPath)
+        }
+        return result
+    }
+
     /**
      * Get short branch name. Removes first two parts before '/'.
      * For example this parts could be 'refs/remotes/' or 'refs/head/'
