@@ -1,44 +1,36 @@
 package multithreading
 
+import GitMinerNewTest
 import GitMinerNewTest.Companion.repository
-import GitMinerTest
-import GitMinerTest.Companion.repositoryDir
-import GitMinerTest.Companion.resourcesMultithreadingDir
-import GitMinerTest.Companion.resourcesOneThreadDir
+import dataProcessor.ChangedFilesDataProcessor
 import gitMiners.ChangedFilesMiner
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.junit.Test
 import util.ProjectConfig
 import java.io.File
+import kotlin.test.assertTrue
 
-internal class ChangedFilesMinerTests : GitMinerTest {
+internal class ChangedFilesMinerTests : GitMinerNewTest {
     @Test
     fun `test one thread and multithreading`() {
-        runMiner(resourcesOneThreadDir, 1)
-        runMiner(resourcesMultithreadingDir)
-
-        val mapOneThread = loadChangedFiles(resourcesOneThreadDir)
-        val mapMultithreading = loadChangedFiles(resourcesMultithreadingDir)
+        val mapOneThread = runMiner(1)
+        val mapMultithreading = runMiner()
 
         compareMapOfSets(mapOneThread, mapMultithreading)
-
     }
 
-    private fun runMiner(resources: File, numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS) {
+    private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Map<String, Set<String>> {
+        val dataProcessor = ChangedFilesDataProcessor()
         val miner = ChangedFilesMiner(repository, numThreads = numThreads)
-        miner.run()
-        miner.saveToJson(resources)
+        miner.run(dataProcessor)
+
+        assertTrue(dataProcessor.userFilesIds.isNotEmpty())
+
+        return changeIdsToValuesInMapOfSets(
+            dataProcessor.userFilesIds,
+            dataProcessor.userMapper.idToUser,
+            dataProcessor.fileMapper.idToFile
+        )
     }
-
-    private fun loadChangedFiles(resources: File): HashMap<String, Set<String>> {
-        val file = File(resources, ProjectConfig.USER_FILES_IDS)
-        val map = Json.decodeFromString<HashMap<Int, Set<Int>>>(file.readText())
-        val idToFile = Json.decodeFromString<HashMap<Int, String>>(File(resources, ProjectConfig.ID_FILE).readText())
-        val idToUser = Json.decodeFromString<HashMap<Int, String>>(File(resources, ProjectConfig.ID_USER).readText())
-
-        return changeIdsToValuesInMapOfSets(map, idToUser, idToFile)
-    }
-
 }

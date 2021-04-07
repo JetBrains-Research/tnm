@@ -6,6 +6,7 @@ import dataProcessor.AssignmentMatrixDataProcessor
 import gitMiners.AssignmentMatrixMiner
 import org.junit.Test
 import util.ProjectConfig
+import kotlin.test.assertTrue
 
 internal class AssignmentMatrixMinerTests : GitMinerNewTest {
 
@@ -22,6 +23,7 @@ internal class AssignmentMatrixMinerTests : GitMinerNewTest {
         val miner = AssignmentMatrixMiner(repository, numThreads = numThreads)
         miner.run(dataProcessor)
 
+        assertTrue(dataProcessor.assignmentMatrix.isNotEmpty())
 
         return changeIdsToValuesInMapOfMaps(
             dataProcessor.assignmentMatrix,
