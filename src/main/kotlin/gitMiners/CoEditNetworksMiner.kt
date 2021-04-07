@@ -1,37 +1,28 @@
 package gitMiners
 
-import kotlinx.serialization.Serializable
+import dataProcessor.CoEditNetworksDataProcessor
+import dataProcessor.CoEditNetworksDataProcessor.*
 import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
-import util.CommitMapper
 import util.ProjectConfig
-import util.UserMapper
-import util.UtilFunctions
-import util.UtilFunctions.entropy
-import util.UtilFunctions.levenshtein
-import util.serialization.ConcurrentSkipListSetSerializer
 import java.io.ByteArrayOutputStream
-import java.io.File
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentSkipListSet
 
 // TODO: hot spots: read line, levenshtein
 class CoEditNetworksMiner(
     repository: FileRepository,
     private val neededBranch: String = ProjectConfig.DEFAULT_BRANCH,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
-) : GitMiner(repository, setOf(neededBranch), numThreads = numThreads) {
+) : GitMinerNew<CoEditNetworksDataProcessor>(repository, setOf(neededBranch), numThreads = numThreads) {
     companion object {
         private const val ADD_MARK = '+'
         private const val DELETE_MARK = '-'
         private const val DIFF_MARK = '@'
         private val regex = Regex("@@ -(\\d+)(,\\d+)? \\+(\\d+)(,\\d+)? @@")
 
-        const val EMPTY_VALUE = ""
-        const val EMPTY_VALUE_ID = -1
     }
 
     private val threadLocalByteArrayOutputStream = object : ThreadLocal<ByteArrayOutputStream>() {
@@ -40,7 +31,7 @@ class CoEditNetworksMiner(
         }
     }
 
-    private val threadLocalDiffFormatter = object : ThreadLocal<DiffFormatter>() {
+    private val threadLocalDiffFormatterWithBuffer = object : ThreadLocal<DiffFormatter>() {
         override fun initialValue(): DiffFormatter {
             val diffFormatter = DiffFormatter(threadLocalByteArrayOutputStream.get())
             diffFormatter.setRepository(repository)
@@ -51,61 +42,10 @@ class CoEditNetworksMiner(
         }
     }
 
-
-    val result = ConcurrentSkipListSet<CommitResult>()
-    private val serializer = ConcurrentSkipListSetSerializer(CommitResult.serializer())
-    private val prevAndNextCommit: ConcurrentHashMap<Int, Pair<CommitInfo, CommitInfo>> = ConcurrentHashMap()
-
-    enum class ChangeType {
-        ADD, DELETE, REPLACE, EMPTY
-    }
-
-    @Serializable
-    class CommitResult(
-        val prevCommitInfo: CommitInfo,
-        val commitInfo: CommitInfo,
-        val nextCommitInfo: CommitInfo,
-        val edits: List<Edit>
-    ) : Comparable<CommitResult> {
-        override fun compareTo(other: CommitResult): Int {
-            return commitInfo.id.compareTo(other.commitInfo.id)
-        }
-    }
-
-    @Serializable
-    data class Edit(
-        val oldPath: Int,
-        val newPath: Int,
-        val preStartLineNum: Int,
-        val postStartLineNum: Int,
-        val preLenInLines: Int,
-        val postLenInLines: Int,
-        val preLenInChars: Int,
-        val postLenInChars: Int,
-        val preEntropy: Double,
-        val postEntropy: Double,
-        val levenshtein: Int,
-        val type: ChangeType
-    )
-
-    @Serializable
-    data class CommitInfo(
-        val id: Int,
-        val author: Int,
-        val date: Long
-    ) {
-        constructor(commit: RevCommit, userMapper: UserMapper, commitMapper: CommitMapper)
-                : this(
-            commitMapper.add(commit.name),
-            userMapper.add(commit.authorIdent.emailAddress),
-            commit.commitTime * 1000L
-        )
-
-        constructor() : this(EMPTY_VALUE_ID, EMPTY_VALUE_ID, -1)
-    }
+    private val prevAndNextCommit: ConcurrentHashMap<String, Pair<CommitInfo, CommitInfo>> = ConcurrentHashMap()
 
     // TODO: file_renaming, binary_file_change, cyclomatic_complexity
-    override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
+    override fun process(dataProcessor: CoEditNetworksDataProcessor, currCommit: RevCommit, prevCommit: RevCommit) {
         val git = threadLocalGit.get()
         val reader = threadLocalReader.get()
 
@@ -114,86 +54,88 @@ class CoEditNetworksMiner(
             UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, it, git)
         }
 
-        val deleteBlock = mutableListOf<String>()
-        val addBlock = mutableListOf<String>()
         val edits = mutableListOf<Edit>()
 
         val out = threadLocalByteArrayOutputStream.get()
-        val diffFormatter = threadLocalDiffFormatter.get()
+        val diffFormatter = threadLocalDiffFormatterWithBuffer.get()
 
         for (diff in diffs) {
+            val deleteBlock = mutableListOf<String>()
+            val addBlock = mutableListOf<String>()
+
             var start = false
             diffFormatter.format(diff)
             val diffText = out.toString("UTF-8").split("\n")
-
             var preStartLineNum = 0
             var postStartLineNum = 0
-            val oldPathId = getFileId(diff.oldPath)
-            val newPathId = getFileId(diff.newPath)
+
+            val oldPath = getFilePath(diff.oldPath)
+            val newPath = getFilePath(diff.newPath)
 
             for (line in diffText) {
                 if (line.isEmpty()) continue
 
                 val mark = line[0]
+
                 // pass until diffs
-                if (!start && mark == DIFF_MARK) {
-                    start = true
+                if (!start) {
+                    if (mark == DIFF_MARK) {
+                        start = true
+                    } else {
+                        continue
+                    }
                 }
 
                 when (mark) {
                     ADD_MARK -> {
-                        if (start) {
                             addBlock.add(line.substring(1))
-                        }
                     }
                     DELETE_MARK -> {
-                        if (start) {
                             deleteBlock.add(line.substring(1))
-                        }
                     }
                     DIFF_MARK -> {
-                        generateEdit(
-                            addBlock, deleteBlock, preStartLineNum,
-                            postStartLineNum, oldPathId, newPathId
-                        )?.let {
-                            edits.add(it)
+                        if (addBlock.isNotEmpty() || deleteBlock.isNotEmpty()) {
+                            // TODO: Start redo?
+                            val data = Edit(
+                                addBlock.toList(), deleteBlock.toList(), preStartLineNum,
+                                postStartLineNum, oldPath, newPath
+                            )
+                            edits.add(data)
+
                             addBlock.clear()
                             deleteBlock.clear()
                         }
 
-                        val match = regex.find(line)
-                        preStartLineNum = match!!.groupValues[1].toInt()
+                        val match = regex.find(line)!!
+                        preStartLineNum = match.groupValues[1].toInt()
                         postStartLineNum = match.groupValues[3].toInt()
                     }
                 }
 
-
             }
 
-
-            generateEdit(
+            val data = Edit(
                 addBlock, deleteBlock, preStartLineNum,
-                postStartLineNum, oldPathId, newPathId
-            )?.let {
-                edits.add(it)
-                addBlock.clear()
-                deleteBlock.clear()
-            }
+                postStartLineNum, oldPath, newPath
+            )
+            edits.add(data)
+
 
             out.reset()
         }
 
-        val currCommitId = commitMapper.add(currCommit.name)
+        val hashCurr = currCommit.name
+        val (prevCommitInfo, nextCommitInfo) = prevAndNextCommit.computeIfAbsent(hashCurr) { CommitInfo() to CommitInfo() }
+        val commitInfo = CommitInfo(currCommit)
 
-        val (prevCommitInfo, nextCommitInfo) = prevAndNextCommit.computeIfAbsent(currCommitId) { CommitInfo() to CommitInfo() }
-        val commitInfo = CommitInfo(currCommit, userMapper, commitMapper)
+        val data = AddEntity(prevCommitInfo, commitInfo, nextCommitInfo, edits)
 
-        result.add(CommitResult(prevCommitInfo, commitInfo, nextCommitInfo, edits))
+        dataProcessor.processData(data)
     }
 
-    override fun run() {
+    override fun run(dataProcessor: CoEditNetworksDataProcessor) {
         getPrevAndNextCommits()
-        super.run()
+        super.run(dataProcessor)
     }
 
     private fun getPrevAndNextCommits() {
@@ -202,121 +144,33 @@ class CoEditNetworksMiner(
 
         val commitsInBranch = getUnprocessedCommits(branch.name)
         for ((next, curr, prev) in commitsInBranch.windowed(3)) {
-            val currId = commitMapper.add(curr.name)
-            prevAndNextCommit[currId] =
-                CommitInfo(prev, userMapper, commitMapper) to CommitInfo(next, userMapper, commitMapper)
+            val hashCurr = curr.name
+            prevAndNextCommit[hashCurr] =
+                CommitInfo(prev) to CommitInfo(next)
         }
 
         when {
             commitsInBranch.size > 1 -> {
                 val (first, second) = commitsInBranch.take(2)
-                val firstId = commitMapper.add(first.name)
-                prevAndNextCommit[firstId] = CommitInfo() to CommitInfo(second, userMapper, commitMapper)
+                val hashFirst = first.name
+                prevAndNextCommit[hashFirst] = CommitInfo() to CommitInfo(second)
 
                 val (preLast, last) = commitsInBranch.takeLast(2)
-                val lastId = commitMapper.add(last.name)
-                prevAndNextCommit[lastId] = CommitInfo(preLast, userMapper, commitMapper) to CommitInfo()
+                val hashLast = last.name
+                prevAndNextCommit[hashLast] = CommitInfo(preLast) to CommitInfo()
             }
             commitsInBranch.size == 1 -> {
                 val commit = commitsInBranch.first()
-                val commitId = commitMapper.add(commit.name)
-                prevAndNextCommit[commitId] = CommitInfo() to CommitInfo()
+                val hashCommit = commit.name
+                prevAndNextCommit[hashCommit] = CommitInfo() to CommitInfo()
             }
         }
     }
 
-
-    private fun getFileId(path: String): Int {
-        if (path == DiffEntry.DEV_NULL) return -1
+    private fun getFilePath(path: String): String {
+        if (path == DiffEntry.DEV_NULL) return ""
         // delete prefixes a/, b/ of DiffFormatter
-        return fileMapper.add(path.substring(2))
-    }
-
-    private fun getType(
-        addBlock: List<String>,
-        deleteBlock: List<String>
-    ): ChangeType {
-
-        when {
-            addBlock.isNotEmpty() && deleteBlock.isEmpty() -> return ChangeType.ADD
-            addBlock.isEmpty() && deleteBlock.isNotEmpty() -> return ChangeType.DELETE
-            addBlock.isNotEmpty() && deleteBlock.isNotEmpty() -> return ChangeType.REPLACE
-        }
-
-        return ChangeType.EMPTY
-    }
-
-    private fun generateEdit(
-        addBlock: List<String>,
-        deleteBlock: List<String>,
-        preStartLineNum: Int,
-        postStartLineNum: Int,
-        oldPath: Int,
-        newPath: Int
-    ): Edit? {
-
-        val type = getType(addBlock, deleteBlock)
-        if (type == ChangeType.EMPTY) return null
-
-        val deleteString = deleteBlock.joinToString("")
-        val addString = addBlock.joinToString("")
-        val preLenInLines: Int = deleteBlock.size
-        val postLenInLines: Int = addBlock.size
-        val preLenInChars = deleteString.length
-        val postLenInChars = addString.length
-        val preEntropy: Double = entropy(countUTF8(deleteBlock))
-        val postEntropy: Double = entropy(countUTF8(addBlock))
-
-        val levenshtein: Int = when (type) {
-            ChangeType.ADD -> {
-                postLenInChars
-            }
-            ChangeType.DELETE -> {
-                preLenInChars
-            }
-            ChangeType.REPLACE -> {
-                levenshtein(deleteString, addString)
-            }
-            else -> 0
-        }
-        return Edit(
-            oldPath,
-            newPath,
-            preStartLineNum,
-            postStartLineNum,
-            preLenInLines,
-            postLenInLines,
-            preLenInChars,
-            postLenInChars,
-            preEntropy,
-            postEntropy,
-            levenshtein,
-            type
-        )
-
-    }
-
-    private fun countUTF8(block: List<String>): Collection<Int> {
-        val count = HashMap<Int, Int>()
-
-        for (line in block) {
-            for (char in line) {
-                val id = char.toInt()
-                if (id < 256) {
-                    count.compute(id) { _, v -> if (v == null) 1 else v + 1 }
-                }
-            }
-        }
-
-        return count.values
-    }
-
-    override fun saveToJson(resourceDirectory: File) {
-        UtilFunctions.saveToJson(
-            File(resourceDirectory, ProjectConfig.CO_EDIT),
-            result, serializer
-        )
-        saveMappers(resourceDirectory)
+        return path.substring(2)
     }
 
 }

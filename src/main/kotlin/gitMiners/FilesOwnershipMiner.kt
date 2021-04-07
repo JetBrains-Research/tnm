@@ -3,12 +3,10 @@ package gitMiners
 import dataProcessor.FilesOwnershipDataProcessor
 import dataProcessor.FilesOwnershipDataProcessor.*
 import gitMiners.exceptions.ProcessInThreadPoolException
-import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.EditList
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
-import org.eclipse.jgit.util.io.DisabledOutputStream
 import util.ProjectConfig
 import util.UtilFunctions
 import java.util.*
@@ -94,7 +92,7 @@ class FilesOwnershipMiner(
 
             for ((editList, fileId) in listsToFileId) {
                 for (edit in editList) {
-                    val data = AddEntity(edit.beginB..edit.endB, fileId, userId, diffDays)
+                    val data = FileLinesAddedByUser(edit.beginB..edit.endB, fileId, userId, diffDays)
                     dataProcessor.processData(data)
                 }
             }

@@ -1,6 +1,6 @@
 package dataProcessor
 
-import dataProcessor.FilesOwnershipDataProcessor.AddEntity
+import dataProcessor.FilesOwnershipDataProcessor.FileLinesAddedByUser
 import dataProcessor.FilesOwnershipDataProcessor.InitData
 import kotlinx.serialization.Serializable
 import util.CommitMapper
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.collections.HashMap
 import kotlin.math.pow
 
-class FilesOwnershipDataProcessor : DataProcessorWithInit<InitData, AddEntity> {
+class FilesOwnershipDataProcessor : DataProcessorWithInit<InitData, FileLinesAddedByUser> {
     override val userMapper = UserMapper()
     override val fileMapper = FileMapper()
     override val commitMapper = CommitMapper()
@@ -53,14 +53,14 @@ class FilesOwnershipDataProcessor : DataProcessorWithInit<InitData, AddEntity> {
 
     }
 
-    data class FileLineOwnedByUser(val lineNumber: Int, val file: String, val user: String)
+    data class FileLineOwnedByUser(val lineNumber: Int, val filePath: String, val user: String)
     data class InitData(val latestCommitDate: Date, val linesOwnedByUser: List<FileLineOwnedByUser>)
 
     override fun init(initData: InitData) {
         latestCommitDate = initData.latestCommitDate
 
         for (entity in initData.linesOwnedByUser) {
-            val fileId = fileMapper.add(entity.file)
+            val fileId = fileMapper.add(entity.filePath)
             val userId = userMapper.add(entity.user)
 
             calculateAuthorshipForLines(entity.lineNumber..entity.lineNumber, fileId, userId, 1.0)
@@ -68,9 +68,9 @@ class FilesOwnershipDataProcessor : DataProcessorWithInit<InitData, AddEntity> {
         }
     }
 
-    data class AddEntity(val addedLines: IntRange, val filePath: String, val user: String, val date: Date)
+    data class FileLinesAddedByUser(val addedLines: IntRange, val filePath: String, val user: String, val date: Date)
 
-    override fun processData(data: AddEntity) {
+    override fun processData(data: FileLinesAddedByUser) {
         val diffDays: Int = TimeUnit.DAYS.convert(
             latestCommitDate.time - data.date.time,
             TimeUnit.MILLISECONDS

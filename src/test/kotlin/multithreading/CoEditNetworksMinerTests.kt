@@ -1,54 +1,34 @@
 package multithreading
 
-import GitMinerTest
+import GitMinerNewTest
 import GitMinerTest.Companion.repositoryDir
-import GitMinerTest.Companion.resourcesMultithreadingDir
-import GitMinerTest.Companion.resourcesOneThreadDir
+import dataProcessor.CoEditNetworksDataProcessor
+import dataProcessor.CoEditNetworksDataProcessor.*
 import gitMiners.CoEditNetworksMiner
-import gitMiners.CoEditNetworksMiner.Companion.EMPTY_VALUE
-import gitMiners.CoEditNetworksMiner.Companion.EMPTY_VALUE_ID
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.junit.Test
 import util.ProjectConfig
 import java.io.File
+import kotlin.test.assertTrue
 
-class CoEditNetworksMinerTests : GitMinerTest {
+class CoEditNetworksMinerTests : GitMinerNewTest {
     @Test
     fun `test one thread and multithreading`() {
-        runMiner(resourcesOneThreadDir, 1)
-        runMiner(resourcesMultithreadingDir)
-
-        val resultOneThread = replaceIds(loadCoEditNetwork(resourcesOneThreadDir), resourcesOneThreadDir)
-        val resultMultithreading = replaceIds(loadCoEditNetwork(resourcesMultithreadingDir), resourcesMultithreadingDir)
+        val resultOneThread = runMiner(1)
+        val resultMultithreading = runMiner()
 
         compareSets(resultOneThread, resultMultithreading)
     }
 
-    private fun runMiner(resources: File, numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS) {
+    private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Set<CommitResultWithoutId> {
+        val dataProcessor = CoEditNetworksDataProcessor()
         val repository = FileRepository(File(repositoryDir, ".git"))
         val miner = CoEditNetworksMiner(repository, numThreads = numThreads)
-        miner.run()
-        miner.saveToJson(resources)
-    }
+        miner.run(dataProcessor)
 
-    private fun loadCoEditNetwork(resources: File): Set<CoEditNetworksMiner.CommitResult> {
-        val file = File(resources, ProjectConfig.CO_EDIT)
-        return Json.decodeFromString(file.readText())
-    }
+        assertTrue(dataProcessor.coEdits.isNotEmpty())
 
-    private fun loadMappers(resources: File): Triple<HashMap<Int, String>, HashMap<Int, String>, HashMap<Int, String>> {
-        val idToUser = Json.decodeFromString<HashMap<Int, String>>(File(resources, ProjectConfig.ID_USER).readText())
-        val idToFile = Json.decodeFromString<HashMap<Int, String>>(File(resources, ProjectConfig.ID_FILE).readText())
-        val idToCommit =
-            Json.decodeFromString<HashMap<Int, String>>(File(resources, ProjectConfig.ID_COMMIT).readText())
-
-        idToUser[EMPTY_VALUE_ID] = EMPTY_VALUE
-        idToFile[EMPTY_VALUE_ID] = EMPTY_VALUE
-        idToCommit[EMPTY_VALUE_ID] = EMPTY_VALUE
-
-        return Triple(idToUser, idToFile, idToCommit)
+        return replaceIds(dataProcessor)
     }
 
     data class CommitResultWithoutId(
@@ -64,14 +44,14 @@ class CoEditNetworksMinerTests : GitMinerTest {
         val date: Long
     ) {
         constructor(
-            commitInfo: CoEditNetworksMiner.CommitInfo,
-            idToCommit: HashMap<Int, String>,
-            idToUser: HashMap<Int, String>
+            commitInfoEncoded: CommitInfoEncoded,
+            idToCommit: Map<Int, String>,
+            idToUser: Map<Int, String>
         ) :
                 this(
-                    idToCommit[commitInfo.id]!!,
-                    idToUser[commitInfo.author]!!,
-                    commitInfo.date
+                    idToCommit[commitInfoEncoded.commitId]!!,
+                    idToUser[commitInfoEncoded.userId]!!,
+                    commitInfoEncoded.date
                 )
     }
 
@@ -87,19 +67,25 @@ class CoEditNetworksMinerTests : GitMinerTest {
         val preEntropy: Double,
         val postEntropy: Double,
         val levenshtein: Int,
-        val type: CoEditNetworksMiner.ChangeType
+        val type: ChangeType
     )
 
-    private fun replaceIds(set: Set<CoEditNetworksMiner.CommitResult>, resources: File): Set<CommitResultWithoutId> {
+    private fun replaceIds(
+        dataProcessor: CoEditNetworksDataProcessor
+    ): Set<CommitResultWithoutId> {
         val result = mutableSetOf<CommitResultWithoutId>()
-        val (idToUser, idToFile, idToCommit) = loadMappers(resources)
+
+        val set = dataProcessor.coEdits
+        val idToUser = dataProcessor.userMapper.idToUser
+        val idToFile = dataProcessor.fileMapper.idToFile
+        val idToCommit = dataProcessor.commitMapper.idToCommit
 
         for (commitResult in set) {
 
             val edits = mutableListOf<EditWithoutId>()
-            for (edit in commitResult.edits) {
-                val oldPath = idToFile[edit.oldPath]!!
-                val newPath = idToFile[edit.newPath]!!
+            for (edit in commitResult.editsData) {
+                val oldPath = idToFile[edit.oldPathId]!!
+                val newPath = idToFile[edit.newPathId]!!
 
                 edits.add(
                     EditWithoutId(
@@ -121,9 +107,9 @@ class CoEditNetworksMinerTests : GitMinerTest {
 
             result.add(
                 CommitResultWithoutId(
-                    CommitInfoWithoutId(commitResult.prevCommitInfo, idToCommit, idToUser),
-                    CommitInfoWithoutId(commitResult.commitInfo, idToCommit, idToUser),
-                    CommitInfoWithoutId(commitResult.nextCommitInfo, idToCommit, idToUser),
+                    CommitInfoWithoutId(commitResult.prevCommitInfoEncoded, idToCommit, idToUser),
+                    CommitInfoWithoutId(commitResult.commitInfoEncoded, idToCommit, idToUser),
+                    CommitInfoWithoutId(commitResult.nextCommitInfoEncoded, idToCommit, idToUser),
                     edits
                 )
             )
