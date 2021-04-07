@@ -17,7 +17,7 @@ class AssignmentMatrixMinerCLI :
 
     override fun run() {
         val miner = AssignmentMatrixMiner(repository, branches, numThreads = numThreads)
-        miner.run()
-        miner.saveToJson(resources)
+//        miner.run()
+//        miner.saveToJson(resources)
     }
 }
