@@ -17,7 +17,7 @@ class ComplexityCodeChangesMiner(
     repository: FileRepository,
     private val neededBranch: String = ProjectConfig.DEFAULT_BRANCH,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS,
-) : GitMinerNew<ComplexityCodeChangesDataProcessor>(repository, setOf(neededBranch), numThreads = numThreads) {
+) : GitMiner<ComplexityCodeChangesDataProcessor>(repository, setOf(neededBranch), numThreads = numThreads) {
     // Mark each commit for period
     // [commitId][periodId]
     private val markedCommits = ConcurrentHashMap<String, Int>()

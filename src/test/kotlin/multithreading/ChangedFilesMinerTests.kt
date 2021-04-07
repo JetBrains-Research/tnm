@@ -1,17 +1,14 @@
 package multithreading
 
-import GitMinerNewTest
-import GitMinerNewTest.Companion.repository
+import GitMinerTest
+import GitMinerTest.Companion.repository
 import dataProcessor.ChangedFilesDataProcessor
 import gitMiners.ChangedFilesMiner
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import org.junit.Test
 import util.ProjectConfig
-import java.io.File
 import kotlin.test.assertTrue
 
-internal class ChangedFilesMinerTests : GitMinerNewTest {
+internal class ChangedFilesMinerTests : GitMinerTest {
     @Test
     fun `test one thread and multithreading`() {
         val mapOneThread = runMiner(1)

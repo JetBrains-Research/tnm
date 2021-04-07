@@ -17,7 +17,7 @@ class FilesOwnershipMiner(
     repository: FileRepository,
     private val neededBranch: String = ProjectConfig.DEFAULT_BRANCH,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
-) : GitMinerNew<FilesOwnershipDataProcessor>(repository, setOf(neededBranch), numThreads = numThreads) {
+) : GitMiner<FilesOwnershipDataProcessor>(repository, setOf(neededBranch), numThreads = numThreads) {
 
     private data class FutureResult(
         val listOfEditsToFile: List<Pair<EditList, String>>,

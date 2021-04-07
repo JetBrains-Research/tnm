@@ -21,7 +21,7 @@ class CommitInfluenceGraphMiner(
     repository: FileRepository,
     neededBranches: Set<String> = ProjectConfig.DEFAULT_NEEDED_BRANCHES,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
-) : GitMinerNew<CommitInfluenceGraphDataProcessor>(
+) : GitMiner<CommitInfluenceGraphDataProcessor>(
     repository,
     neededBranches,
     numThreads = numThreads,

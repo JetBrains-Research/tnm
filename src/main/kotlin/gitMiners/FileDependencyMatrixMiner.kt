@@ -16,7 +16,7 @@ class FileDependencyMatrixMiner(
     repository: FileRepository,
     neededBranches: Set<String> = ProjectConfig.DEFAULT_NEEDED_BRANCHES,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
-) : GitMinerNew<FileDependencyMatrixDataProcessor>(repository, neededBranches, numThreads = numThreads) {
+) : GitMiner<FileDependencyMatrixDataProcessor>(repository, neededBranches, numThreads = numThreads) {
     override fun process(
         dataProcessor: FileDependencyMatrixDataProcessor,
         currCommit: RevCommit,

@@ -1,18 +1,14 @@
 package multithreading
 
-import GitMinerNewTest
-import GitMinerNewTest.Companion.repository
-import GitMinerTest.Companion.repositoryDir
+import GitMinerTest
+import GitMinerTest.Companion.repository
 import dataProcessor.FilesOwnershipDataProcessor
 import gitMiners.FilesOwnershipMiner
-import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.junit.Test
 import util.ProjectConfig
-import java.io.File
-import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
-internal class FilesOwnershipMinerTests : GitMinerNewTest {
+internal class FilesOwnershipMinerTests : GitMinerTest {
 
     @Test
     fun `test one thread and multithreading`() {

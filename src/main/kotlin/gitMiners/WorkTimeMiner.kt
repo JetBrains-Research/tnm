@@ -1,15 +1,11 @@
 package gitMiners
 
-import kotlinx.serialization.builtins.serializer
+import dataProcessor.WorkTimeDataProcessor
+import dataProcessor.WorkTimeDataProcessor.UserCommitDate
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig
-import util.UtilFunctions
-import util.serialization.ConcurrentHashMapSerializer
-import java.io.File
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.TimeUnit
 
 
 /**
@@ -24,37 +20,13 @@ class WorkTimeMiner(
     repository: FileRepository,
     neededBranches: Set<String> = ProjectConfig.DEFAULT_NEEDED_BRANCHES,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
-) : GitMiner(repository, neededBranches, numThreads = numThreads) {
+) : GitMiner<WorkTimeDataProcessor>(repository, neededBranches, numThreads = numThreads) {
 
-    // [user][minuteInWeek] = numOfCommits
-    private val workTimeDistribution = ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>>()
-    private val serializer = ConcurrentHashMapSerializer(
-        Int.serializer(),
-        ConcurrentHashMapSerializer(Int.serializer(), Int.serializer())
-    )
-
-    override fun process(currCommit: RevCommit, prevCommit: RevCommit) {
-        val email = currCommit.authorIdent.emailAddress
-        val userId = userMapper.add(email)
-
-        val calendar: Calendar = GregorianCalendar.getInstance()
+    override fun process(dataProcessor: WorkTimeDataProcessor, currCommit: RevCommit, prevCommit: RevCommit) {
+        val user = currCommit.authorIdent.emailAddress
         val date = Date(currCommit.commitTime * 1000L)
-        calendar.time = date
 
-        val time = (TimeUnit.DAYS.toMinutes(calendar[Calendar.DAY_OF_WEEK].toLong()) +
-                TimeUnit.HOURS.toMinutes(calendar[Calendar.HOUR_OF_DAY].toLong()) +
-                calendar[Calendar.MINUTE]).toInt()
-
-        workTimeDistribution
-            .computeIfAbsent(userId) { ConcurrentHashMap() }
-            .compute(time) { _, v -> if (v == null) 1 else v + 1 }
-    }
-
-    override fun saveToJson(resourceDirectory: File) {
-        UtilFunctions.saveToJson(
-            File(resourceDirectory, ProjectConfig.WORKTIME_DISTRIBUTION),
-            workTimeDistribution, serializer
-        )
-        saveMappers(resourceDirectory)
+        val data = UserCommitDate(user, date)
+        dataProcessor.processData(data)
     }
 }

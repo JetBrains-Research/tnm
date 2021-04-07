@@ -16,7 +16,7 @@ class CoEditNetworksMiner(
     repository: FileRepository,
     private val neededBranch: String = ProjectConfig.DEFAULT_BRANCH,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
-) : GitMinerNew<CoEditNetworksDataProcessor>(repository, setOf(neededBranch), numThreads = numThreads) {
+) : GitMiner<CoEditNetworksDataProcessor>(repository, setOf(neededBranch), numThreads = numThreads) {
     companion object {
         private const val ADD_MARK = '+'
         private const val DELETE_MARK = '-'

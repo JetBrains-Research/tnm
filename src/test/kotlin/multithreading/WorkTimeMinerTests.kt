@@ -1,47 +1,32 @@
 package multithreading
 
 import GitMinerTest
-import GitMinerTest.Companion.repositoryDir
-import GitMinerTest.Companion.resourcesMultithreadingDir
-import GitMinerTest.Companion.resourcesOneThreadDir
+import GitMinerTest.Companion.repository
+import dataProcessor.WorkTimeDataProcessor
 import gitMiners.WorkTimeMiner
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.junit.Test
 import util.ProjectConfig
-import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 internal class WorkTimeMinerTests : GitMinerTest {
     @Test
     fun `test one thread and multithreading`() {
-        runMiner(resourcesOneThreadDir, 1)
-        runMiner(resourcesMultithreadingDir)
-
-        val mapOneThread = loadWorkTime(resourcesOneThreadDir)
-        val mapMultithreading = loadWorkTime(resourcesMultithreadingDir)
+        val mapOneThread = runMiner(1)
+        val mapMultithreading = runMiner()
 
         compare(mapOneThread, mapMultithreading)
     }
 
-    private fun runMiner(resources: File, numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS) {
-        val repository = FileRepository(File(repositoryDir, ".git"))
+    private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Map<String, Map<Int, Int>> {
+        val dataProcessor = WorkTimeDataProcessor()
         val miner = WorkTimeMiner(repository, numThreads = numThreads)
-        miner.run()
-        miner.saveToJson(resources)
-    }
-
-    private fun loadWorkTime(resources: File): HashMap<String, HashMap<Int, Int>> {
-        val file = File(resources, ProjectConfig.WORKTIME_DISTRIBUTION)
-        val map = Json.decodeFromString<HashMap<Int, HashMap<Int, Int>>>(file.readText())
-        val idToUser = Json.decodeFromString<HashMap<Int, String>>(File(resources, ProjectConfig.ID_USER).readText())
+        miner.run(dataProcessor)
 
         val newMap = HashMap<String, HashMap<Int, Int>>()
-        for (entry1 in map.entries) {
+        for (entry1 in dataProcessor.workTimeDistribution.entries) {
             val userId = entry1.key
-            val user = idToUser[userId]
+            val user = dataProcessor.userMapper.idToUser[userId]
             assertNotNull(user, "can't find user $userId")
 
             for (entry2 in entry1.value.entries) {
@@ -50,11 +35,12 @@ internal class WorkTimeMinerTests : GitMinerTest {
             }
         }
         return newMap
+
     }
 
     private fun compare(
-        mapOneThread: HashMap<String, HashMap<Int, Int>>,
-        mapMultithreading: HashMap<String, HashMap<Int, Int>>
+        mapOneThread: Map<String, Map<Int, Int>>,
+        mapMultithreading: Map<String, Map<Int, Int>>
     ) {
         for (entry1 in mapOneThread.entries) {
             for (entry2 in entry1.value.entries) {

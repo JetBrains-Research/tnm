@@ -17,7 +17,7 @@ class AssignmentMatrixMiner(
     repository: FileRepository,
     neededBranches: Set<String> = ProjectConfig.DEFAULT_NEEDED_BRANCHES,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
-) : GitMinerNew<AssignmentMatrixDataProcessor>(repository, neededBranches, numThreads = numThreads) {
+) : GitMiner<AssignmentMatrixDataProcessor>(repository, neededBranches, numThreads = numThreads) {
 
     override fun process(dataProcessor: AssignmentMatrixDataProcessor, currCommit: RevCommit, prevCommit: RevCommit) {
         val git = threadLocalGit.get()

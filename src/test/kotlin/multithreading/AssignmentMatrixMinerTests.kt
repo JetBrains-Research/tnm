@@ -1,14 +1,14 @@
 package multithreading
 
-import GitMinerNewTest
-import GitMinerNewTest.Companion.repository
+import GitMinerTest
+import GitMinerTest.Companion.repository
 import dataProcessor.AssignmentMatrixDataProcessor
 import gitMiners.AssignmentMatrixMiner
 import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertTrue
 
-internal class AssignmentMatrixMinerTests : GitMinerNewTest {
+internal class AssignmentMatrixMinerTests : GitMinerTest {
 
     @Test
     fun `test one thread and multithreading`() {
