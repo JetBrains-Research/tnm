@@ -2,9 +2,7 @@ package dataProcessor
 
 import dataProcessor.ComplexityCodeChangesDataProcessor.FileModification
 import kotlinx.serialization.Serializable
-import util.CommitMapper
 import util.FileMapper
-import util.UserMapper
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.log2
 
@@ -25,9 +23,7 @@ class ComplexityCodeChangesDataProcessor(
     enum class PeriodType { TIME_BASED, MODIFICATION_LIMIT }
     enum class ChangeType { FILE, LINES }
 
-    override val userMapper = UserMapper()
-    override val fileMapper = FileMapper()
-    override val commitMapper = CommitMapper()
+    val fileMapper = FileMapper()
 
     // HCPF1 is equal to periodEntropy
     @Serializable
@@ -39,7 +35,6 @@ class ComplexityCodeChangesDataProcessor(
 
     @Serializable
     data class PeriodStats(val periodEntropy: Double, val filesStats: HashMap<Int, FileStats>)
-
 
     // Counter of changed files of period
     // [period][fileId] = num of changes

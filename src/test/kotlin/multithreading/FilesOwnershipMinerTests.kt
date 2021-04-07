@@ -1,6 +1,7 @@
 package multithreading
 
 import GitMinerNewTest
+import GitMinerNewTest.Companion.repository
 import GitMinerTest.Companion.repositoryDir
 import dataProcessor.FilesOwnershipDataProcessor
 import gitMiners.FilesOwnershipMiner
@@ -24,7 +25,6 @@ internal class FilesOwnershipMinerTests : GitMinerNewTest {
         numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
     ): Map<String, Map<String, Double>> {
         val dataProcessor = FilesOwnershipDataProcessor()
-        val repository = FileRepository(File(repositoryDir, ".git"))
         val miner = FilesOwnershipMiner(repository, numThreads = numThreads)
         miner.run(dataProcessor)
 

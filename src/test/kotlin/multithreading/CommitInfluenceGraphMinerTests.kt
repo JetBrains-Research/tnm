@@ -1,6 +1,7 @@
 package multithreading
 
 import GitMinerNewTest
+import GitMinerNewTest.Companion.repository
 import GitMinerTest
 import GitMinerTest.Companion.repositoryDir
 import GitMinerTest.Companion.resourcesMultithreadingDir
@@ -25,7 +26,6 @@ class CommitInfluenceGraphMinerTests : GitMinerNewTest {
 
     private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Map<String, Set<String>> {
         val dataProcessor = CommitInfluenceGraphDataProcessor()
-        val repository = FileRepository(File(repositoryDir, ".git"))
         val miner = CommitInfluenceGraphMiner(repository, numThreads = numThreads)
         miner.run(dataProcessor)
 

@@ -1,5 +1,6 @@
 package multithreading
 
+import GitMinerNewTest.Companion.repository
 import GitMinerTest
 import GitMinerTest.Companion.repositoryDir
 import GitMinerTest.Companion.resourcesMultithreadingDir
@@ -26,7 +27,6 @@ internal class ChangedFilesMinerTests : GitMinerTest {
     }
 
     private fun runMiner(resources: File, numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS) {
-        val repository = FileRepository(File(repositoryDir, ".git"))
         val miner = ChangedFilesMiner(repository, numThreads = numThreads)
         miner.run()
         miner.saveToJson(resources)

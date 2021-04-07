@@ -1,6 +1,7 @@
 package multithreading
 
 import GitMinerNewTest
+import GitMinerNewTest.Companion.repository
 import GitMinerTest
 import GitMinerTest.Companion.repositoryDir
 import GitMinerTest.Companion.resourcesMultithreadingDir
@@ -28,7 +29,6 @@ class ComplexityCodeChangesTests : GitMinerNewTest {
 
     private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): ComplexityCodeChangesDataProcessor {
         val dataProcessor = ComplexityCodeChangesDataProcessor()
-        val repository = FileRepository(File(repositoryDir, ".git"))
         val miner = ComplexityCodeChangesMiner(repository, numThreads = numThreads)
         miner.run(dataProcessor)
 

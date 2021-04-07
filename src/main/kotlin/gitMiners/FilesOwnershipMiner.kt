@@ -19,7 +19,11 @@ class FilesOwnershipMiner(
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMinerNew<FilesOwnershipDataProcessor>(repository, setOf(neededBranch), numThreads = numThreads) {
 
-    private data class FutureResult(val listOfEditsToFile: List<Pair<EditList, String>>, val commitDate: Date, val user: String)
+    private data class FutureResult(
+        val listOfEditsToFile: List<Pair<EditList, String>>,
+        val commitDate: Date,
+        val user: String
+    )
 
     private fun getListOfFutures(
         commitsInBranch: List<RevCommit>,

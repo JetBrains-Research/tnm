@@ -1,6 +1,7 @@
 package multithreading
 
 import GitMinerNewTest
+import GitMinerNewTest.Companion.repository
 import GitMinerTest.Companion.repositoryDir
 import dataProcessor.CoEditNetworksDataProcessor
 import dataProcessor.CoEditNetworksDataProcessor.*
@@ -22,7 +23,6 @@ class CoEditNetworksMinerTests : GitMinerNewTest {
 
     private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Set<CommitResultWithoutId> {
         val dataProcessor = CoEditNetworksDataProcessor()
-        val repository = FileRepository(File(repositoryDir, ".git"))
         val miner = CoEditNetworksMiner(repository, numThreads = numThreads)
         miner.run(dataProcessor)
 

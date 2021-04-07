@@ -3,7 +3,6 @@ package dataProcessor
 import dataProcessor.FilesOwnershipDataProcessor.FileLinesAddedByUser
 import dataProcessor.FilesOwnershipDataProcessor.InitData
 import kotlinx.serialization.Serializable
-import util.CommitMapper
 import util.FileMapper
 import util.UserMapper
 import java.util.*
@@ -14,9 +13,8 @@ import kotlin.collections.HashMap
 import kotlin.math.pow
 
 class FilesOwnershipDataProcessor : DataProcessorWithInit<InitData, FileLinesAddedByUser> {
-    override val userMapper = UserMapper()
-    override val fileMapper = FileMapper()
-    override val commitMapper = CommitMapper()
+    val userMapper = UserMapper()
+    val fileMapper = FileMapper()
 
     private lateinit var latestCommitDate: Date
 

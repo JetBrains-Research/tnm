@@ -10,9 +10,9 @@ import util.UtilFunctions
 import java.util.concurrent.ConcurrentSkipListSet
 
 class CoEditNetworksDataProcessor : DataProcessor<AddEntity> {
-    override val userMapper = UserMapper()
-    override val fileMapper = FileMapper()
-    override val commitMapper = CommitMapper()
+    val userMapper = UserMapper()
+    val fileMapper = FileMapper()
+    val commitMapper = CommitMapper()
 
     val coEdits = ConcurrentSkipListSet<CommitResult>()
 

@@ -88,10 +88,10 @@ class CoEditNetworksMiner(
 
                 when (mark) {
                     ADD_MARK -> {
-                            addBlock.add(line.substring(1))
+                        addBlock.add(line.substring(1))
                     }
                     DELETE_MARK -> {
-                            deleteBlock.add(line.substring(1))
+                        deleteBlock.add(line.substring(1))
                     }
                     DIFF_MARK -> {
                         if (addBlock.isNotEmpty() || deleteBlock.isNotEmpty()) {

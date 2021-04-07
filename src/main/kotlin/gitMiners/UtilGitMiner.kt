@@ -12,8 +12,6 @@ import org.eclipse.jgit.treewalk.CanonicalTreeParser
 import org.eclipse.jgit.treewalk.TreeWalk
 import util.FileMapper
 import util.UserMapper
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Future
 
 object UtilGitMiner {
     /**

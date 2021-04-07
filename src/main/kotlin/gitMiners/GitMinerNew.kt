@@ -16,11 +16,11 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.atomic.AtomicInteger
 
-abstract class GitMinerNew <T>(
+abstract class GitMinerNew<T>(
     protected val repository: FileRepository, val neededBranches: Set<String>,
     protected val reversed: Boolean = false,
     protected val numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
-) where T : DataProcessor<*>   {
+) where T : DataProcessor<*> {
     protected val threadLocalGit = object : ThreadLocal<Git>() {
         override fun initialValue(): Git {
             return Git(repository)
