@@ -1,4 +1,4 @@
-package gitMiners
+package miners.gitMiners
 
 import dataProcessor.ChangedFilesDataProcessor
 import dataProcessor.ChangedFilesDataProcessor.UserChangedFiles

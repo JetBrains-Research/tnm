@@ -1,4 +1,4 @@
-package gitMiners.exceptions
+package miners.gitMiners.exceptions
 
 class BranchNotExistsException : Exception {
     companion object {

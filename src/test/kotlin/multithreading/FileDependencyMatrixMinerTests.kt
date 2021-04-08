@@ -3,7 +3,7 @@ package multithreading
 import GitMinerTest
 import GitMinerTest.Companion.repository
 import dataProcessor.FileDependencyMatrixDataProcessor
-import gitMiners.FileDependencyMatrixMiner
+import miners.gitMiners.FileDependencyMatrixMiner
 import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertTrue

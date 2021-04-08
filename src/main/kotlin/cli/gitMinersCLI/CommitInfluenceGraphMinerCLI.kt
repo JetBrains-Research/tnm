@@ -2,7 +2,6 @@ package cli.gitMinersCLI
 
 import cli.InfoCLI
 import cli.gitMinersCLI.base.GitMinerMultithreadedMultipleBranchesCLI
-import gitMiners.CommitInfluenceGraphMiner
 import util.ProjectConfig
 
 class CommitInfluenceGraphMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(

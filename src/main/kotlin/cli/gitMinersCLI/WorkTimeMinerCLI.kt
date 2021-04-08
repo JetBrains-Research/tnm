@@ -2,7 +2,7 @@ package cli.gitMinersCLI
 
 import cli.InfoCLI
 import cli.gitMinersCLI.base.GitMinerMultithreadedMultipleBranchesCLI
-import gitMiners.WorkTimeMiner
+import miners.gitMiners.WorkTimeMiner
 import util.ProjectConfig
 
 class WorkTimeMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(

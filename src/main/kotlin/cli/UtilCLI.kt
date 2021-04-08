@@ -1,6 +1,6 @@
 package cli
 
-import gitMiners.UtilGitMiner
+import miners.gitMiners.UtilGitMiner
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import util.ProjectConfig

@@ -3,7 +3,7 @@ package multithreading
 import GitMinerTest
 import GitMinerTest.Companion.repository
 import dataProcessor.WorkTimeDataProcessor
-import gitMiners.WorkTimeMiner
+import miners.gitMiners.WorkTimeMiner
 import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertEquals

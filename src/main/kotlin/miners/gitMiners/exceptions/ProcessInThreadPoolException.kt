@@ -1,4 +1,4 @@
-package gitMiners.exceptions
+package miners.gitMiners.exceptions
 
 class ProcessInThreadPoolException : Exception {
     constructor() : super()

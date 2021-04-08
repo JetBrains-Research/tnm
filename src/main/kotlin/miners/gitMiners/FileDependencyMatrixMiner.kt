@@ -1,4 +1,4 @@
-package gitMiners
+package miners.gitMiners
 
 import dataProcessor.FileDependencyMatrixDataProcessor
 import org.eclipse.jgit.internal.storage.file.FileRepository

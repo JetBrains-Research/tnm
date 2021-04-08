@@ -5,7 +5,7 @@ import GitMinerTest.Companion.repository
 import dataProcessor.CoEditNetworksDataProcessor
 import dataProcessor.CoEditNetworksDataProcessor.ChangeType
 import dataProcessor.CoEditNetworksDataProcessor.CommitInfoEncoded
-import gitMiners.CoEditNetworksMiner
+import miners.gitMiners.CoEditNetworksMiner
 import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertTrue

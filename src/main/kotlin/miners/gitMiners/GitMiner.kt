@@ -1,7 +1,8 @@
-package gitMiners
+package miners.gitMiners
 
 import dataProcessor.DataProcessor
-import gitMiners.exceptions.ProcessInThreadPoolException
+import miners.Miner
+import miners.gitMiners.exceptions.ProcessInThreadPoolException
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
@@ -20,7 +21,7 @@ abstract class GitMiner<T>(
     protected val repository: FileRepository, val neededBranches: Set<String>,
     protected val reversed: Boolean = false,
     protected val numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
-) where T : DataProcessor<*> {
+) : Miner<T> where T : DataProcessor<*> {
     protected val threadLocalGit = object : ThreadLocal<Git>() {
         override fun initialValue(): Git {
             return Git(repository)
@@ -60,11 +61,12 @@ abstract class GitMiner<T>(
      * pairs of commits in DESC order while applying [process] function.
      *
      */
-    open fun run(dataProcessor: T) {
+    override fun run(dataProcessor: T) {
         val branches = UtilGitMiner.findNeededBranches(threadLocalGit.get(), neededBranches)
         val threadPool = Executors.newFixedThreadPool(numThreads)
         processAllCommitsInThreadPool(branches, dataProcessor, threadPool)
         threadPool.shutdown()
+        dataProcessor.calculate()
     }
 
     private fun processAllCommitsInThreadPool(branches: Set<Ref>, dataProcessor: T, threadPool: ExecutorService) {

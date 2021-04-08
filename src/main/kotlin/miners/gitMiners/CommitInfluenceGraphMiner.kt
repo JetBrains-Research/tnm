@@ -1,8 +1,8 @@
-package gitMiners
+package miners.gitMiners
 
 import dataProcessor.CommitInfluenceGraphDataProcessor
 import dataProcessor.CommitInfluenceGraphDataProcessor.AddData
-import gitMiners.UtilGitMiner.isBugFixCommit
+import miners.gitMiners.UtilGitMiner.isBugFixCommit
 import org.eclipse.jgit.api.BlameCommand
 import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.diff.Edit

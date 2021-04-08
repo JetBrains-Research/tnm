@@ -3,7 +3,7 @@ package multithreading
 import GitMinerTest
 import GitMinerTest.Companion.repository
 import dataProcessor.ComplexityCodeChangesDataProcessor
-import gitMiners.ComplexityCodeChangesMiner
+import miners.gitMiners.ComplexityCodeChangesMiner
 import org.junit.Assert
 import org.junit.Test
 import util.ProjectConfig

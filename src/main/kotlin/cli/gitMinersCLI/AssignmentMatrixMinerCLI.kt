@@ -2,7 +2,7 @@ package cli.gitMinersCLI
 
 import cli.InfoCLI
 import cli.gitMinersCLI.base.GitMinerMultithreadedMultipleBranchesCLI
-import gitMiners.AssignmentMatrixMiner
+import miners.gitMiners.AssignmentMatrixMiner
 import util.ProjectConfig
 
 class AssignmentMatrixMinerCLI :

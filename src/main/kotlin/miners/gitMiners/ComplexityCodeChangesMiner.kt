@@ -1,8 +1,8 @@
-package gitMiners
+package miners.gitMiners
 
 import dataProcessor.ComplexityCodeChangesDataProcessor
 import dataProcessor.ComplexityCodeChangesDataProcessor.*
-import gitMiners.UtilGitMiner.isBugFixCommit
+import miners.gitMiners.UtilGitMiner.isBugFixCommit
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.internal.storage.file.FileRepository

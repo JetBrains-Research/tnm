@@ -1,4 +1,4 @@
-package gitMiners
+package miners.gitMiners
 
 import dataProcessor.AssignmentMatrixDataProcessor
 import dataProcessor.AssignmentMatrixDataProcessor.UserChangedFiles

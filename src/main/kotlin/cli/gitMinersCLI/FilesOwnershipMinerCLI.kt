@@ -2,7 +2,7 @@ package cli.gitMinersCLI
 
 import cli.InfoCLI
 import cli.gitMinersCLI.base.GitMinerMultithreadedOneBranchCLI
-import gitMiners.FilesOwnershipMiner
+import miners.gitMiners.FilesOwnershipMiner
 import util.ProjectConfig
 
 class FilesOwnershipMinerCLI : GitMinerMultithreadedOneBranchCLI(

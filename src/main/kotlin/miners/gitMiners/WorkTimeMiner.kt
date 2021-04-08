@@ -1,4 +1,4 @@
-package gitMiners
+package miners.gitMiners
 
 import dataProcessor.WorkTimeDataProcessor
 import dataProcessor.WorkTimeDataProcessor.UserCommitDate

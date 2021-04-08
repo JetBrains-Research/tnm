@@ -1,4 +1,4 @@
-package gitMiners
+package miners.gitMiners
 
 import dataProcessor.CoEditNetworksDataProcessor
 import dataProcessor.CoEditNetworksDataProcessor.*

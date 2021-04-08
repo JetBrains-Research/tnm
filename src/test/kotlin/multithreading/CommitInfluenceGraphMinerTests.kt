@@ -3,7 +3,7 @@ package multithreading
 import GitMinerTest
 import GitMinerTest.Companion.repository
 import dataProcessor.CommitInfluenceGraphDataProcessor
-import gitMiners.CommitInfluenceGraphMiner
+import miners.gitMiners.CommitInfluenceGraphMiner
 import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertTrue

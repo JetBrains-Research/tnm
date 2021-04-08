@@ -2,7 +2,7 @@ package cli.gitMinersCLI
 
 import cli.InfoCLI
 import cli.gitMinersCLI.base.GitMinerMultithreadedMultipleBranchesCLI
-import gitMiners.ChangedFilesMiner
+import miners.gitMiners.ChangedFilesMiner
 import util.ProjectConfig
 
 class ChangedFilesMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(

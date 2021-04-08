@@ -2,7 +2,6 @@ package cli.gitMinersCLI
 
 import cli.InfoCLI
 import cli.gitMinersCLI.base.GitMinerMultithreadedOneBranchCLI
-import gitMiners.CoEditNetworksMiner
 import util.ProjectConfig
 
 class CoEditNetworksMinerCLI : GitMinerMultithreadedOneBranchCLI(

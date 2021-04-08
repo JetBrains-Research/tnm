@@ -1,8 +1,8 @@
-package gitMiners
+package miners.gitMiners
 
 import dataProcessor.FilesOwnershipDataProcessor
 import dataProcessor.FilesOwnershipDataProcessor.*
-import gitMiners.exceptions.ProcessInThreadPoolException
+import miners.gitMiners.exceptions.ProcessInThreadPoolException
 import org.eclipse.jgit.diff.EditList
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.internal.storage.file.FileRepository

@@ -1,6 +1,6 @@
-package gitMiners
+package miners.gitMiners
 
-import gitMiners.exceptions.BranchNotExistsException
+import miners.gitMiners.exceptions.BranchNotExistsException
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.ListBranchCommand
 import org.eclipse.jgit.diff.DiffEntry
