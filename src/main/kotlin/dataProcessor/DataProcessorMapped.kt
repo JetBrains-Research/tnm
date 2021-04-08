@@ -1,8 +1,8 @@
 package dataProcessor
 
-import util.CommitMapper
-import util.FileMapper
-import util.UserMapper
+import util.mappers.CommitMapper
+import util.mappers.FileMapper
+import util.mappers.UserMapper
 import java.io.File
 
 abstract class DataProcessorMapped<T> : DataProcessor<T> {
@@ -25,10 +25,5 @@ abstract class DataProcessorMapped<T> : DataProcessor<T> {
     val commitToId
         get() = commitMapper.commitToId
 
-    fun saveMappersToJson(resourceDirectory: File) {
-        userMapper.saveToJson(resourceDirectory)
-        commitMapper.saveToJson(resourceDirectory)
-        commitMapper.saveToJson(resourceDirectory)
-    }
 }
 

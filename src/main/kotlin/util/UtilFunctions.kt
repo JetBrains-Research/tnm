@@ -1,5 +1,6 @@
 package util
 
+import dataProcessor.DataProcessorMapped
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -29,6 +30,17 @@ object UtilFunctions {
         createParentFolder(file)
         val jsonString = Json.encodeToString(serializer, data)
         file.writeText(jsonString)
+    }
+
+    fun saveToJsonDataProcessorMaps(resources: File, dataProcessorMapped: DataProcessorMapped<*>) {
+        saveToJson(File(resources, ProjectConfig.ID_USER), dataProcessorMapped.idToUser)
+        saveToJson(File(resources, ProjectConfig.USER_ID), dataProcessorMapped.userToId)
+
+        saveToJson(File(resources, ProjectConfig.ID_FILE), dataProcessorMapped.idToFile)
+        saveToJson(File(resources, ProjectConfig.FILE_ID), dataProcessorMapped.fileToId)
+
+        saveToJson(File(resources, ProjectConfig.ID_COMMIT), dataProcessorMapped.idToCommit)
+        saveToJson(File(resources, ProjectConfig.COMMIT_ID), dataProcessorMapped.commitToId)
     }
 
     fun loadArray(file: File, rows: Int, columns: Int): INDArray {

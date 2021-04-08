@@ -22,6 +22,6 @@ class WorkTimeMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
         miner.run(dataProcessor)
 
         UtilFunctions.saveToJson(File(resources, ProjectConfig.WORKTIME_DISTRIBUTION), dataProcessor.workTimeDistribution)
-        dataProcessor.saveMappersToJson(resources)
+        UtilFunctions.saveToJsonDataProcessorMaps(resources, dataProcessor)
     }
 }

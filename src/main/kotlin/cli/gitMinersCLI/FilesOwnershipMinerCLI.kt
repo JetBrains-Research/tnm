@@ -26,6 +26,6 @@ class FilesOwnershipMinerCLI : GitMinerMultithreadedOneBranchCLI(
         UtilFunctions.saveToJson(File(resources, ProjectConfig.FILES_OWNERSHIP), dataProcessor.filesOwnership)
         UtilFunctions.saveToJson(File(resources, ProjectConfig.POTENTIAL_OWNERSHIP), dataProcessor.potentialAuthorship)
 
-        dataProcessor.saveMappersToJson(resources)
+        UtilFunctions.saveToJsonDataProcessorMaps(resources, dataProcessor)
     }
 }

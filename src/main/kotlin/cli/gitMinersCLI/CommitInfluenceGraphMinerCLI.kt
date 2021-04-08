@@ -21,6 +21,6 @@ class CommitInfluenceGraphMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
         miner.run(dataProcessor)
 
         UtilFunctions.saveToJson(File(resources, ProjectConfig.COMMITS_GRAPH), dataProcessor.adjacencyMap)
-        dataProcessor.saveMappersToJson(resources)
+        UtilFunctions.saveToJsonDataProcessorMaps(resources, dataProcessor)
     }
 }

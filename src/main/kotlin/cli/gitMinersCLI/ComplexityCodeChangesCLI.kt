@@ -96,6 +96,6 @@ class ComplexityCodeChangesCLI : GitMinerMultithreadedOneBranchCLI(
         miner.run(dataProcessor)
 
         UtilFunctions.saveToJson(File(resources, ProjectConfig.COMPLEXITY_CODE), dataProcessor.periodsToStats)
-        dataProcessor.saveMappersToJson(resources)
+        UtilFunctions.saveToJsonDataProcessorMaps(resources, dataProcessor)
     }
 }

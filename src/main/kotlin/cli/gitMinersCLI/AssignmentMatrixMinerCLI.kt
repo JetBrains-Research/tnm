@@ -24,6 +24,6 @@ class AssignmentMatrixMinerCLI :
         miner.run(dataProcessor)
 
         UtilFunctions.saveToJson(File(resources, ProjectConfig.ASSIGNMENT_MATRIX), dataProcessor.assignmentMatrix)
-        dataProcessor.saveMappersToJson(resources)
+        UtilFunctions.saveToJsonDataProcessorMaps(resources, dataProcessor)
     }
 }

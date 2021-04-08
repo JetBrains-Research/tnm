@@ -3,8 +3,8 @@ package dataProcessor
 import dataProcessor.CoEditNetworksDataProcessor.AddEntity
 import kotlinx.serialization.Serializable
 import org.eclipse.jgit.revwalk.RevCommit
-import util.CommitMapper
-import util.UserMapper
+import util.mappers.CommitMapper
+import util.mappers.UserMapper
 import util.UtilFunctions
 import java.util.concurrent.ConcurrentSkipListSet
 

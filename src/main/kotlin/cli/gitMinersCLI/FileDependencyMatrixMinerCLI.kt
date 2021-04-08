@@ -23,6 +23,6 @@ class FileDependencyMatrixMinerCLI :
         miner.run(dataProcessor)
 
         UtilFunctions.saveToJson(File(resources, ProjectConfig.FILE_DEPENDENCY), dataProcessor.fileDependencyMatrix)
-        dataProcessor.saveMappersToJson(resources)
+        UtilFunctions.saveToJsonDataProcessorMaps(resources, dataProcessor)
     }
 }

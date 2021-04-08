@@ -1,10 +1,10 @@
-package util
+package util.mappers
 
 /**
  * This object maps users to unique id.
  *
  */
-class UserMapper : Mapper(ProjectConfig.USER_ID, ProjectConfig.ID_USER) {
+class UserMapper : Mapper() {
     val userToId : Map<String, Int>
         get() = entityToId
 

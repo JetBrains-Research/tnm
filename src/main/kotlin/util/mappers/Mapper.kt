@@ -1,4 +1,4 @@
-package util
+package util.mappers
 
 import kotlinx.serialization.builtins.serializer
 import util.serialization.ConcurrentHashMapSerializer
@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
 // TODO: make generic, serialize error with generic Only KClass supported as classifier, got V
-abstract class Mapper(private val entityToIdFileName: String, private val idToEntityFileName: String) {
+abstract class Mapper {
 
     protected val entityToId = ConcurrentHashMap<String, Int>()
     protected val idToEntity = ConcurrentHashMap<Int, String>()
@@ -22,13 +22,5 @@ abstract class Mapper(private val entityToIdFileName: String, private val idToEn
         val currId = entityToId.computeIfAbsent(value) { lastId.incrementAndGet() }
         idToEntity[currId] = value
         return currId
-    }
-
-    fun saveToJson(resourceDirectory: File) {
-        val serializerEntityToId = ConcurrentHashMapSerializer(String.serializer(), Int.serializer())
-        UtilFunctions.saveToJson(File(resourceDirectory, entityToIdFileName), entityToId, serializerEntityToId)
-
-        val serializerIdToEntity = ConcurrentHashMapSerializer(Int.serializer(), String.serializer())
-        UtilFunctions.saveToJson(File(resourceDirectory, idToEntityFileName), idToEntity, serializerIdToEntity)
     }
 }

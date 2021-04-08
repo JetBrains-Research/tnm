@@ -1,11 +1,11 @@
-package util
+package util.mappers
 
 
 /**
  * This object maps files to unique id.
  *
  */
-class FileMapper : Mapper(ProjectConfig.FILE_ID, ProjectConfig.ID_FILE) {
+class FileMapper : Mapper() {
     val fileToId : Map<String, Int>
         get() = entityToId
 

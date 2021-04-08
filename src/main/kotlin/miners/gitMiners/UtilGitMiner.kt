@@ -10,8 +10,8 @@ import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.treewalk.CanonicalTreeParser
 import org.eclipse.jgit.treewalk.TreeWalk
-import util.FileMapper
-import util.UserMapper
+import util.mappers.FileMapper
+import util.mappers.UserMapper
 
 object UtilGitMiner {
     /**

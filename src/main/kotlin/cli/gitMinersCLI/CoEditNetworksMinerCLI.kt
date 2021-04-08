@@ -3,6 +3,7 @@ package cli.gitMinersCLI
 import cli.InfoCLI
 import cli.gitMinersCLI.base.GitMinerMultithreadedOneBranchCLI
 import dataProcessor.CoEditNetworksDataProcessor
+import jdk.jshell.execution.Util
 import miners.gitMiners.CoEditNetworksMiner
 import util.ProjectConfig
 import util.UtilFunctions
@@ -22,6 +23,6 @@ class CoEditNetworksMinerCLI : GitMinerMultithreadedOneBranchCLI(
         miner.run(dataProcessor)
 
         UtilFunctions.saveToJson(File(resources, ProjectConfig.CO_EDIT), dataProcessor.coEdits)
-        dataProcessor.saveMappersToJson(resources)
+        UtilFunctions.saveToJsonDataProcessorMaps(resources, dataProcessor)
     }
 }

@@ -21,6 +21,6 @@ class ChangedFilesMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
         miner.run(dataProcessor)
 
         UtilFunctions.saveToJson(File(resources, ProjectConfig.USER_FILES_IDS), dataProcessor.userFilesIds)
-        dataProcessor.saveMappersToJson(resources)
+        UtilFunctions.saveToJsonDataProcessorMaps(resources, dataProcessor)
     }
 }
