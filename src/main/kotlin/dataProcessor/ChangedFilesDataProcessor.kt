@@ -1,15 +1,10 @@
 package dataProcessor
 
 import dataProcessor.ChangedFilesDataProcessor.UserChangedFiles
-import util.FileMapper
-import util.UserMapper
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListSet
 
-class ChangedFilesDataProcessor : DataProcessor<UserChangedFiles> {
-
-    val fileMapper = FileMapper()
-    val userMapper = UserMapper()
+class ChangedFilesDataProcessor : DataProcessorMapped<UserChangedFiles>() {
 
     private val _userFilesIds = ConcurrentHashMap<Int, ConcurrentSkipListSet<Int>>()
 

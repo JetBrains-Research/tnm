@@ -25,8 +25,8 @@ class CommitInfluenceGraphMinerTests : GitMinerTest {
 
         return changeIdsToValuesInMapOfSets(
             dataProcessor.adjacencyMap,
-            dataProcessor.commitMapper.idToCommit,
-            dataProcessor.commitMapper.idToCommit
+            dataProcessor.idToCommit,
+            dataProcessor.idToCommit
         )
     }
 

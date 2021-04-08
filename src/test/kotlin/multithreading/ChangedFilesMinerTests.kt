@@ -26,8 +26,8 @@ internal class ChangedFilesMinerTests : GitMinerTest {
 
         return changeIdsToValuesInMapOfSets(
             dataProcessor.userFilesIds,
-            dataProcessor.userMapper.idToUser,
-            dataProcessor.fileMapper.idToFile
+            dataProcessor.idToUser,
+            dataProcessor.idToFile
         )
     }
 }

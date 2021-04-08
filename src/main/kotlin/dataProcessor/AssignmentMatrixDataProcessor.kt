@@ -1,18 +1,13 @@
 package dataProcessor
 
 import dataProcessor.AssignmentMatrixDataProcessor.UserChangedFiles
-import util.FileMapper
-import util.UserMapper
 import java.util.concurrent.ConcurrentHashMap
 
-class AssignmentMatrixDataProcessor: DataProcessor<UserChangedFiles> {
-
-    val fileMapper = FileMapper()
-    val userMapper = UserMapper()
+class AssignmentMatrixDataProcessor : DataProcessorMapped<UserChangedFiles>() {
 
     private val _assignmentMatrix: ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>> = ConcurrentHashMap()
 
-    val assignmentMatrix : Map<Int, Map<Int, Int>>
+    val assignmentMatrix: Map<Int, Map<Int, Int>>
         get() = _assignmentMatrix
 
     data class UserChangedFiles(val user: String, val files: Set<String>)

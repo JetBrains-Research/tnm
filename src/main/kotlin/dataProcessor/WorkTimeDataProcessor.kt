@@ -1,14 +1,11 @@
 package dataProcessor
 
 import dataProcessor.WorkTimeDataProcessor.UserCommitDate
-import util.UserMapper
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
-class WorkTimeDataProcessor : DataProcessor<UserCommitDate> {
-    val userMapper = UserMapper()
-
+class WorkTimeDataProcessor : DataProcessorMapped<UserCommitDate>() {
     // [user][minuteInWeek] = numOfCommits
     private val _workTimeDistribution = ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>>()
 

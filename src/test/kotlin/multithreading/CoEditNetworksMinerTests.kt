@@ -74,9 +74,9 @@ class CoEditNetworksMinerTests : GitMinerTest {
         val result = mutableSetOf<CommitResultWithoutId>()
 
         val set = dataProcessor.coEdits
-        val idToUser = dataProcessor.userMapper.idToUser
-        val idToFile = dataProcessor.fileMapper.idToFile
-        val idToCommit = dataProcessor.commitMapper.idToCommit
+        val idToUser = dataProcessor.idToUser
+        val idToFile = dataProcessor.idToFile
+        val idToCommit = dataProcessor.idToCommit
 
         for (commitResult in set) {
 

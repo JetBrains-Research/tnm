@@ -2,7 +2,6 @@ package dataProcessor
 
 import dataProcessor.ComplexityCodeChangesDataProcessor.FileModification
 import kotlinx.serialization.Serializable
-import util.FileMapper
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.log2
 
@@ -11,7 +10,7 @@ class ComplexityCodeChangesDataProcessor(
     val changeType: ChangeType = DEFAULT_CHANGE_TYPE,
     val numOfCommitsInPeriod: Int = DEFAULT_NUM_COMMITS,
     val numOfMonthInPeriod: Int = DEFAULT_NUM_MONTH
-) : DataProcessor<FileModification> {
+) : DataProcessorMapped<FileModification>() {
 
     companion object {
         const val DEFAULT_NUM_MONTH = 1
@@ -22,8 +21,6 @@ class ComplexityCodeChangesDataProcessor(
 
     enum class PeriodType { TIME_BASED, MODIFICATION_LIMIT }
     enum class ChangeType { FILE, LINES }
-
-    val fileMapper = FileMapper()
 
     // HCPF1 is equal to periodEntropy
     @Serializable
@@ -39,7 +36,11 @@ class ComplexityCodeChangesDataProcessor(
     // Counter of changed files of period
     // [period][fileId] = num of changes
     private val periodToFileChanges = ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>>()
-    val periodsToStats = HashMap<Int, PeriodStats>()
+
+    private val _periodsToStats = HashMap<Int, PeriodStats>()
+
+    val periodsToStats: Map<Int, PeriodStats>
+        get() = _periodsToStats
 
     data class FileModification(val periodId: Int, val filePath: String, val modifications: Int)
 
@@ -80,7 +81,7 @@ class ComplexityCodeChangesDataProcessor(
 
             }
 
-            periodsToStats[periodId] = PeriodStats(periodEntropy, filesStats)
+            _periodsToStats[periodId] = PeriodStats(periodEntropy, filesStats)
         }
     }
 

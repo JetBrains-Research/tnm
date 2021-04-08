@@ -28,8 +28,8 @@ internal class FileDependencyMatrixMinerTests : GitMinerTest {
 
         return changeIdsToValuesInMapOfMaps(
             dataProcessor.fileDependencyMatrix,
-            dataProcessor.fileMapper.idToFile,
-            dataProcessor.fileMapper.idToFile
+            dataProcessor.idToFile,
+            dataProcessor.idToFile
         )
     }
 }

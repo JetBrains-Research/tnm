@@ -12,7 +12,7 @@ internal class FilesOwnershipMinerTests : GitMinerTest {
 
     @Test
     fun `test one thread and multithreading`() {
-        val mapOneThread = runMiner()
+        val mapOneThread = runMiner(1)
         val mapMultithreading = runMiner()
         compareMapsOfMapsDouble(mapOneThread, mapMultithreading)
     }
@@ -28,8 +28,8 @@ internal class FilesOwnershipMinerTests : GitMinerTest {
 
         return changeIdsToValuesInMapOfMaps(
             dataProcessor.developerKnowledge,
-            dataProcessor.userMapper.idToUser,
-            dataProcessor.fileMapper.idToFile
+            dataProcessor.idToUser,
+            dataProcessor.idToFile
         )
     }
 }

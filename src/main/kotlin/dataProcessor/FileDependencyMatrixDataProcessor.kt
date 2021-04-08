@@ -1,10 +1,8 @@
 package dataProcessor
 
-import util.FileMapper
 import java.util.concurrent.ConcurrentHashMap
 
-class FileDependencyMatrixDataProcessor : DataProcessor<List<String>> {
-    val fileMapper = FileMapper()
+class FileDependencyMatrixDataProcessor : DataProcessorMapped<List<String>>() {
 
     private val _fileDependencyMatrix: ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>> =
         ConcurrentHashMap()

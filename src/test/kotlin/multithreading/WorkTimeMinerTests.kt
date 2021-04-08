@@ -26,7 +26,7 @@ internal class WorkTimeMinerTests : GitMinerTest {
         val newMap = HashMap<String, HashMap<Int, Int>>()
         for (entry1 in dataProcessor.workTimeDistribution.entries) {
             val userId = entry1.key
-            val user = dataProcessor.userMapper.idToUser[userId]
+            val user = dataProcessor.idToUser[userId]
             assertNotNull(user, "can't find user $userId")
 
             for (entry2 in entry1.value.entries) {

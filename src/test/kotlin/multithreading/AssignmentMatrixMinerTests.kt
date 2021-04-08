@@ -27,8 +27,8 @@ internal class AssignmentMatrixMinerTests : GitMinerTest {
 
         return changeIdsToValuesInMapOfMaps(
             dataProcessor.assignmentMatrix,
-            dataProcessor.userMapper.idToUser,
-            dataProcessor.fileMapper.idToFile
+            dataProcessor.idToUser,
+            dataProcessor.idToFile
         )
     }
 }

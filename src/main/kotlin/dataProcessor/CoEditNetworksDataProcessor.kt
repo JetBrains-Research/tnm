@@ -4,17 +4,15 @@ import dataProcessor.CoEditNetworksDataProcessor.AddEntity
 import kotlinx.serialization.Serializable
 import org.eclipse.jgit.revwalk.RevCommit
 import util.CommitMapper
-import util.FileMapper
 import util.UserMapper
 import util.UtilFunctions
 import java.util.concurrent.ConcurrentSkipListSet
 
-class CoEditNetworksDataProcessor : DataProcessor<AddEntity> {
-    val userMapper = UserMapper()
-    val fileMapper = FileMapper()
-    val commitMapper = CommitMapper()
+class CoEditNetworksDataProcessor : DataProcessorMapped<AddEntity>() {
+    private val _coEdits = ConcurrentSkipListSet<CommitResult>()
 
-    val coEdits = ConcurrentSkipListSet<CommitResult>()
+    val coEdits: Set<CommitResult>
+        get() = _coEdits
 
     @Serializable
     data class CommitInfoEncoded(
@@ -107,7 +105,7 @@ class CoEditNetworksDataProcessor : DataProcessor<AddEntity> {
         val commitInfoEncoded = CommitInfoEncoded(commitInfo, commitMapper, userMapper)
         val nextCommitInfoEncoded = CommitInfoEncoded(nextCommitInfo, commitMapper, userMapper)
 
-        coEdits.add(CommitResult(prevCommitInfoEncoded, commitInfoEncoded, nextCommitInfoEncoded, editsData))
+        _coEdits.add(CommitResult(prevCommitInfoEncoded, commitInfoEncoded, nextCommitInfoEncoded, editsData))
     }
 
     override fun calculate() {}

@@ -33,8 +33,8 @@ class ComplexityCodeChangesTests : GitMinerTest {
         dataProcessorOneThread: ComplexityCodeChangesDataProcessor,
         dataProcessorMultithreading: ComplexityCodeChangesDataProcessor
     ) {
-        val idToFileOneThread = dataProcessorOneThread.fileMapper.idToFile
-        val fileToIdMultiThread = dataProcessorMultithreading.fileMapper.fileToId
+        val idToFileOneThread = dataProcessorOneThread.idToFile
+        val fileToIdMultiThread = dataProcessorMultithreading.fileToId
 
         val oneThreadResult = dataProcessorOneThread.periodsToStats
         val multiThreadResult = dataProcessorMultithreading.periodsToStats

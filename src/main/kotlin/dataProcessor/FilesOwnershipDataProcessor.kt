@@ -3,8 +3,6 @@ package dataProcessor
 import dataProcessor.FilesOwnershipDataProcessor.FileLinesAddedByUser
 import dataProcessor.FilesOwnershipDataProcessor.InitData
 import kotlinx.serialization.Serializable
-import util.FileMapper
-import util.UserMapper
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListSet
@@ -12,22 +10,25 @@ import java.util.concurrent.TimeUnit
 import kotlin.collections.HashMap
 import kotlin.math.pow
 
-class FilesOwnershipDataProcessor : DataProcessorWithInit<InitData, FileLinesAddedByUser> {
-    val userMapper = UserMapper()
-    val fileMapper = FileMapper()
-
+class FilesOwnershipDataProcessor : DataProcessorMappedWithInit<InitData, FileLinesAddedByUser>() {
     private lateinit var latestCommitDate: Date
 
     // [fileId][userId]
-    val filesOwnership: ConcurrentHashMap<Int, ConcurrentHashMap<Int, UserData>> = ConcurrentHashMap()
+    private val _filesOwnership: ConcurrentHashMap<Int, ConcurrentHashMap<Int, UserData>> = ConcurrentHashMap()
+    val filesOwnership: Map<Int, Map<Int, UserData>>
+        get() = _filesOwnership
 
     // denoting the total potential authorship amount of all developers
     // [fileId]
-    val potentialAuthorship = mutableMapOf<Int, Int>()
+    private val _potentialAuthorship = mutableMapOf<Int, Int>()
+    val potentialAuthorship: Map<Int, Int>
+        get() = _potentialAuthorship
 
     // denoting the total potential authorship amount of all developers
     // [userId][fileId]
-    val developerKnowledge: HashMap<Int, HashMap<Int, Double>> = HashMap()
+    private val _developerKnowledge: HashMap<Int, HashMap<Int, Double>> = HashMap()
+    val developerKnowledge: Map<Int, Map<Int, Double>>
+        get() = _developerKnowledge
 
     // [fileId][line] = set(userId, ...)
     private val authorsForLine: ConcurrentHashMap<Int, ConcurrentHashMap<Int, ConcurrentSkipListSet<Int>>> =
@@ -97,7 +98,7 @@ class FilesOwnershipDataProcessor : DataProcessorWithInit<InitData, FileLinesAdd
     }
 
     private fun calculateAuthorshipForLines(lines: IntRange, fileId: Int, userId: Int, decay: Double) {
-        filesOwnership
+        _filesOwnership
             .computeIfAbsent(fileId) { ConcurrentHashMap() }
             .computeIfAbsent(userId) { UserData() }
             .calculateAuthorship(lines, decay)
@@ -111,21 +112,21 @@ class FilesOwnershipDataProcessor : DataProcessorWithInit<InitData, FileLinesAdd
             for (lineEntry in fileEntry.value) {
                 potentialAuthorshipForFile += lineEntry.value.size
             }
-            potentialAuthorship[fileId] = potentialAuthorshipForFile
+            _potentialAuthorship[fileId] = potentialAuthorshipForFile
         }
         println("End calculating potential authorship")
     }
 
     private fun calculateDeveloperKnowledge() {
         println("Start calculating developer knowledge")
-        for (entryOwnership in filesOwnership) {
+        for (entryOwnership in _filesOwnership) {
             val fileId = entryOwnership.key
             for (entryUserData in entryOwnership.value) {
                 val userId = entryUserData.key
                 val userData = entryUserData.value
-                developerKnowledge
+                _developerKnowledge
                     .computeIfAbsent(userId) { HashMap() }[fileId] =
-                    userData.authorship / potentialAuthorship[fileId]!!
+                    userData.authorship / _potentialAuthorship[fileId]!!
             }
         }
         println("End calculating developer knowledge")

@@ -1,13 +1,9 @@
 package dataProcessor
 
 import dataProcessor.CommitInfluenceGraphDataProcessor.AddData
-import util.CommitMapper
 import util.Graph
 
-class CommitInfluenceGraphDataProcessor : DataProcessor<AddData> {
-
-    val commitMapper = CommitMapper()
-
+class CommitInfluenceGraphDataProcessor : DataProcessorMapped<AddData>() {
     // H is the transition probability matrix whose (i, j)
     // element signifies the probability of transition from the i-th page to the j-th page
     // pages - commits
