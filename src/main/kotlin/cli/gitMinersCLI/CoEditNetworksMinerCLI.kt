@@ -2,7 +2,11 @@ package cli.gitMinersCLI
 
 import cli.InfoCLI
 import cli.gitMinersCLI.base.GitMinerMultithreadedOneBranchCLI
+import dataProcessor.CoEditNetworksDataProcessor
+import miners.gitMiners.CoEditNetworksMiner
 import util.ProjectConfig
+import util.UtilFunctions
+import java.io.File
 
 class CoEditNetworksMinerCLI : GitMinerMultithreadedOneBranchCLI(
     InfoCLI(
@@ -13,8 +17,11 @@ class CoEditNetworksMinerCLI : GitMinerMultithreadedOneBranchCLI(
     )
 ) {
     override fun run() {
-//        val miner = CoEditNetworksMiner(repository, branch, numThreads = numThreads)
-//        miner.run()
-//        miner.saveToJson(resources)
+        val dataProcessor = CoEditNetworksDataProcessor()
+        val miner = CoEditNetworksMiner(repository, branch, numThreads = numThreads)
+        miner.run(dataProcessor)
+
+        UtilFunctions.saveToJson(File(resources, ProjectConfig.CO_EDIT), dataProcessor.coEdits)
+        dataProcessor.saveMappersToJson(resources)
     }
 }

@@ -2,7 +2,11 @@ package cli.gitMinersCLI
 
 import cli.InfoCLI
 import cli.gitMinersCLI.base.GitMinerMultithreadedMultipleBranchesCLI
+import dataProcessor.FileDependencyMatrixDataProcessor
+import miners.gitMiners.FileDependencyMatrixMiner
 import util.ProjectConfig
+import util.UtilFunctions
+import java.io.File
 
 class FileDependencyMatrixMinerCLI :
     GitMinerMultithreadedMultipleBranchesCLI(
@@ -14,8 +18,11 @@ class FileDependencyMatrixMinerCLI :
     ) {
 
     override fun run() {
-//        val miner = FileDependencyMatrixMiner(repository, branches, numThreads = numThreads)
-//        miner.run()
-//        miner.saveToJson(resources)
+        val dataProcessor = FileDependencyMatrixDataProcessor()
+        val miner = FileDependencyMatrixMiner(repository, branches, numThreads = numThreads)
+        miner.run(dataProcessor)
+
+        UtilFunctions.saveToJson(File(resources, ProjectConfig.FILE_DEPENDENCY), dataProcessor.fileDependencyMatrix)
+        dataProcessor.saveMappersToJson(resources)
     }
 }

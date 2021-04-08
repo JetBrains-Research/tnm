@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicInteger
 // TODO: make generic, serialize error with generic Only KClass supported as classifier, got V
 abstract class Mapper(private val entityToIdFileName: String, private val idToEntityFileName: String) {
 
-    // TODO: do smth about public
     protected val entityToId = ConcurrentHashMap<String, Int>()
     protected val idToEntity = ConcurrentHashMap<Int, String>()
 

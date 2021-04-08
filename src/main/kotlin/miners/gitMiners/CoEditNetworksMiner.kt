@@ -95,7 +95,6 @@ class CoEditNetworksMiner(
                     }
                     DIFF_MARK -> {
                         if (addBlock.isNotEmpty() || deleteBlock.isNotEmpty()) {
-                            // TODO: Start redo?
                             val data = Edit(
                                 addBlock.toList(), deleteBlock.toList(), preStartLineNum,
                                 postStartLineNum, oldPath, newPath

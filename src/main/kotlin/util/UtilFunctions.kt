@@ -88,7 +88,6 @@ object UtilFunctions {
         return Di[Di.size - 1]
     }
 
-    // TODO: move from UtilGit
     fun runInThreadPoolWithExceptionHandle(threadPool: ExecutorService, tasks: List<Runnable>) {
         val futures = mutableListOf<Future<*>>()
         for (task in tasks) {
