@@ -7,10 +7,14 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListSet
 import java.util.concurrent.TimeUnit
-import kotlin.collections.HashMap
 import kotlin.math.pow
 
-class FilesOwnershipDataProcessor : DataProcessorMappedWithInit<InitData, FileLinesAddedByUser>() {
+class FilesOwnershipDataProcessor(private val decayFactor: Double = DEFAULT_DECAY_FACTOR) :
+    DataProcessorMappedWithInit<InitData, FileLinesAddedByUser>() {
+    companion object {
+        const val DEFAULT_DECAY_FACTOR = 0.01
+    }
+
     private lateinit var latestCommitDate: Date
 
     // [fileId][userId]
@@ -33,8 +37,6 @@ class FilesOwnershipDataProcessor : DataProcessorMappedWithInit<InitData, FileLi
     // [fileId][line] = set(userId, ...)
     private val authorsForLine: ConcurrentHashMap<Int, ConcurrentHashMap<Int, ConcurrentSkipListSet<Int>>> =
         ConcurrentHashMap()
-
-    private val decayFactor = 0.01
 
     @Serializable
     class UserData {
