@@ -1,9 +1,8 @@
-package multithreading
+package miners.gitMiners
 
 import GitMinerTest
 import GitMinerTest.Companion.repository
 import dataProcessor.FilesOwnershipDataProcessor
-import miners.gitMiners.FilesOwnershipMiner
 import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertTrue

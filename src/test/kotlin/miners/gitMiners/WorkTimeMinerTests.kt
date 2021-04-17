@@ -1,4 +1,4 @@
-package multithreading
+package miners.gitMiners
 
 import GitMinerTest
 import GitMinerTest.Companion.repository

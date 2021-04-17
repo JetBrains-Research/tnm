@@ -1,9 +1,8 @@
-package multithreading
+package miners.gitMiners
 
 import GitMinerTest
 import GitMinerTest.Companion.repository
 import dataProcessor.ChangedFilesDataProcessor
-import miners.gitMiners.ChangedFilesMiner
 import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertTrue

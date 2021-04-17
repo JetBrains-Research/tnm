@@ -1,14 +1,13 @@
-package multithreading
+package miners.gitMiners
 
 import GitMinerTest
 import GitMinerTest.Companion.repository
-import dataProcessor.AssignmentMatrixDataProcessor
-import miners.gitMiners.AssignmentMatrixMiner
+import dataProcessor.FileDependencyMatrixDataProcessor
 import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertTrue
 
-internal class AssignmentMatrixMinerTests : GitMinerTest {
+internal class FileDependencyMatrixMinerTests : GitMinerTest {
 
     @Test
     fun `test one thread and multithreading`() {
@@ -19,15 +18,16 @@ internal class AssignmentMatrixMinerTests : GitMinerTest {
     }
 
     private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Map<String, Map<String, Int>> {
-        val dataProcessor = AssignmentMatrixDataProcessor()
-        val miner = AssignmentMatrixMiner(repository, numThreads = numThreads)
+        val dataProcessor = FileDependencyMatrixDataProcessor()
+
+        val miner = FileDependencyMatrixMiner(repository, numThreads = numThreads)
         miner.run(dataProcessor)
 
-        assertTrue(dataProcessor.assignmentMatrix.isNotEmpty())
+        assertTrue(dataProcessor.fileDependencyMatrix.isNotEmpty())
 
         return changeIdsToValuesInMapOfMaps(
-            dataProcessor.assignmentMatrix,
-            dataProcessor.idToUser,
+            dataProcessor.fileDependencyMatrix,
+            dataProcessor.idToFile,
             dataProcessor.idToFile
         )
     }
