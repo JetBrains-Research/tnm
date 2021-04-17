@@ -5,9 +5,9 @@ package util.mappers
  *
  */
 class UserMapper : Mapper() {
-    val userToId : Map<String, Int>
+    val userToId: Map<String, Int>
         get() = entityToId
 
-    val idToUser : Map<Int, String>
+    val idToUser: Map<Int, String>
         get() = idToEntity
 }

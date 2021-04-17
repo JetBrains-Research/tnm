@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentSkipListSet
 class Graph<T> {
     private val _adjacencyMap: ConcurrentHashMap<T, ConcurrentSkipListSet<T>> = ConcurrentHashMap()
 
-    val adjacencyMap : Map<T, Set<T>>
+    val adjacencyMap: Map<T, Set<T>>
         get() = _adjacencyMap
 
     fun addEdge(sourceVertex: T, destinationVertex: T) {

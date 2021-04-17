@@ -11,7 +11,6 @@ import util.ProjectConfig
 import util.UtilFunctions
 import java.util.*
 import java.util.concurrent.*
-import kotlin.collections.ArrayList
 
 class FilesOwnershipMiner(
     repository: FileRepository,

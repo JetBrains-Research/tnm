@@ -6,9 +6,9 @@ package util.mappers
  *
  */
 class FileMapper : Mapper() {
-    val fileToId : Map<String, Int>
+    val fileToId: Map<String, Int>
         get() = entityToId
 
-    val idToFile : Map<Int, String>
+    val idToFile: Map<Int, String>
         get() = idToEntity
 }

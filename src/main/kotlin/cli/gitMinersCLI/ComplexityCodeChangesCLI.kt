@@ -92,7 +92,7 @@ class ComplexityCodeChangesCLI : GitMinerMultithreadedOneBranchCLI(
             periodType = periodTypeStringToEnum[periodType]!!
         )
 
-        val miner = ComplexityCodeChangesMiner(repository,branch,numThreads = numThreads)
+        val miner = ComplexityCodeChangesMiner(repository, branch, numThreads = numThreads)
         miner.run(dataProcessor)
 
         UtilFunctions.saveToJson(File(resources, ProjectConfig.COMPLEXITY_CODE), dataProcessor.periodsToStats)

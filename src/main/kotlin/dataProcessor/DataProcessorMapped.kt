@@ -3,7 +3,6 @@ package dataProcessor
 import util.mappers.CommitMapper
 import util.mappers.FileMapper
 import util.mappers.UserMapper
-import java.io.File
 
 abstract class DataProcessorMapped<T> : DataProcessor<T> {
 

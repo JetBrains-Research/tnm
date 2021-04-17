@@ -21,7 +21,10 @@ class WorkTimeMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
         val miner = WorkTimeMiner(repository, branches, numThreads = numThreads)
         miner.run(dataProcessor)
 
-        UtilFunctions.saveToJson(File(resources, ProjectConfig.WORKTIME_DISTRIBUTION), dataProcessor.workTimeDistribution)
+        UtilFunctions.saveToJson(
+            File(resources, ProjectConfig.WORKTIME_DISTRIBUTION),
+            dataProcessor.workTimeDistribution
+        )
         UtilFunctions.saveToJsonDataProcessorMaps(resources, dataProcessor)
     }
 }

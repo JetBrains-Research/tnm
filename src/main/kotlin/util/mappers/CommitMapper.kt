@@ -6,9 +6,9 @@ package util.mappers
  *
  */
 class CommitMapper : Mapper() {
-    val commitToId : Map<String, Int>
+    val commitToId: Map<String, Int>
         get() = entityToId
 
-    val idToCommit : Map<Int, String>
+    val idToCommit: Map<Int, String>
         get() = idToEntity
 }
