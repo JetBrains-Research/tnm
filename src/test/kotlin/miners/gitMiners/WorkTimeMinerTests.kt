@@ -1,9 +1,8 @@
 package miners.gitMiners
 
-import GitMinerTest
-import GitMinerTest.Companion.repository
+import miners.gitMiners.GitMinerTest.Companion.repository
 import dataProcessor.WorkTimeDataProcessor
-import miners.gitMiners.WorkTimeMiner
+import miners.gitMiners.GitMinerTest.Companion.branches
 import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertEquals
@@ -20,7 +19,7 @@ internal class WorkTimeMinerTests : GitMinerTest {
 
     private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Map<String, Map<Int, Int>> {
         val dataProcessor = WorkTimeDataProcessor()
-        val miner = WorkTimeMiner(repository, numThreads = numThreads)
+        val miner = WorkTimeMiner(repository, numThreads = numThreads, neededBranches = branches)
         miner.run(dataProcessor)
 
         val newMap = HashMap<String, HashMap<Int, Int>>()

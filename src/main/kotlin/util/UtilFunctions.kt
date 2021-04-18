@@ -5,6 +5,8 @@ import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.eclipse.jgit.lib.RepositoryCache
+import org.eclipse.jgit.util.FS
 import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerMinMaxScaler
 import org.nd4j.linalg.factory.Nd4j
@@ -14,6 +16,11 @@ import java.util.concurrent.Future
 import kotlin.math.log2
 
 object UtilFunctions {
+
+    fun isGitRepository(directory: File): Boolean {
+        return RepositoryCache.FileKey.isGitRepository(directory, FS.DETECTED)
+    }
+
     fun createParentFolder(file: File) {
         val folder = File(file.parent)
         folder.mkdirs()

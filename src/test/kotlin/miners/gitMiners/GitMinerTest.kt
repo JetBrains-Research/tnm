@@ -1,28 +1,41 @@
+package miners.gitMiners
+
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.api.LsRemoteCommand
 import org.eclipse.jgit.internal.storage.file.FileRepository
+import org.eclipse.jgit.lib.RepositoryCache
+import org.eclipse.jgit.util.FS
+import org.junit.After
 import org.junit.Assert
+import org.junit.Before
+import util.UtilFunctions
 import java.io.File
+import java.util.*
+import kotlin.collections.HashMap
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
+
 internal interface GitMinerTest {
     companion object {
-        val repositoryDir = File("src/test/repository")
-        val resourcesOneThreadDir = File("src/test/resultsOneThread")
-        val resourcesMultithreadingDir = File("src/test/resultsMultithreading")
-        val repository = FileRepository(File(repositoryDir, ".git"))
+        val repositoryDir = File("src/test/tmp/repository")
+        val gitDir = File(repositoryDir, ".git")
+        val repository = FileRepository(gitDir)
+        const val branch = "origin/trunk"
+        val branches = setOf(branch)
     }
 
-    //    @Before
+    @Before
     fun `load repository`() {
-        deleteAll()
-        val repoURI = "https://github.com/facebook/react.git"
+
+        if (UtilFunctions.isGitRepository(gitDir)) return
+
+        val repoURI = "https://github.com/cli/cli.git"
         println("Loading repository for tests $repoURI")
+        deleteDir(repositoryDir)
         repositoryDir.mkdirs()
-        resourcesOneThreadDir.mkdirs()
-        resourcesMultithreadingDir.mkdirs()
 
         Git.cloneRepository()
             .setURI(repoURI)
@@ -32,15 +45,6 @@ internal interface GitMinerTest {
                 println("Finish loading repo $repoURI")
                 println("Repository inside: " + result.repository.directory)
             }
-    }
-
-    //    @After
-    fun deleteAll() {
-        println("Start cleaning results and loaded repository")
-        deleteDir(resourcesOneThreadDir)
-        deleteDir(resourcesMultithreadingDir)
-        deleteDir(repositoryDir)
-        println("End cleaning results and loaded repository")
     }
 
     fun deleteDir(directory: File) {

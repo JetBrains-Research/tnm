@@ -1,10 +1,10 @@
 package miners.gitMiners
 
-import GitMinerTest
-import GitMinerTest.Companion.repository
+import miners.gitMiners.GitMinerTest.Companion.repository
 import dataProcessor.CoEditNetworksDataProcessor
 import dataProcessor.CoEditNetworksDataProcessor.ChangeType
 import dataProcessor.CoEditNetworksDataProcessor.CommitInfoEncoded
+import miners.gitMiners.GitMinerTest.Companion.branch
 import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertTrue
@@ -20,7 +20,7 @@ class CoEditNetworksMinerTests : GitMinerTest {
 
     private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Set<CommitResultWithoutId> {
         val dataProcessor = CoEditNetworksDataProcessor()
-        val miner = CoEditNetworksMiner(repository, numThreads = numThreads)
+        val miner = CoEditNetworksMiner(repository, numThreads = numThreads, neededBranch = branch)
         miner.run(dataProcessor)
 
         assertTrue(dataProcessor.coEdits.isNotEmpty())

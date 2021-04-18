@@ -1,8 +1,8 @@
 package miners.gitMiners
 
-import GitMinerTest
-import GitMinerTest.Companion.repository
 import dataProcessor.AssignmentMatrixDataProcessor
+import miners.gitMiners.GitMinerTest.Companion.branches
+import miners.gitMiners.GitMinerTest.Companion.repository
 import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertTrue
@@ -19,7 +19,7 @@ internal class AssignmentMatrixMinerTests : GitMinerTest {
 
     private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Map<String, Map<String, Int>> {
         val dataProcessor = AssignmentMatrixDataProcessor()
-        val miner = AssignmentMatrixMiner(repository, numThreads = numThreads)
+        val miner = AssignmentMatrixMiner(repository, numThreads = numThreads, neededBranches = branches)
         miner.run(dataProcessor)
 
         assertTrue(dataProcessor.assignmentMatrix.isNotEmpty())

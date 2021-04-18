@@ -1,8 +1,8 @@
 package miners.gitMiners
 
-import GitMinerTest
-import GitMinerTest.Companion.repository
+import miners.gitMiners.GitMinerTest.Companion.repository
 import dataProcessor.ComplexityCodeChangesDataProcessor
+import miners.gitMiners.GitMinerTest.Companion.branch
 import org.junit.Assert
 import org.junit.Test
 import util.ProjectConfig
@@ -19,7 +19,7 @@ class ComplexityCodeChangesTests : GitMinerTest {
 
     private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): ComplexityCodeChangesDataProcessor {
         val dataProcessor = ComplexityCodeChangesDataProcessor()
-        val miner = ComplexityCodeChangesMiner(repository, numThreads = numThreads)
+        val miner = ComplexityCodeChangesMiner(repository, numThreads = numThreads, neededBranch = branch)
         miner.run(dataProcessor)
 
         assertTrue(dataProcessor.periodsToStats.isNotEmpty())

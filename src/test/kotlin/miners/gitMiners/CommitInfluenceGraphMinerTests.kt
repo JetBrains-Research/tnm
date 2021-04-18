@@ -1,8 +1,8 @@
 package miners.gitMiners
 
-import GitMinerTest
-import GitMinerTest.Companion.repository
+import miners.gitMiners.GitMinerTest.Companion.repository
 import dataProcessor.CommitInfluenceGraphDataProcessor
+import miners.gitMiners.GitMinerTest.Companion.branches
 import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertTrue
@@ -17,7 +17,7 @@ class CommitInfluenceGraphMinerTests : GitMinerTest {
 
     private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Map<String, Set<String>> {
         val dataProcessor = CommitInfluenceGraphDataProcessor()
-        val miner = CommitInfluenceGraphMiner(repository, numThreads = numThreads)
+        val miner = CommitInfluenceGraphMiner(repository, numThreads = numThreads, neededBranches = branches)
         miner.run(dataProcessor)
 
         assertTrue(dataProcessor.adjacencyMap.isNotEmpty())

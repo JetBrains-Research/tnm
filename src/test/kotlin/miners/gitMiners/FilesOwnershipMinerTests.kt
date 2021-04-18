@@ -1,8 +1,8 @@
 package miners.gitMiners
 
-import GitMinerTest
-import GitMinerTest.Companion.repository
+import miners.gitMiners.GitMinerTest.Companion.repository
 import dataProcessor.FilesOwnershipDataProcessor
+import miners.gitMiners.GitMinerTest.Companion.branch
 import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertTrue
@@ -20,7 +20,7 @@ internal class FilesOwnershipMinerTests : GitMinerTest {
         numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
     ): Map<String, Map<String, Double>> {
         val dataProcessor = FilesOwnershipDataProcessor()
-        val miner = FilesOwnershipMiner(repository, numThreads = numThreads)
+        val miner = FilesOwnershipMiner(repository, numThreads = numThreads, neededBranch = branch)
         miner.run(dataProcessor)
 
         assertTrue(dataProcessor.developerKnowledge.isNotEmpty())

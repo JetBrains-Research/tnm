@@ -1,8 +1,8 @@
 package miners.gitMiners
 
-import GitMinerTest
-import GitMinerTest.Companion.repository
+import miners.gitMiners.GitMinerTest.Companion.repository
 import dataProcessor.FileDependencyMatrixDataProcessor
+import miners.gitMiners.GitMinerTest.Companion.branches
 import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertTrue
@@ -20,7 +20,7 @@ internal class FileDependencyMatrixMinerTests : GitMinerTest {
     private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Map<String, Map<String, Int>> {
         val dataProcessor = FileDependencyMatrixDataProcessor()
 
-        val miner = FileDependencyMatrixMiner(repository, numThreads = numThreads)
+        val miner = FileDependencyMatrixMiner(repository, numThreads = numThreads, neededBranches = branches)
         miner.run(dataProcessor)
 
         assertTrue(dataProcessor.fileDependencyMatrix.isNotEmpty())
