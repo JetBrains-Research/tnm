@@ -32,7 +32,6 @@ class MirrorCongruenceCalculation(
         for (i in 0 until numOfArtifacts) {
             for (j in 0 until numOfArtifacts) {
                 if (Gs.adjacencyMap[i]?.contains(j) == true) {
-                    // TODO: replace !!, ?:
                     for (userId1 in J.adjacencyMap[i]!!) {
                         for (userId2 in J.adjacencyMap[j]!!) {
                             if (userId1 != userId2) y++

@@ -2,8 +2,11 @@ package cli.gitMinersCLI
 
 import cli.InfoCLI
 import cli.gitMinersCLI.base.GitMinerMultithreadedMultipleBranchesCLI
-import gitMiners.WorkTimeMiner
+import dataProcessor.WorkTimeDataProcessor
+import miners.gitMiners.WorkTimeMiner
 import util.ProjectConfig
+import util.UtilFunctions
+import java.io.File
 
 class WorkTimeMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
     InfoCLI(
@@ -14,8 +17,14 @@ class WorkTimeMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
     )
 ) {
     override fun run() {
+        val dataProcessor = WorkTimeDataProcessor()
         val miner = WorkTimeMiner(repository, branches, numThreads = numThreads)
-        miner.run()
-        miner.saveToJson(resources)
+        miner.run(dataProcessor)
+
+        UtilFunctions.saveToJson(
+            File(resources, ProjectConfig.WORKTIME_DISTRIBUTION),
+            dataProcessor.workTimeDistribution
+        )
+        UtilFunctions.saveToJsonDataProcessorMaps(resources, dataProcessor)
     }
 }

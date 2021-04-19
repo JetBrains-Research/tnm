@@ -6,7 +6,7 @@ import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.multiple
 import com.github.ajalt.clikt.parameters.arguments.unique
 import com.github.ajalt.clikt.parameters.arguments.validate
-import gitMiners.UtilGitMiner
+import miners.gitMiners.UtilGitMiner
 import org.eclipse.jgit.api.Git
 
 abstract class GitMinerMultipleBranchesCLI(infoCLI: InfoCLI) :

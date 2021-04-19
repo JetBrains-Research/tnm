@@ -28,8 +28,6 @@ class CoordinationNeedsMatrixCalculation(resourceDirectory: File) : Calculation 
 
         val fileA = File(resourceDirectory, ProjectConfig.ASSIGNMENT_MATRIX)
         A = UtilFunctions.loadArray(fileA, numOfUsers, numOfFiles)
-//        BooleanIndexing.replaceWhere(A,0.0, Conditions.lessThan(thresholdForAssignmentMatrix))
-//        BooleanIndexing.replaceWhere(A,1.0, Conditions.greaterThanOrEqual(thresholdForAssignmentMatrix))
     }
 
     override fun run() {

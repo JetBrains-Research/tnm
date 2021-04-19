@@ -2,8 +2,11 @@ package cli.gitMinersCLI
 
 import cli.InfoCLI
 import cli.gitMinersCLI.base.GitMinerMultithreadedMultipleBranchesCLI
-import gitMiners.AssignmentMatrixMiner
+import dataProcessor.AssignmentMatrixDataProcessor
+import miners.gitMiners.AssignmentMatrixMiner
 import util.ProjectConfig
+import util.UtilFunctions
+import java.io.File
 
 class AssignmentMatrixMinerCLI :
     GitMinerMultithreadedMultipleBranchesCLI
@@ -16,8 +19,11 @@ class AssignmentMatrixMinerCLI :
     ) {
 
     override fun run() {
+        val dataProcessor = AssignmentMatrixDataProcessor()
         val miner = AssignmentMatrixMiner(repository, branches, numThreads = numThreads)
-        miner.run()
-        miner.saveToJson(resources)
+        miner.run(dataProcessor)
+
+        UtilFunctions.saveToJson(File(resources, ProjectConfig.ASSIGNMENT_MATRIX), dataProcessor.assignmentMatrix)
+        UtilFunctions.saveToJsonDataProcessorMaps(resources, dataProcessor)
     }
 }

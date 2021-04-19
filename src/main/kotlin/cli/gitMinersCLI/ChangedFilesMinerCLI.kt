@@ -2,8 +2,11 @@ package cli.gitMinersCLI
 
 import cli.InfoCLI
 import cli.gitMinersCLI.base.GitMinerMultithreadedMultipleBranchesCLI
-import gitMiners.ChangedFilesMiner
+import dataProcessor.ChangedFilesDataProcessor
+import miners.gitMiners.ChangedFilesMiner
 import util.ProjectConfig
+import util.UtilFunctions
+import java.io.File
 
 class ChangedFilesMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
     InfoCLI(
@@ -13,8 +16,11 @@ class ChangedFilesMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
     )
 ) {
     override fun run() {
+        val dataProcessor = ChangedFilesDataProcessor()
         val miner = ChangedFilesMiner(repository, branches, numThreads = numThreads)
-        miner.run()
-        miner.saveToJson(resources)
+        miner.run(dataProcessor)
+
+        UtilFunctions.saveToJson(File(resources, ProjectConfig.USER_FILES_IDS), dataProcessor.userFilesIds)
+        UtilFunctions.saveToJsonDataProcessorMaps(resources, dataProcessor)
     }
 }

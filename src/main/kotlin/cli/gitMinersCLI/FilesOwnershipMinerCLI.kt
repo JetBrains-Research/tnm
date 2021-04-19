@@ -2,10 +2,14 @@ package cli.gitMinersCLI
 
 import cli.InfoCLI
 import cli.gitMinersCLI.base.GitMinerMultithreadedOneBranchCLI
-import gitMiners.FilesOwnershipMiner
+import dataProcessor.FilesOwnershipDataProcessor
+import miners.gitMiners.FilesOwnershipMiner
 import util.ProjectConfig
+import util.UtilFunctions
+import java.io.File
 
 class FilesOwnershipMinerCLI : GitMinerMultithreadedOneBranchCLI(
+    // TODO: change help, add info about other maps
     InfoCLI(
         "FilesOwnershipMiner",
         "Miner yields JSON file ${ProjectConfig.DEVELOPER_KNOWLEDGE} with map of maps, where the outer " +
@@ -14,8 +18,14 @@ class FilesOwnershipMinerCLI : GitMinerMultithreadedOneBranchCLI(
 ) {
 
     override fun run() {
+        val dataProcessor = FilesOwnershipDataProcessor()
         val miner = FilesOwnershipMiner(repository, numThreads = numThreads)
-        miner.run()
-        miner.saveToJson(resources)
+        miner.run(dataProcessor)
+
+        UtilFunctions.saveToJson(File(resources, ProjectConfig.DEVELOPER_KNOWLEDGE), dataProcessor.developerKnowledge)
+        UtilFunctions.saveToJson(File(resources, ProjectConfig.FILES_OWNERSHIP), dataProcessor.filesOwnership)
+        UtilFunctions.saveToJson(File(resources, ProjectConfig.POTENTIAL_OWNERSHIP), dataProcessor.potentialAuthorship)
+
+        UtilFunctions.saveToJsonDataProcessorMaps(resources, dataProcessor)
     }
 }

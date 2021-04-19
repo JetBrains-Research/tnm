@@ -1,16 +1,26 @@
 package util
 
+import dataProcessor.DataProcessorMapped
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.eclipse.jgit.lib.RepositoryCache
+import org.eclipse.jgit.util.FS
 import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerMinMaxScaler
 import org.nd4j.linalg.factory.Nd4j
 import java.io.File
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Future
 import kotlin.math.log2
 
 object UtilFunctions {
+
+    fun isGitRepository(directory: File): Boolean {
+        return RepositoryCache.FileKey.isGitRepository(directory, FS.DETECTED)
+    }
+
     fun createParentFolder(file: File) {
         val folder = File(file.parent)
         folder.mkdirs()
@@ -27,6 +37,17 @@ object UtilFunctions {
         createParentFolder(file)
         val jsonString = Json.encodeToString(serializer, data)
         file.writeText(jsonString)
+    }
+
+    fun saveToJsonDataProcessorMaps(resources: File, dataProcessorMapped: DataProcessorMapped<*>) {
+        saveToJson(File(resources, ProjectConfig.ID_USER), dataProcessorMapped.idToUser)
+        saveToJson(File(resources, ProjectConfig.USER_ID), dataProcessorMapped.userToId)
+
+        saveToJson(File(resources, ProjectConfig.ID_FILE), dataProcessorMapped.idToFile)
+        saveToJson(File(resources, ProjectConfig.FILE_ID), dataProcessorMapped.fileToId)
+
+        saveToJson(File(resources, ProjectConfig.ID_COMMIT), dataProcessorMapped.idToCommit)
+        saveToJson(File(resources, ProjectConfig.COMMIT_ID), dataProcessorMapped.commitToId)
     }
 
     fun loadArray(file: File, rows: Int, columns: Int): INDArray {
@@ -86,4 +107,19 @@ object UtilFunctions {
         return Di[Di.size - 1]
     }
 
+    fun runInThreadPoolWithExceptionHandle(threadPool: ExecutorService, tasks: List<Runnable>) {
+        val futures = mutableListOf<Future<*>>()
+        for (task in tasks) {
+            futures.add(threadPool.submit(task))
+        }
+
+        for (future in futures) {
+            try {
+                future.get()
+            } catch (e: Exception) {
+                threadPool.shutdownNow()
+                throw e
+            }
+        }
+    }
 }

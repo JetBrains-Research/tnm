@@ -12,7 +12,6 @@ import visualisation.GraphHTML.NodeInfo
 import visualisation.WeightedEdgesGraphHTML
 import java.io.File
 import java.util.*
-import kotlin.collections.HashMap
 
 
 class WeightedEdgesGraphCLI : VisualizationCLI(
