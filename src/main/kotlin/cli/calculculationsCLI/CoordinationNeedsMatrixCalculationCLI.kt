@@ -24,8 +24,8 @@ class CoordinationNeedsMatrixCalculationCLI : CalculationCLI(
     }
 
     private val coordinationNeedsJsonFile by saveFileOption(
-        HELP_COORDINATION_NEEDS,
         LONGNAME_COORDINATION_NEEDS,
+        HELP_COORDINATION_NEEDS,
         File(resultDir, "CoordinationNeeds")
     )
 
@@ -39,13 +39,13 @@ class CoordinationNeedsMatrixCalculationCLI : CalculationCLI(
         val assignmentMatrixDataProcessor = AssignmentMatrixDataProcessor()
         val assignmentMatrixMiner = AssignmentMatrixMiner(repository, branches, numThreads = numOfThreads)
         assignmentMatrixMiner.run(assignmentMatrixDataProcessor)
-        val numOfUsers = assignmentMatrixDataProcessor.assignmentMatrix.size
+        val numOfUsers = assignmentMatrixDataProcessor.idToUser.size
 
         val fileDependencyDataProcessor = FileDependencyMatrixDataProcessor()
         val fileDependencyMiner = FileDependencyMatrixMiner(repository, branches, numThreads = numOfThreads)
         fileDependencyMiner.run(fileDependencyDataProcessor)
 
-        val numOfFiles = fileDependencyDataProcessor.fileDependencyMatrix.size
+        val numOfFiles = fileDependencyDataProcessor.idToFile.size
         val fileDependencyMatrix = UtilFunctions.convertMapToArray(
             UtilFunctions.changeKeysInMapOfMaps(
                 fileDependencyDataProcessor.fileDependencyMatrix,
@@ -71,7 +71,7 @@ class CoordinationNeedsMatrixCalculationCLI : CalculationCLI(
 
         UtilFunctions.saveToJson(
             coordinationNeedsJsonFile,
-            calculation.coordinationsNeeds
+            calculation.coordinationNeeds
         )
 
         UtilFunctions.saveToJson(

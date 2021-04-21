@@ -8,12 +8,12 @@ class CoordinationNeedsMatrixCalculation(
     private val fileDependencyMatrix: INDArray,
     private val assignmentMatrix: INDArray
 ) : Calculation {
-    var coordinationsNeeds: INDArray? = null
-        private set
+    private var _coordinationNeeds: INDArray? = null
+    val coordinationNeeds: Array<out FloatArray>
+            get() = _coordinationNeeds?.toFloatMatrix() ?: emptyArray()
 
     override fun run() {
-        coordinationsNeeds = assignmentMatrix.mmul(fileDependencyMatrix).mmul(assignmentMatrix.transpose())
-        coordinationsNeeds?.let { UtilFunctions.normalizeMax(it) }
+        _coordinationNeeds = assignmentMatrix.mmul(fileDependencyMatrix).mmul(assignmentMatrix.transpose())
+        _coordinationNeeds?.let { UtilFunctions.normalizeMax(it) }
     }
-
 }

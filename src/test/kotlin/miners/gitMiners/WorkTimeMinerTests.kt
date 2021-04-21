@@ -1,8 +1,8 @@
 package miners.gitMiners
 
-import miners.gitMiners.GitMinerTest.Companion.repository
+import TestConfig.branches
+import TestConfig.repository
 import dataProcessor.WorkTimeDataProcessor
-import miners.gitMiners.GitMinerTest.Companion.branches
 import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertEquals

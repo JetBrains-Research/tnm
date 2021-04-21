@@ -1,10 +1,10 @@
 package util
 
-import dataProcessor.DataProcessorMapped
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.lib.RepositoryCache
 import org.eclipse.jgit.util.FS
 import org.nd4j.linalg.api.ndarray.INDArray
@@ -39,6 +39,16 @@ object UtilFunctions {
         file.writeText(jsonString)
     }
 
+    fun deleteDir(directory: File) {
+        if (directory.exists() && directory.isDirectory) {
+            try {
+                FileUtils.deleteDirectory(directory)
+            } catch (e: Exception) {
+                println("Got error while cleaning directory $directory: $e")
+            }
+        }
+    }
+
 
     fun loadArray(file: File, rows: Int, columns: Int): INDArray {
         val result = Array(rows) { FloatArray(columns) }
@@ -69,14 +79,14 @@ object UtilFunctions {
                 val newKey2 = valueToNewKey2[keyToValue2[key2]!!]!!
 
                 result
-                    .computeIfAbsent(newKey1) {HashMap()} [newKey2] = value
+                    .computeIfAbsent(newKey1) { HashMap() }[newKey2] = value
             }
         }
 
         return result
     }
 
-    fun convertMapToArray(map:Map<Int, Map<Int, Int>>, rows: Int, columns: Int): INDArray {
+    fun convertMapToArray(map: Map<Int, Map<Int, Int>>, rows: Int, columns: Int): INDArray {
         val result = Array(rows) { FloatArray(columns) }
         for ((x, innerMap) in map) {
             for ((y, value) in innerMap) {

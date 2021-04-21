@@ -1,8 +1,8 @@
 package miners.gitMiners
 
-import miners.gitMiners.GitMinerTest.Companion.repository
+import TestConfig.branches
+import TestConfig.repository
 import dataProcessor.FileDependencyMatrixDataProcessor
-import miners.gitMiners.GitMinerTest.Companion.branches
 import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertTrue
