@@ -1,27 +1,58 @@
 package cli.gitMinersCLI
 
-import cli.InfoCLI
 import cli.gitMinersCLI.base.GitMinerMultithreadedOneBranchCLI
 import dataProcessor.CoEditNetworksDataProcessor
 import miners.gitMiners.CoEditNetworksMiner
-import util.ProjectConfig
+import org.eclipse.jgit.internal.storage.file.FileRepository
 import util.UtilFunctions
 import java.io.File
 
 class CoEditNetworksMinerCLI : GitMinerMultithreadedOneBranchCLI(
-    InfoCLI(
-        "CoEditNetworksMiner",
-        "Miner yields JSON file ${ProjectConfig.CO_EDIT} with dict of commits information and list of edits. " +
+    "CoEditNetworksMiner",
+    "Miner yields $HELP_CO_EDIT_NETWORKS"
+) {
+
+    companion object {
+        const val HELP_CO_EDIT_NETWORKS = "JSON file with dict of commits information and list of edits. " +
                 "Each edit includes pre/post file path, start line, length, number of chars, " +
                 "entropy of changed block of code, Levenshtein distance between previous and new block of code, type of edit."
+        const val LONGNAME_CO_EDIT_NETWORKS = "--co-edit-networks"
+    }
+
+    private val coEditNetworksJsonFile by saveFileOption(
+        LONGNAME_CO_EDIT_NETWORKS,
+        HELP_CO_EDIT_NETWORKS,
+        File(resultDir, "CoEdits")
     )
-) {
+
+    private val idToUserJsonFile by idToUserOption()
+    private val idToFileJsonFile by idToFileOption()
+    private val idToCommitJsonFile by idToCommitOption()
+
     override fun run() {
+        val repository = FileRepository(repositoryDirectory)
         val dataProcessor = CoEditNetworksDataProcessor()
         val miner = CoEditNetworksMiner(repository, branch, numThreads = numThreads)
         miner.run(dataProcessor)
 
-        UtilFunctions.saveToJson(File(resources, ProjectConfig.CO_EDIT), dataProcessor.coEdits)
-        UtilFunctions.saveToJsonDataProcessorMaps(resources, dataProcessor)
+        UtilFunctions.saveToJson(
+            coEditNetworksJsonFile,
+            dataProcessor.coEdits
+        )
+
+        UtilFunctions.saveToJson(
+            idToUserJsonFile,
+            dataProcessor.idToUser
+        )
+
+        UtilFunctions.saveToJson(
+            idToFileJsonFile,
+            dataProcessor.idToFile
+        )
+
+        UtilFunctions.saveToJson(
+            idToCommitJsonFile,
+            dataProcessor.idToCommit
+        )
     }
 }

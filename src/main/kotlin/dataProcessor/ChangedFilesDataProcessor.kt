@@ -8,7 +8,7 @@ class ChangedFilesDataProcessor : DataProcessorMapped<UserChangedFiles>() {
 
     private val _userFilesIds = ConcurrentHashMap<Int, ConcurrentSkipListSet<Int>>()
 
-    val userFilesIds: Map<Int, Set<Int>>
+    val changedFilesByUsers: Map<Int, Set<Int>>
         get() = _userFilesIds
 
     // TODO: Same class in FileDependencyMatrix

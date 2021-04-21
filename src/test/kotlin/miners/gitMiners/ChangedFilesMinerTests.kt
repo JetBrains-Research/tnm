@@ -21,10 +21,10 @@ internal class ChangedFilesMinerTests : GitMinerTest {
         val miner = ChangedFilesMiner(repository, numThreads = numThreads, neededBranches = branches)
         miner.run(dataProcessor)
 
-        assertTrue(dataProcessor.userFilesIds.isNotEmpty())
+        assertTrue(dataProcessor.changedFilesByUsers.isNotEmpty())
 
         return changeIdsToValuesInMapOfSets(
-            dataProcessor.userFilesIds,
+            dataProcessor.changedFilesByUsers,
             dataProcessor.idToUser,
             dataProcessor.idToFile
         )
