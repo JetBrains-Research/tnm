@@ -7,10 +7,14 @@ import util.UtilFunctions
 class PageRankCalculation(
     private val commitsGraph: Map<Int, Set<Int>>,
     private val numOfCommits: Int,
-    private val alpha: Float = 0.85f
+    private val alpha: Float = DEFAULT_ALPHA
 ) : Calculation {
-    var pageRank: INDArray? = null
-        private set
+    companion object {
+        const val DEFAULT_ALPHA = 0.85f
+    }
+    private var _pageRank: INDArray? = null
+    val pageRank: Array<out FloatArray>
+        get() = _pageRank?.toFloatMatrix() ?: emptyArray()
 
     override fun run() {
         val H = UtilFunctions.loadGraph(commitsGraph, numOfCommits)
@@ -31,7 +35,7 @@ class PageRankCalculation(
             throw Exception("PageRankCalculation according to algorithm of Suzuki et al. is not supported for this repository.")
         }
 
-        pageRank = I
+        _pageRank = I
     }
 
     private fun loadMatrixA(adjacencyMap: Map<Int, Set<Int>>, size: Int): INDArray {
@@ -39,7 +43,7 @@ class PageRankCalculation(
         val result = Nd4j.create(Array(size) { FloatArray(size) { coefficient } })
         for (entry in adjacencyMap) {
             val nodeFrom = entry.key
-            if (entry.value.size != 0) {
+            if (entry.value.isNotEmpty()) {
                 result.getColumn(nodeFrom.toLong()).addi(-coefficient)
             }
         }

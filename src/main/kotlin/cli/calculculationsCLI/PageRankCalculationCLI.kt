@@ -1,6 +1,7 @@
 package cli.calculculationsCLI
 
 import calculations.PageRankCalculation
+import calculations.PageRankCalculation.Companion.DEFAULT_ALPHA
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.float
@@ -19,7 +20,7 @@ class PageRankCalculationCLI : CalculationCLI(
     companion object {
         const val SHORTNAME_ALPHA = "-a"
         const val LONGNAME_ALPHA = "--alpha"
-        const val DEFAULT_ALPHA = 0.85f
+
         const val HELP_ALPHA = "Scalar parameter in [0, 1]. By default $DEFAULT_ALPHA"
 
         const val LONGNAME_PAGE_RANK = "--page-rank"
@@ -31,8 +32,8 @@ class PageRankCalculationCLI : CalculationCLI(
         .default(DEFAULT_ALPHA)
 
     private val pageRankJsonFile by saveFileOption(
-        HELP_PAGE_RANK,
         LONGNAME_PAGE_RANK,
+        HELP_PAGE_RANK,
         File(resultDir, "PageRank")
     )
 
