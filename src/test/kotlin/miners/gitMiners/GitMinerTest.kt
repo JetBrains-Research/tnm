@@ -1,15 +1,7 @@
 package miners.gitMiners
 
 import GitTest
-import TestConfig.gitDir
-import TestConfig.repositoryDir
-import org.apache.commons.io.FileUtils
-import org.eclipse.jgit.api.Git
 import org.junit.Assert
-import org.junit.Before
-import util.UtilFunctions
-import util.UtilFunctions.deleteDir
-import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue

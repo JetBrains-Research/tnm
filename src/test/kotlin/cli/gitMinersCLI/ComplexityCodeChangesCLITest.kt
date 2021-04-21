@@ -16,27 +16,30 @@ import dataProcessor.ComplexityCodeChangesDataProcessor.Companion.DEFAULT_NUM_CO
 import dataProcessor.ComplexityCodeChangesDataProcessor.Companion.DEFAULT_NUM_MONTH
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.junit.Assert.*
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import util.ProjectConfig
 import java.io.File
 
-class ComplexityCodeChangesCLITest: AbstractCLITest(testFolder) {
+class ComplexityCodeChangesCLITest : AbstractCLITest(testFolder) {
     companion object {
         private val testFolder = File(tmpCLITestFolder, "ComplexityCodeChangesCLITest/")
     }
 
     private val complexityCodeChangesJsonFile = File(testFolder, "CCC")
 
-    private fun runTest(requiredOptions: List<Pair<String, String>>,
-                        nonRequiredOptions: List<Pair<String, String>>,
-                        arguments: List<String>) {
+    private fun runTest(
+        requiredOptions: List<Pair<String, String>>,
+        nonRequiredOptions: List<Pair<String, String>>,
+        arguments: List<String>
+    ) {
         val input = createInput(requiredOptions, nonRequiredOptions, arguments)
         ComplexityCodeChangesCLI().parse(input)
 
         checkIdToEntity(idToFileJsonFile)
 
-        val complexityCodeChanges = Json.decodeFromString<Map<Int, PeriodStats>>(complexityCodeChangesJsonFile.readText())
+        val complexityCodeChanges =
+            Json.decodeFromString<Map<Int, PeriodStats>>(complexityCodeChangesJsonFile.readText())
         assertTrue(complexityCodeChanges.isNotEmpty())
     }
 

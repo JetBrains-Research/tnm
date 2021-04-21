@@ -9,7 +9,7 @@ import cli.AbstractCLITest
 import cli.gitMinersCLI.CommitInfluenceGraphMinerCLI.Companion.LONGNAME_COMMITS_GRAPH
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.junit.Assert.*
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import util.ProjectConfig
 import java.io.File

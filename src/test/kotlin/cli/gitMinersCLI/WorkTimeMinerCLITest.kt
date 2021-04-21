@@ -9,12 +9,12 @@ import cli.AbstractCLITest
 import cli.gitMinersCLI.WorkTimeMinerCLI.Companion.LONGNAME_WORK_TIME
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.junit.Assert.*
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import util.ProjectConfig
 import java.io.File
 
-class WorkTimeMinerCLITest: AbstractCLITest(testFolder) {
+class WorkTimeMinerCLITest : AbstractCLITest(testFolder) {
     companion object {
         private val testFolder = File(tmpCLITestFolder, "WorkTimeMinerCLITest/")
     }

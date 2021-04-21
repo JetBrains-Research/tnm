@@ -11,12 +11,12 @@ import cli.calculculationsCLI.PageRankCalculationCLI.Companion.LONGNAME_ALPHA
 import cli.calculculationsCLI.PageRankCalculationCLI.Companion.LONGNAME_PAGE_RANK
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.junit.Assert.*
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import util.ProjectConfig
 import java.io.File
 
-class PageRankCalculationTest: AbstractCLITest(testFolder) {
+class PageRankCalculationTest : AbstractCLITest(testFolder) {
     companion object {
         private val testFolder = File(tmpCLITestFolder, "PageRankCalculationTest/")
     }

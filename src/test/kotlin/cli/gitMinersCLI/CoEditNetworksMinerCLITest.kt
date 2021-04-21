@@ -12,12 +12,12 @@ import cli.gitMinersCLI.CoEditNetworksMinerCLI.Companion.LONGNAME_CO_EDIT_NETWOR
 import dataProcessor.CoEditNetworksDataProcessor
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.junit.Assert.*
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import util.ProjectConfig
 import java.io.File
 
-class CoEditNetworksMinerCLITest: AbstractCLITest(testFolder) {
+class CoEditNetworksMinerCLITest : AbstractCLITest(testFolder) {
     companion object {
         private val testFolder = File(tmpCLITestFolder, "CoEditNetworksMinerCLITest/")
     }
@@ -48,7 +48,8 @@ class CoEditNetworksMinerCLITest: AbstractCLITest(testFolder) {
         checkIdToEntity(idToUserJsonFile)
         checkIdToEntity(idToCommitJsonFile)
 
-        val coEdit = Json.decodeFromString<Set<CoEditNetworksDataProcessor.CommitResult>>(coEditNetworksJsonFile.readText())
+        val coEdit =
+            Json.decodeFromString<Set<CoEditNetworksDataProcessor.CommitResult>>(coEditNetworksJsonFile.readText())
         assertTrue(coEdit.isNotEmpty())
     }
 }

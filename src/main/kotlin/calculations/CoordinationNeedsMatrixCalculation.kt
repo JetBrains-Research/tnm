@@ -10,7 +10,7 @@ class CoordinationNeedsMatrixCalculation(
 ) : Calculation {
     private var _coordinationNeeds: INDArray? = null
     val coordinationNeeds: Array<out FloatArray>
-            get() = _coordinationNeeds?.toFloatMatrix() ?: emptyArray()
+        get() = _coordinationNeeds?.toFloatMatrix() ?: emptyArray()
 
     override fun run() {
         _coordinationNeeds = assignmentMatrix.mmul(fileDependencyMatrix).mmul(assignmentMatrix.transpose())

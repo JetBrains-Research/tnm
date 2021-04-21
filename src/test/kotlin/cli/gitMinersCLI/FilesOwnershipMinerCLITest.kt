@@ -13,12 +13,12 @@ import cli.gitMinersCLI.FilesOwnershipMinerCLI.Companion.LONGNAME_POTENTIAL_OWNE
 import dataProcessor.FilesOwnershipDataProcessor.UserData
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.junit.Assert.*
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import util.ProjectConfig
 import java.io.File
 
-class FilesOwnershipMinerCLITest: AbstractCLITest(testFolder) {
+class FilesOwnershipMinerCLITest : AbstractCLITest(testFolder) {
     companion object {
         private val testFolder = File(tmpCLITestFolder, "FilesOwnershipMinerCLITest/")
     }
@@ -55,7 +55,8 @@ class FilesOwnershipMinerCLITest: AbstractCLITest(testFolder) {
         val filesOwnership = Json.decodeFromString<Map<Int, Map<Int, UserData>>>(filesOwnershipJsonFile.readText())
         assertTrue(filesOwnership.isNotEmpty())
 
-        val developerKnowledge = Json.decodeFromString<Map<Int, Map<Int, Double>>>(developerKnowledgeJsonFile.readText())
+        val developerKnowledge =
+            Json.decodeFromString<Map<Int, Map<Int, Double>>>(developerKnowledgeJsonFile.readText())
         assertTrue(developerKnowledge.isNotEmpty())
 
         val potentialOwnership = Json.decodeFromString<Map<Int, Int>>(potentialOwnershipJsonFile.readText())

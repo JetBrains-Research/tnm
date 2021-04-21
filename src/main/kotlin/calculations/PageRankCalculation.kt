@@ -12,6 +12,7 @@ class PageRankCalculation(
     companion object {
         const val DEFAULT_ALPHA = 0.85f
     }
+
     private var _pageRank: INDArray? = null
     val pageRank: Array<out FloatArray>
         get() = _pageRank?.toFloatMatrix() ?: emptyArray()

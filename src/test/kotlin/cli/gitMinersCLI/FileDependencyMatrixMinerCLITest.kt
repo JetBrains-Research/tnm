@@ -9,12 +9,12 @@ import cli.AbstractCLITest
 import cli.gitMinersCLI.FileDependencyMatrixMinerCLI.Companion.LONGNAME_FILE_DEPENDENCY_MATRIX
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.junit.Assert.*
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import util.ProjectConfig
 import java.io.File
 
-class FileDependencyMatrixMinerCLITest: AbstractCLITest(testFolder) {
+class FileDependencyMatrixMinerCLITest : AbstractCLITest(testFolder) {
     companion object {
         private val testFolder = File(tmpCLITestFolder, "FileDependencyMatrixMinerCLITest/")
     }
@@ -42,7 +42,8 @@ class FileDependencyMatrixMinerCLITest: AbstractCLITest(testFolder) {
 
         checkIdToEntity(idToFileJsonFile)
 
-        val fileDependencyMatrix = Json.decodeFromString<Map<Int, Map<Int, Int>>>(fileDependencyMatrixJsonFile.readText())
+        val fileDependencyMatrix =
+            Json.decodeFromString<Map<Int, Map<Int, Int>>>(fileDependencyMatrixJsonFile.readText())
         assertTrue(fileDependencyMatrix.isNotEmpty())
     }
 

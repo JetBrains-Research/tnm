@@ -10,12 +10,12 @@ import cli.AbstractCLITest
 import cli.calculculationsCLI.CoordinationNeedsMatrixCalculationCLI.Companion.LONGNAME_COORDINATION_NEEDS
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.junit.Assert.*
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import util.ProjectConfig
 import java.io.File
 
-class CoordinationNeedsMatrixCalculationCLITest: AbstractCLITest(testFolder) {
+class CoordinationNeedsMatrixCalculationCLITest : AbstractCLITest(testFolder) {
     companion object {
         private val testFolder = File(tmpCLITestFolder, "CoordinationNeedsMatrixCalculationCLI/")
     }
