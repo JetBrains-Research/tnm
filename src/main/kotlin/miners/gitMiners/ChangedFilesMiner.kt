@@ -8,7 +8,7 @@ import util.ProjectConfig
 
 class ChangedFilesMiner(
     repository: FileRepository,
-    neededBranches: Set<String> = ProjectConfig.DEFAULT_NEEDED_BRANCHES,
+    neededBranches: Set<String>,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner<ChangedFilesDataProcessor>(repository, neededBranches, numThreads = numThreads) {
 

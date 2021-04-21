@@ -14,7 +14,7 @@ import java.util.concurrent.*
 
 class FilesOwnershipMiner(
     repository: FileRepository,
-    private val neededBranch: String = ProjectConfig.DEFAULT_BRANCH,
+    private val neededBranch: String,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner<FilesOwnershipDataProcessor>(repository, setOf(neededBranch), numThreads = numThreads) {
 

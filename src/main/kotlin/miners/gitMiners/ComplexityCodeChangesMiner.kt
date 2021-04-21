@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 class ComplexityCodeChangesMiner(
     repository: FileRepository,
-    private val neededBranch: String = ProjectConfig.DEFAULT_BRANCH,
+    private val neededBranch: String,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS,
 ) : GitMiner<ComplexityCodeChangesDataProcessor>(repository, setOf(neededBranch), numThreads = numThreads) {
     // Mark each commit for period
