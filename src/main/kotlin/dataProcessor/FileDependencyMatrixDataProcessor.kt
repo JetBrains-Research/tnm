@@ -13,8 +13,8 @@ class FileDependencyMatrixDataProcessor : DataProcessorMapped<List<String>>() {
     override fun processData(data: List<String>) {
 
         for ((index, currFile) in data.withIndex()) {
+            val currFileId = fileMapper.add(currFile)
             for (otherFile in data.subList(index, data.lastIndex)) {
-                val currFileId = fileMapper.add(currFile)
                 val otherFileId = fileMapper.add(otherFile)
 
                 if (currFileId == otherFileId)
