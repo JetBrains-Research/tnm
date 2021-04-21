@@ -25,9 +25,9 @@ class FileDependencyMatrixMiner(
         val git = threadLocalGit.get()
         val reader = repository.newObjectReader()
 
-        val listOfChangedFiles =
-            UtilGitMiner.getChangedFiles(currCommit, prevCommit, reader, git).toList()
-
-        dataProcessor.processData(listOfChangedFiles)
+        val changedFiles = reader.use {
+            UtilGitMiner.getChangedFiles(currCommit, prevCommit, it, git).toList()
+        }
+        dataProcessor.processData(changedFiles)
     }
 }
