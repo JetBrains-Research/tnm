@@ -1,22 +1,18 @@
-package calculations
+package cli.calculculationsCLI
 
 import TestConfig.branch
 import TestConfig.gitDir
-import cli.AbstractCLI.Companion.LONGNAME_ID_TO_COMMIT
-import cli.AbstractCLI.Companion.LONGNAME_NUM_THREADS
-import cli.AbstractCLI.Companion.LONGNAME_REPOSITORY
+import calculations.PageRankCalculation
+import cli.AbstractCLI
 import cli.AbstractCLITest
-import cli.calculculationsCLI.PageRankCalculationCLI
-import cli.calculculationsCLI.PageRankCalculationCLI.Companion.LONGNAME_ALPHA
-import cli.calculculationsCLI.PageRankCalculationCLI.Companion.LONGNAME_PAGE_RANK
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
 import util.ProjectConfig
 import java.io.File
 
-class PageRankCalculationTest : AbstractCLITest(testFolder) {
+class PageRankCalculationCLITest : AbstractCLITest(testFolder) {
     companion object {
         private val testFolder = File(tmpCLITestFolder, "PageRankCalculationTest/")
     }
@@ -24,14 +20,14 @@ class PageRankCalculationTest : AbstractCLITest(testFolder) {
     private val pageRankJsonFile = File(testFolder, "PR")
 
     private val requiredOptions = listOf(
-        LONGNAME_REPOSITORY to gitDir.absolutePath
+        AbstractCLI.LONGNAME_REPOSITORY to gitDir.absolutePath
     )
 
     private val nonRequiredOptions = listOf(
-        LONGNAME_ALPHA to PageRankCalculation.DEFAULT_ALPHA.toString(),
-        LONGNAME_PAGE_RANK to pageRankJsonFile.absolutePath,
-        LONGNAME_NUM_THREADS to ProjectConfig.DEFAULT_NUM_THREADS.toString(),
-        LONGNAME_ID_TO_COMMIT to idToCommitJsonFile.absolutePath,
+        PageRankCalculationCLI.LONGNAME_ALPHA to PageRankCalculation.DEFAULT_ALPHA.toString(),
+        PageRankCalculationCLI.LONGNAME_PAGE_RANK to pageRankJsonFile.absolutePath,
+        AbstractCLI.LONGNAME_NUM_THREADS to ProjectConfig.DEFAULT_NUM_THREADS.toString(),
+        AbstractCLI.LONGNAME_ID_TO_COMMIT to idToCommitJsonFile.absolutePath,
     )
 
     private val arguments = listOf(
