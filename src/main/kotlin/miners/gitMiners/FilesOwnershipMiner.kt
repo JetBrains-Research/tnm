@@ -101,7 +101,7 @@ class FilesOwnershipMiner(
             }
 
             if (num % logFrequency == 0 || num == futures.size) {
-                println("Processed $num commits of ${futures.size}")
+                println("Processed $num pairs of commits out of ${futures.size}")
             }
             num++
 
