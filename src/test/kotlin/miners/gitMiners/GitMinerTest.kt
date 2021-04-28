@@ -1,61 +1,13 @@
 package miners.gitMiners
 
-import org.apache.commons.io.FileUtils
-import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.api.LsRemoteCommand
-import org.eclipse.jgit.internal.storage.file.FileRepository
-import org.eclipse.jgit.lib.RepositoryCache
-import org.eclipse.jgit.util.FS
-import org.junit.After
+import GitTest
 import org.junit.Assert
-import org.junit.Before
-import util.UtilFunctions
-import java.io.File
-import java.util.*
-import kotlin.collections.HashMap
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 
-internal interface GitMinerTest {
-    companion object {
-        val repositoryDir = File("src/test/tmp/repository")
-        val gitDir = File(repositoryDir, ".git")
-        val repository = FileRepository(gitDir)
-        const val branch = "origin/trunk"
-        val branches = setOf(branch)
-    }
-
-    @Before
-    fun `load repository`() {
-
-        if (UtilFunctions.isGitRepository(gitDir)) return
-
-        val repoURI = "https://github.com/cli/cli.git"
-        println("Loading repository for tests $repoURI")
-        deleteDir(repositoryDir)
-        repositoryDir.mkdirs()
-
-        Git.cloneRepository()
-            .setURI(repoURI)
-            .setDirectory(repositoryDir)
-            .setNoCheckout(true)
-            .call().use { result ->
-                println("Finish loading repo $repoURI")
-                println("Repository inside: " + result.repository.directory)
-            }
-    }
-
-    fun deleteDir(directory: File) {
-        if (directory.exists() && directory.isDirectory) {
-            try {
-                FileUtils.deleteDirectory(directory)
-            } catch (e: Exception) {
-                println("Got error while cleaning directory $directory: $e")
-            }
-        }
-    }
+internal interface GitMinerTest : GitTest {
 
     fun <T> changeIdsToValuesInMapOfMaps(
         map: Map<Int, Map<Int, T>>,

@@ -14,7 +14,7 @@ import java.util.concurrent.*
 
 class FilesOwnershipMiner(
     repository: FileRepository,
-    private val neededBranch: String = ProjectConfig.DEFAULT_BRANCH,
+    private val neededBranch: String,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner<FilesOwnershipDataProcessor>(repository, setOf(neededBranch), numThreads = numThreads) {
 
@@ -101,7 +101,7 @@ class FilesOwnershipMiner(
             }
 
             if (num % logFrequency == 0 || num == futures.size) {
-                println("Processed $num commits of ${futures.size}")
+                println("Processed $num pairs of commits out of ${futures.size}")
             }
             num++
 

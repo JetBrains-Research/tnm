@@ -1,8 +1,8 @@
 package miners.gitMiners
 
-import miners.gitMiners.GitMinerTest.Companion.repository
+import TestConfig.branches
+import TestConfig.repository
 import dataProcessor.ChangedFilesDataProcessor
-import miners.gitMiners.GitMinerTest.Companion.branches
 import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertTrue
@@ -21,10 +21,10 @@ internal class ChangedFilesMinerTests : GitMinerTest {
         val miner = ChangedFilesMiner(repository, numThreads = numThreads, neededBranches = branches)
         miner.run(dataProcessor)
 
-        assertTrue(dataProcessor.userFilesIds.isNotEmpty())
+        assertTrue(dataProcessor.changedFilesByUsers.isNotEmpty())
 
         return changeIdsToValuesInMapOfSets(
-            dataProcessor.userFilesIds,
+            dataProcessor.changedFilesByUsers,
             dataProcessor.idToUser,
             dataProcessor.idToFile
         )

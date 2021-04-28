@@ -31,12 +31,11 @@ class ComplexityCodeChangesDataProcessor(
     )
 
     @Serializable
-    data class PeriodStats(val periodEntropy: Double, val filesStats: HashMap<Int, FileStats>)
+    data class PeriodStats(val periodEntropy: Double, val filesStats: Map<Int, FileStats>)
 
     // Counter of changed files of period
     // [period][fileId] = num of changes
     private val periodToFileChanges = ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>>()
-
     private val _periodsToStats = HashMap<Int, PeriodStats>()
 
     val periodsToStats: Map<Int, PeriodStats>

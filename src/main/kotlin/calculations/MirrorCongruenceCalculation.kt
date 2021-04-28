@@ -1,9 +1,6 @@
 package calculations
 
 import util.Graph
-import util.ProjectConfig
-import util.UtilFunctions
-import java.io.File
 
 /**
  * Calc mirror congruence
@@ -42,10 +39,6 @@ class MirrorCongruenceCalculation(
             }
         }
         congruence = k.toFloat() / y.toFloat()
-    }
-
-    override fun saveToJson(resourceDirectory: File) {
-        congruence?.let { UtilFunctions.saveToJson(File(resourceDirectory, ProjectConfig.MIRROR_CONGRUENCE), it) }
     }
 
     private fun createGraph(adjacencyMatrix: Array<Array<Int>>): Graph<Int> {

@@ -15,7 +15,7 @@ import util.ProjectConfig
  */
 class AssignmentMatrixMiner(
     repository: FileRepository,
-    neededBranches: Set<String> = ProjectConfig.DEFAULT_NEEDED_BRANCHES,
+    neededBranches: Set<String>,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner<AssignmentMatrixDataProcessor>(repository, neededBranches, numThreads = numThreads) {
 

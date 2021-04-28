@@ -14,7 +14,7 @@ import util.ProjectConfig
  */
 class FileDependencyMatrixMiner(
     repository: FileRepository,
-    neededBranches: Set<String> = ProjectConfig.DEFAULT_NEEDED_BRANCHES,
+    neededBranches: Set<String>,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner<FileDependencyMatrixDataProcessor>(repository, neededBranches, numThreads = numThreads) {
     override fun process(
@@ -25,9 +25,9 @@ class FileDependencyMatrixMiner(
         val git = threadLocalGit.get()
         val reader = repository.newObjectReader()
 
-        val listOfChangedFiles =
-            UtilGitMiner.getChangedFiles(currCommit, prevCommit, reader, git).toList()
-
-        dataProcessor.processData(listOfChangedFiles)
+        val changedFiles = reader.use {
+            UtilGitMiner.getChangedFiles(currCommit, prevCommit, it, git).toList()
+        }
+        dataProcessor.processData(changedFiles)
     }
 }

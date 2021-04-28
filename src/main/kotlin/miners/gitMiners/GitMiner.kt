@@ -95,7 +95,7 @@ abstract class GitMiner<T>(
                     } finally {
                         val num = proceedCommits.incrementAndGet()
                         if (num % logFrequency == 0 || num == commitsPairsCount) {
-                            println("Processed $num commits of $commitsPairsCount")
+                            println("Processed $num pairs of commits out of $commitsPairsCount")
                         }
 
                     }

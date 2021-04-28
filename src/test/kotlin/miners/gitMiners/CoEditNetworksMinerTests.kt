@@ -1,10 +1,10 @@
 package miners.gitMiners
 
-import miners.gitMiners.GitMinerTest.Companion.repository
+import TestConfig.branch
+import TestConfig.repository
 import dataProcessor.CoEditNetworksDataProcessor
 import dataProcessor.CoEditNetworksDataProcessor.ChangeType
 import dataProcessor.CoEditNetworksDataProcessor.CommitInfoEncoded
-import miners.gitMiners.GitMinerTest.Companion.branch
 import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertTrue

@@ -1,10 +1,10 @@
 package util
 
-import dataProcessor.DataProcessorMapped
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.lib.RepositoryCache
 import org.eclipse.jgit.util.FS
 import org.nd4j.linalg.api.ndarray.INDArray
@@ -39,16 +39,16 @@ object UtilFunctions {
         file.writeText(jsonString)
     }
 
-    fun saveToJsonDataProcessorMaps(resources: File, dataProcessorMapped: DataProcessorMapped<*>) {
-        saveToJson(File(resources, ProjectConfig.ID_USER), dataProcessorMapped.idToUser)
-        saveToJson(File(resources, ProjectConfig.USER_ID), dataProcessorMapped.userToId)
-
-        saveToJson(File(resources, ProjectConfig.ID_FILE), dataProcessorMapped.idToFile)
-        saveToJson(File(resources, ProjectConfig.FILE_ID), dataProcessorMapped.fileToId)
-
-        saveToJson(File(resources, ProjectConfig.ID_COMMIT), dataProcessorMapped.idToCommit)
-        saveToJson(File(resources, ProjectConfig.COMMIT_ID), dataProcessorMapped.commitToId)
+    fun deleteDir(directory: File) {
+        if (directory.exists() && directory.isDirectory) {
+            try {
+                FileUtils.deleteDirectory(directory)
+            } catch (e: Exception) {
+                println("Got error while cleaning directory $directory: $e")
+            }
+        }
     }
+
 
     fun loadArray(file: File, rows: Int, columns: Int): INDArray {
         val result = Array(rows) { FloatArray(columns) }
@@ -61,9 +61,43 @@ object UtilFunctions {
         return Nd4j.create(result)
     }
 
-    fun loadGraph(file: File, size: Int): INDArray {
+    fun <T> changeKeysInMapOfMaps(
+        map: Map<Int, Map<Int, T>>,
+        keyToValue1: Map<Int, String>, valueToNewKey1: Map<String, Int>,
+        keyToValue2: Map<Int, String>, valueToNewKey2: Map<String, Int>,
+    ): Map<Int, Map<Int, T>> {
+
+        val result = HashMap<Int, HashMap<Int, T>>()
+
+        for (entry1 in map) {
+            val key1 = entry1.key
+            val newKey1 = valueToNewKey1[keyToValue1[key1]!!]!!
+            for (entry2 in entry1.value) {
+                val key2 = entry2.key
+                val value = entry2.value
+
+                val newKey2 = valueToNewKey2[keyToValue2[key2]!!]!!
+
+                result
+                    .computeIfAbsent(newKey1) { HashMap() }[newKey2] = value
+            }
+        }
+
+        return result
+    }
+
+    fun convertMapToArray(map: Map<Int, Map<Int, Int>>, rows: Int, columns: Int): INDArray {
+        val result = Array(rows) { FloatArray(columns) }
+        for ((x, innerMap) in map) {
+            for ((y, value) in innerMap) {
+                result[x][y] = value.toFloat()
+            }
+        }
+        return Nd4j.create(result)
+    }
+
+    fun loadGraph(adjacencyMap: Map<Int, Set<Int>>, size: Int): INDArray {
         val result = Array(size) { FloatArray(size) }
-        val adjacencyMap = Json.decodeFromString<HashMap<Int, HashSet<Int>>>(file.readText())
         for (entry in adjacencyMap) {
             val nodeFrom = entry.key
             for (nodeTo in entry.value) {
