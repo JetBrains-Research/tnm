@@ -10,7 +10,7 @@ The main idea behind the structure of the tool is that every class implement one
 interface or abstract class for each task type, which make it easily extendable.
 
 Currently, tool got 4 types of classes:
-* Mapper - singleton classes for mapping specified entity for the unique id.
+* Mapper - classes for mapping specified entity for the unique id.
 * GitMiner - classes for mining data for one task.
 * Calculation - classes for calculating complex dependencies in data.
   Use data from GitMiners.

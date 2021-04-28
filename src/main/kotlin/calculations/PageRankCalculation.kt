@@ -1,33 +1,29 @@
 package calculations
 
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.factory.Nd4j
-import util.ProjectConfig
 import util.UtilFunctions
-import java.io.File
 
-class PageRankCalculation(resourceDirectory: File, private val alpha: Float = 0.85f) : Calculation {
-    var result: INDArray? = null
-        private set
-
-    private val size: Int
-    private val commitsGraphFile = File(resourceDirectory, ProjectConfig.COMMITS_GRAPH)
-
-    init {
-        val jsonCommitsMapper = File(resourceDirectory, ProjectConfig.COMMIT_ID).readText()
-        val commitsMap = Json.decodeFromString<HashMap<String, Int>>(jsonCommitsMapper)
-        size = commitsMap.size
+class PageRankCalculation(
+    private val commitsGraph: Map<Int, Set<Int>>,
+    private val numOfCommits: Int,
+    private val alpha: Float = DEFAULT_ALPHA
+) : Calculation {
+    companion object {
+        const val DEFAULT_ALPHA = 0.85f
     }
 
-    override fun run() {
-        val H = UtilFunctions.loadGraph(commitsGraphFile, size)
-        val A = loadMatrixA(commitsGraphFile, size)
-        val ones = Nd4j.ones(size, size)
-        val G = H.muli(alpha).addi(A.muli(alpha)).addi(ones.muli((1 - alpha) / size))
+    private var _pageRank: INDArray? = null
+    val pageRank: Array<out FloatArray>
+        get() = _pageRank?.toFloatMatrix() ?: emptyArray()
 
-        var I = Nd4j.zeros(size, 1)
+    override fun run() {
+        val H = UtilFunctions.loadGraph(commitsGraph, numOfCommits)
+        val A = loadMatrixA(commitsGraph, numOfCommits)
+        val ones = Nd4j.ones(numOfCommits, numOfCommits)
+        val G = H.muli(alpha).addi(A.muli(alpha)).addi(ones.muli((1 - alpha) / numOfCommits))
+
+        var I = Nd4j.zeros(numOfCommits, 1)
         I.put(0, 0, 1F)
 
         // must be between 50-100 iterations
@@ -40,25 +36,15 @@ class PageRankCalculation(resourceDirectory: File, private val alpha: Float = 0.
             throw Exception("PageRankCalculation according to algorithm of Suzuki et al. is not supported for this repository.")
         }
 
-        result = I
+        _pageRank = I
     }
 
-    override fun saveToJson(resourceDirectory: File) {
-        result?.let {
-            UtilFunctions.saveToJson(
-                File(resourceDirectory, ProjectConfig.PAGERANK_MATRIX),
-                it.toFloatMatrix()
-            )
-        }
-    }
-
-    private fun loadMatrixA(file: File, size: Int): INDArray {
+    private fun loadMatrixA(adjacencyMap: Map<Int, Set<Int>>, size: Int): INDArray {
         val coefficient = 1F / size
         val result = Nd4j.create(Array(size) { FloatArray(size) { coefficient } })
-        val map = Json.decodeFromString<HashMap<Int, HashSet<Int>>>(file.readText())
-        for (entry in map) {
+        for (entry in adjacencyMap) {
             val nodeFrom = entry.key
-            if (entry.value.size != 0) {
+            if (entry.value.isNotEmpty()) {
                 result.getColumn(nodeFrom.toLong()).addi(-coefficient)
             }
         }

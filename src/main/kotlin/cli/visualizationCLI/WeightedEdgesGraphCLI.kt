@@ -1,6 +1,5 @@
 package cli.visualizationCLI
 
-import cli.InfoCLI
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -12,14 +11,11 @@ import visualisation.GraphHTML.NodeInfo
 import visualisation.WeightedEdgesGraphHTML
 import java.io.File
 import java.util.*
-import kotlin.collections.HashMap
 
 
 class WeightedEdgesGraphCLI : VisualizationCLI(
-    InfoCLI(
-        "WeightedEdgesGraph",
-        "Create graph with weighted edges in html format"
-    )
+    "WeightedEdgesGraph",
+    "Create graph with weighted edges in html format"
 ) {
     private val reverse by option("-r", "--reverse", help = "Store edges from min to max.")
         .flag(default = false)

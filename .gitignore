@@ -4,5 +4,4 @@ local_repository
 build
 resources
 _resources
-test
-!test/kotlin
+/src/test/tmp/
