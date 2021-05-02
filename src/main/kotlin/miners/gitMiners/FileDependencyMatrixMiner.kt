@@ -1,6 +1,7 @@
 package miners.gitMiners
 
 import dataProcessor.FileDependencyMatrixDataProcessor
+import dataProcessor.inputData.FilesChangeset
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig
@@ -26,8 +27,8 @@ class FileDependencyMatrixMiner(
         val reader = repository.newObjectReader()
 
         val changedFiles = reader.use {
-            UtilGitMiner.getChangedFiles(currCommit, prevCommit, it, git).toList()
+            UtilGitMiner.getChangedFiles(currCommit, prevCommit, it, git)
         }
-        dataProcessor.processData(changedFiles)
+        dataProcessor.processData(FilesChangeset(changedFiles))
     }
 }

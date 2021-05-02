@@ -1,9 +1,9 @@
 package dataProcessor
 
-import dataProcessor.CommitInfluenceGraphDataProcessor.AddData
+import dataProcessor.inputData.CommitInfluenceInfo
 import util.Graph
 
-class CommitInfluenceGraphDataProcessor : DataProcessorMapped<AddData>() {
+class CommitInfluenceGraphDataProcessor : DataProcessorMapped<CommitInfluenceInfo>() {
     // H is the transition probability matrix whose (i, j)
     // element signifies the probability of transition from the i-th page to the j-th page
     // pages - commits
@@ -12,9 +12,8 @@ class CommitInfluenceGraphDataProcessor : DataProcessorMapped<AddData>() {
     val adjacencyMap: Map<Int, Set<Int>>
         get() = commitsGraph.adjacencyMap
 
-    data class AddData(val bugFixCommit: String, val prevCommit: String, val adjCommits: Set<String>)
 
-    override fun processData(data: AddData) {
+    override fun processData(data: CommitInfluenceInfo) {
         val bugFixCommitId = commitMapper.add(data.bugFixCommit)
         val prevCommitId = commitMapper.add(data.prevCommit)
 

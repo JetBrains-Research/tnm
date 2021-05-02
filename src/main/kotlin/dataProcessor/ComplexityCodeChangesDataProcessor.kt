@@ -1,6 +1,6 @@
 package dataProcessor
 
-import dataProcessor.ComplexityCodeChangesDataProcessor.FileModification
+import dataProcessor.inputData.FileModification
 import kotlinx.serialization.Serializable
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.log2
@@ -40,8 +40,6 @@ class ComplexityCodeChangesDataProcessor(
 
     val periodsToStats: Map<Int, PeriodStats>
         get() = _periodsToStats
-
-    data class FileModification(val periodId: Int, val filePath: String, val modifications: Int)
 
     override fun processData(data: FileModification) {
         val fileId = fileMapper.add(data.filePath)

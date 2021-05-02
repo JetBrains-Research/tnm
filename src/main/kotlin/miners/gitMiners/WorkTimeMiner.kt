@@ -1,7 +1,7 @@
 package miners.gitMiners
 
 import dataProcessor.WorkTimeDataProcessor
-import dataProcessor.WorkTimeDataProcessor.UserCommitDate
+import dataProcessor.inputData.UserCommitDate
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig

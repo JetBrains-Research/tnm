@@ -1,6 +1,6 @@
 package dataProcessor
 
-import dataProcessor.ChangedFilesDataProcessor.UserChangedFiles
+import dataProcessor.inputData.UserChangedFiles
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListSet
 
@@ -10,9 +10,6 @@ class ChangedFilesDataProcessor : DataProcessorMapped<UserChangedFiles>() {
 
     val changedFilesByUsers: Map<Int, Set<Int>>
         get() = _userFilesIds
-
-    // TODO: Same class in FileDependencyMatrix
-    data class UserChangedFiles(val user: String, val files: Set<String>)
 
     override fun processData(data: UserChangedFiles) {
         val userId = userMapper.add(data.user)

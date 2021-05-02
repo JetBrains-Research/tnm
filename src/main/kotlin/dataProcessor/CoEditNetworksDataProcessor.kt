@@ -1,14 +1,15 @@
 package dataProcessor
 
-import dataProcessor.CoEditNetworksDataProcessor.AddEntity
+import dataProcessor.inputData.CoEditInfo
+import dataProcessor.inputData.entity.CommitInfo
+import dataProcessor.inputData.entity.FileEdit
 import kotlinx.serialization.Serializable
-import org.eclipse.jgit.revwalk.RevCommit
 import util.UtilFunctions
 import util.mappers.CommitMapper
 import util.mappers.UserMapper
 import java.util.concurrent.ConcurrentSkipListSet
 
-class CoEditNetworksDataProcessor : DataProcessorMapped<AddEntity>() {
+class CoEditNetworksDataProcessor : DataProcessorMapped<CoEditInfo>() {
     private val _coEdits = ConcurrentSkipListSet<CommitResult>()
 
     val coEdits: Set<CommitResult>
@@ -59,38 +60,7 @@ class CoEditNetworksDataProcessor : DataProcessorMapped<AddEntity>() {
         ADD, DELETE, REPLACE, EMPTY
     }
 
-    data class Edit(
-        val addBlock: List<String>,
-        val deleteBlock: List<String>,
-        val preStartLineNum: Int,
-        val postStartLineNum: Int,
-        val oldPath: String,
-        val newPath: String
-    )
-
-    data class CommitInfo(
-        val hash: String,
-        val author: String,
-        val date: Long
-    ) {
-        constructor(commit: RevCommit)
-                : this(
-            commit.name,
-            commit.authorIdent.emailAddress,
-            commit.commitTime * 1000L
-        )
-
-        constructor() : this("", "", 0)
-    }
-
-    data class AddEntity(
-        val prevCommitInfo: CommitInfo,
-        val commitInfo: CommitInfo,
-        val nextCommitInfo: CommitInfo,
-        val edits: List<Edit>
-    )
-
-    override fun processData(data: AddEntity) {
+    override fun processData(data: CoEditInfo) {
         val editsData = mutableListOf<EditData>()
 
         for (edit in data.edits) {
@@ -111,7 +81,7 @@ class CoEditNetworksDataProcessor : DataProcessorMapped<AddEntity>() {
     override fun calculate() {}
 
     private fun generateEditData(
-        edit: Edit
+        edit: FileEdit
     ): EditData? {
         val (addBlock, deleteBlock, preStartLineNum, postStartLineNum, oldPath, newPath) = edit
 

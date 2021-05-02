@@ -1,7 +1,7 @@
 package miners.gitMiners
 
 import dataProcessor.CommitInfluenceGraphDataProcessor
-import dataProcessor.CommitInfluenceGraphDataProcessor.AddData
+import dataProcessor.inputData.CommitInfluenceInfo
 import miners.gitMiners.UtilGitMiner.isBugFixCommit
 import org.eclipse.jgit.api.BlameCommand
 import org.eclipse.jgit.diff.DiffEntry
@@ -40,7 +40,7 @@ class CommitInfluenceGraphMiner(
                 reader.use { UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, it, git) }
 
             val adjCommits = getCommitsAdj(diffs, prevCommit)
-            val data = AddData(currCommit.name, prevCommit.name, adjCommits)
+            val data = CommitInfluenceInfo(currCommit.name, prevCommit.name, adjCommits)
             dataProcessor.processData(data)
         }
     }

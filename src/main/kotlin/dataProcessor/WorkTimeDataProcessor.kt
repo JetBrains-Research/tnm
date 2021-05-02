@@ -1,6 +1,6 @@
 package dataProcessor
 
-import dataProcessor.WorkTimeDataProcessor.UserCommitDate
+import dataProcessor.inputData.UserCommitDate
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
@@ -11,8 +11,6 @@ class WorkTimeDataProcessor : DataProcessorMapped<UserCommitDate>() {
 
     val workTimeDistribution: Map<Int, Map<Int, Int>>
         get() = _workTimeDistribution
-
-    data class UserCommitDate(val user: String, val date: Date)
 
     override fun processData(data: UserCommitDate) {
         val calendar: Calendar = GregorianCalendar.getInstance()

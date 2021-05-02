@@ -1,7 +1,7 @@
 package miners.gitMiners
 
 import dataProcessor.AssignmentMatrixDataProcessor
-import dataProcessor.AssignmentMatrixDataProcessor.UserChangedFiles
+import dataProcessor.inputData.UserChangedFiles
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig

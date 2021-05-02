@@ -1,7 +1,9 @@
 package miners.gitMiners
 
 import dataProcessor.FilesOwnershipDataProcessor
-import dataProcessor.FilesOwnershipDataProcessor.*
+import dataProcessor.initData.LatestCommitOwnedLines
+import dataProcessor.initData.entity.FileLineOwnedByUser
+import dataProcessor.inputData.FileLinesAddedByUser
 import miners.gitMiners.exceptions.ProcessInThreadPoolException
 import org.eclipse.jgit.diff.EditList
 import org.eclipse.jgit.diff.RawTextComparator
@@ -84,7 +86,7 @@ class FilesOwnershipMiner(
 
         val threadPool = Executors.newFixedThreadPool(numThreads)
         val initEntityList = processLatestCommit(latestCommit, threadPool)
-        val initData = InitData(latestCommitDate, initEntityList)
+        val initData = LatestCommitOwnedLines(latestCommitDate, initEntityList)
         dataProcessor.init(initData)
 
         val futures = getListOfFutures(commitsInBranch, threadPool)

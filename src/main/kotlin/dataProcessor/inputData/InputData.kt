@@ -1,0 +1,3 @@
+package dataProcessor.inputData
+
+interface InputData

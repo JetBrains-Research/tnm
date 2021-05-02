@@ -1,7 +1,9 @@
 package miners.gitMiners
 
 import dataProcessor.CoEditNetworksDataProcessor
-import dataProcessor.CoEditNetworksDataProcessor.*
+import dataProcessor.inputData.CoEditInfo
+import dataProcessor.inputData.entity.CommitInfo
+import dataProcessor.inputData.entity.FileEdit
 import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
@@ -54,7 +56,7 @@ class CoEditNetworksMiner(
             UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, it, git)
         }
 
-        val edits = mutableListOf<Edit>()
+        val edits = mutableListOf<FileEdit>()
 
         val out = threadLocalByteArrayOutputStream.get()
         val diffFormatter = threadLocalDiffFormatterWithBuffer.get()
@@ -95,7 +97,7 @@ class CoEditNetworksMiner(
                     }
                     DIFF_MARK -> {
                         if (addBlock.isNotEmpty() || deleteBlock.isNotEmpty()) {
-                            val data = Edit(
+                            val data = FileEdit(
                                 addBlock.toList(), deleteBlock.toList(), preStartLineNum,
                                 postStartLineNum, oldPath, newPath
                             )
@@ -113,7 +115,7 @@ class CoEditNetworksMiner(
 
             }
 
-            val data = Edit(
+            val data = FileEdit(
                 addBlock, deleteBlock, preStartLineNum,
                 postStartLineNum, oldPath, newPath
             )
@@ -127,7 +129,7 @@ class CoEditNetworksMiner(
         val (prevCommitInfo, nextCommitInfo) = prevAndNextCommit.computeIfAbsent(hashCurr) { CommitInfo() to CommitInfo() }
         val commitInfo = CommitInfo(currCommit)
 
-        val data = AddEntity(prevCommitInfo, commitInfo, nextCommitInfo, edits)
+        val data = CoEditInfo(prevCommitInfo, commitInfo, nextCommitInfo, edits)
 
         dataProcessor.processData(data)
     }

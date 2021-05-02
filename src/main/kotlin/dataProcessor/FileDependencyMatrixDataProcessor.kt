@@ -1,8 +1,9 @@
 package dataProcessor
 
+import dataProcessor.inputData.FilesChangeset
 import java.util.concurrent.ConcurrentHashMap
 
-class FileDependencyMatrixDataProcessor : DataProcessorMapped<List<String>>() {
+class FileDependencyMatrixDataProcessor : DataProcessorMapped<FilesChangeset>() {
 
     private val _fileDependencyMatrix: ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>> =
         ConcurrentHashMap()
@@ -10,11 +11,12 @@ class FileDependencyMatrixDataProcessor : DataProcessorMapped<List<String>>() {
     val fileDependencyMatrix: Map<Int, Map<Int, Int>>
         get() = _fileDependencyMatrix
 
-    override fun processData(data: List<String>) {
+    override fun processData(data: FilesChangeset) {
+        val dataList = data.changeset.toList()
 
-        for ((index, currFile) in data.withIndex()) {
+        for ((index, currFile) in dataList.withIndex()) {
             val currFileId = fileMapper.add(currFile)
-            for (otherFile in data.subList(index, data.lastIndex)) {
+            for (otherFile in dataList.subList(index, dataList.lastIndex)) {
                 val otherFileId = fileMapper.add(otherFile)
 
                 if (currFileId == otherFileId)

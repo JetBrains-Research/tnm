@@ -1,7 +1,7 @@
 package dataProcessor
 
-import dataProcessor.FilesOwnershipDataProcessor.FileLinesAddedByUser
-import dataProcessor.FilesOwnershipDataProcessor.InitData
+import dataProcessor.initData.LatestCommitOwnedLines
+import dataProcessor.inputData.FileLinesAddedByUser
 import kotlinx.serialization.Serializable
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -10,7 +10,8 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.pow
 
 class FilesOwnershipDataProcessor(private val decayFactor: Double = DEFAULT_DECAY_FACTOR) :
-    DataProcessorMappedWithInit<InitData, FileLinesAddedByUser>() {
+    DataProcessorMappedWithInit<LatestCommitOwnedLines, FileLinesAddedByUser>() {
+
     companion object {
         const val DEFAULT_DECAY_FACTOR = 0.01
     }
@@ -54,10 +55,7 @@ class FilesOwnershipDataProcessor(private val decayFactor: Double = DEFAULT_DECA
 
     }
 
-    data class FileLineOwnedByUser(val lineNumber: Int, val filePath: String, val user: String)
-    data class InitData(val latestCommitDate: Date, val linesOwnedByUser: List<FileLineOwnedByUser>)
-
-    override fun init(initData: InitData) {
+    override fun init(initData: LatestCommitOwnedLines) {
         latestCommitDate = initData.latestCommitDate
 
         for (entity in initData.linesOwnedByUser) {
@@ -68,8 +66,6 @@ class FilesOwnershipDataProcessor(private val decayFactor: Double = DEFAULT_DECA
             addAuthorsForLines(entity.lineNumber..entity.lineNumber, fileId, userId)
         }
     }
-
-    data class FileLinesAddedByUser(val addedLines: IntRange, val filePath: String, val user: String, val date: Date)
 
     override fun processData(data: FileLinesAddedByUser) {
         val diffDays: Int = TimeUnit.DAYS.convert(

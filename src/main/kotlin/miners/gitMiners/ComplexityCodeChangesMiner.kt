@@ -1,7 +1,9 @@
 package miners.gitMiners
 
 import dataProcessor.ComplexityCodeChangesDataProcessor
-import dataProcessor.ComplexityCodeChangesDataProcessor.*
+import dataProcessor.ComplexityCodeChangesDataProcessor.ChangeType
+import dataProcessor.ComplexityCodeChangesDataProcessor.PeriodType
+import dataProcessor.inputData.FileModification
 import miners.gitMiners.UtilGitMiner.isBugFixCommit
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator

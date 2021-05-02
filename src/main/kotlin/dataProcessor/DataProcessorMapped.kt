@@ -1,10 +1,11 @@
 package dataProcessor
 
+import dataProcessor.inputData.InputData
 import util.mappers.CommitMapper
 import util.mappers.FileMapper
 import util.mappers.UserMapper
 
-abstract class DataProcessorMapped<T> : DataProcessor<T> {
+abstract class DataProcessorMapped<D> : DataProcessor<D> where D : InputData {
 
     protected val fileMapper = FileMapper()
     val idToFile

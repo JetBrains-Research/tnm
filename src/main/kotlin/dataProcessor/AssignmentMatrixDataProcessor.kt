@@ -1,6 +1,6 @@
 package dataProcessor
 
-import dataProcessor.AssignmentMatrixDataProcessor.UserChangedFiles
+import dataProcessor.inputData.UserChangedFiles
 import java.util.concurrent.ConcurrentHashMap
 
 class AssignmentMatrixDataProcessor : DataProcessorMapped<UserChangedFiles>() {
@@ -9,8 +9,6 @@ class AssignmentMatrixDataProcessor : DataProcessorMapped<UserChangedFiles>() {
 
     val assignmentMatrix: Map<Int, Map<Int, Int>>
         get() = _assignmentMatrix
-
-    data class UserChangedFiles(val user: String, val files: Set<String>)
 
     override fun processData(data: UserChangedFiles) {
         val userId = userMapper.add(data.user)
