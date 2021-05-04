@@ -7,7 +7,7 @@ import cli.AbstractCLI
 import cli.AbstractCLITest
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.junit.Assert.*
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import util.ProjectConfig
 import java.io.File

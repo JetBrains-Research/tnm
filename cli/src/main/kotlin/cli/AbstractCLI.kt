@@ -84,47 +84,65 @@ abstract class AbstractCLI(name: String, help: String) :
     }
 
     protected fun idToFileOption() =
-        saveFileOption(LONGNAME_ID_TO_FILE, mapperHelp("id", "file"), File(resultDir, "idToFile"))
+        saveFileOption(
+            cli.AbstractCLI.Companion.LONGNAME_ID_TO_FILE,
+            cli.AbstractCLI.Companion.mapperHelp("id", "file"), File(resultDir, "idToFile")
+        )
 
     protected fun fileToIdOption() =
-        saveFileOption(LONGNAME_FILE_TO_ID, mapperHelp("file", "id"), File(resultDir, "fileToId"))
+        saveFileOption(
+            cli.AbstractCLI.Companion.LONGNAME_FILE_TO_ID,
+            cli.AbstractCLI.Companion.mapperHelp("file", "id"), File(resultDir, "fileToId")
+        )
 
     protected fun idToUserOption() =
-        saveFileOption(LONGNAME_ID_TO_USER, mapperHelp("id", "user"), File(resultDir, "idToUser"))
+        saveFileOption(
+            cli.AbstractCLI.Companion.LONGNAME_ID_TO_USER,
+            cli.AbstractCLI.Companion.mapperHelp("id", "user"), File(resultDir, "idToUser")
+        )
 
     protected fun userToIdOption() =
-        saveFileOption(LONGNAME_USER_TO_ID, mapperHelp("user", "id"), File(resultDir, "userToId"))
+        saveFileOption(
+            cli.AbstractCLI.Companion.LONGNAME_USER_TO_ID,
+            cli.AbstractCLI.Companion.mapperHelp("user", "id"), File(resultDir, "userToId")
+        )
 
     protected fun idToCommitOption() =
-        saveFileOption(LONGNAME_ID_TO_COMMIT, mapperHelp("id", "commit"), File(resultDir, "idToCommit"))
+        saveFileOption(
+            cli.AbstractCLI.Companion.LONGNAME_ID_TO_COMMIT,
+            cli.AbstractCLI.Companion.mapperHelp("id", "commit"), File(resultDir, "idToCommit")
+        )
 
     protected fun commitToIdOption() =
-        saveFileOption(LONGNAME_COMMIT_TO_ID, mapperHelp("commit", "id"), File(resultDir, "commitToId"))
+        saveFileOption(
+            cli.AbstractCLI.Companion.LONGNAME_COMMIT_TO_ID,
+            cli.AbstractCLI.Companion.mapperHelp("commit", "id"), File(resultDir, "commitToId")
+        )
 
-    protected fun branchesOption() = argument(help = HELP_MULTIPLE_BRANCHES)
+    protected fun branchesOption() = argument(help = cli.AbstractCLI.Companion.HELP_MULTIPLE_BRANCHES)
         .multiple()
         .unique()
         .validate {
             require((it - UtilGitMiner.getBranchesShortNames(Git(FileRepository(repositoryDirectory)))).isEmpty()) {
-                checkBranchesArgsMsg(
+                cli.AbstractCLI.Companion.checkBranchesArgsMsg(
                     FileRepository(repositoryDirectory)
                 )
             }
         }
 
-    protected fun oneBranchOption() = argument(help = HELP_ONE_BRANCH)
+    protected fun oneBranchOption() = argument(help = cli.AbstractCLI.Companion.HELP_ONE_BRANCH)
         .validate {
             require(it in UtilGitMiner.getBranchesShortNames(Git(FileRepository(repositoryDirectory)))) {
-                checkBranchesArgsMsg(
+                cli.AbstractCLI.Companion.checkBranchesArgsMsg(
                     FileRepository(repositoryDirectory)
                 )
             }
         }
 
     protected fun numOfThreadsOption() = option(
-        SHORTNAME_NUM_THREADS,
-        LONGNAME_NUM_THREADS,
-        help = HELP_NUM_THREADS
+        cli.AbstractCLI.Companion.SHORTNAME_NUM_THREADS,
+        cli.AbstractCLI.Companion.LONGNAME_NUM_THREADS,
+        help = cli.AbstractCLI.Companion.HELP_NUM_THREADS
     )
         .int()
         .default(ProjectConfig.DEFAULT_NUM_THREADS)

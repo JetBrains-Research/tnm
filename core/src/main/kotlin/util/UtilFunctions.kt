@@ -49,7 +49,6 @@ object UtilFunctions {
         }
     }
 
-
     fun loadArray(file: File, rows: Int, columns: Int): INDArray {
         val result = Array(rows) { FloatArray(columns) }
         val adjacencyMap = Json.decodeFromString<HashMap<Int, HashMap<Int, Int>>>(file.readText())
