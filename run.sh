@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
- java -jar build/libs/shadow-*.jar "$@"
+ java -jar ./cli/build/libs/shadow-*.jar "$@"

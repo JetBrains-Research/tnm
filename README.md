@@ -89,8 +89,8 @@ TNM includes basic browser-based visualization class `WeightedEdgesGraphHTML` fo
 ## Usage
 
 ### CLI
-1. Run `./gradlew shadowJar`
-2. Now you can use shell script to use cli `./run.sh` 
+1. Run `./gradlew :cli:shadowJar`
+2. Now you can use shell script to use cli `./run.sh`
 
 Script should be executed as:    
 ```shell script
@@ -103,7 +103,7 @@ to get information about needed `options` and `arguments`.
 
 Example of script usage: 
 ```shell script
-./run.sh AssignmentMatrixMiner --repository ./local_repository/.git --resources ./resources main
+./run.sh AssignmentMatrixMiner --repository ./local_repository/.git main
 ```
 
 
