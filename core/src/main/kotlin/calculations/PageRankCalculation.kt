@@ -2,7 +2,7 @@ package calculations
 
 import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.factory.Nd4j
-import util.UtilFunctions
+import util.HelpFunctionsUtil
 
 class PageRankCalculation(
     private val commitsGraph: Map<Int, Set<Int>>,
@@ -18,7 +18,7 @@ class PageRankCalculation(
         get() = _pageRank?.toFloatMatrix() ?: emptyArray()
 
     override fun run() {
-        val H = UtilFunctions.loadGraph(commitsGraph, numOfCommits)
+        val H = HelpFunctionsUtil.loadGraph(commitsGraph, numOfCommits)
         val A = loadMatrixA(commitsGraph, numOfCommits)
         val ones = Nd4j.ones(numOfCommits, numOfCommits)
         val G = H.muli(alpha).addi(A.muli(alpha)).addi(ones.muli((1 - alpha) / numOfCommits))

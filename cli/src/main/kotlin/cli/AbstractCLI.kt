@@ -11,8 +11,8 @@ import com.github.ajalt.clikt.parameters.types.int
 import miners.gitMiners.UtilGitMiner
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
+import util.HelpFunctionsUtil
 import util.ProjectConfig
-import util.UtilFunctions
 import java.io.File
 
 abstract class AbstractCLI(name: String, help: String) :
@@ -61,7 +61,7 @@ abstract class AbstractCLI(name: String, help: String) :
     protected val repositoryDirectory by option(LONGNAME_REPOSITORY, help = HELP_REPOSITORY)
         .file(mustExist = true, canBeDir = true, canBeFile = false)
         .required()
-        .check(ERR_NOT_GIT_REPO) { UtilFunctions.isGitRepository(it) }
+        .check(ERR_NOT_GIT_REPO) { HelpFunctionsUtil.isGitRepository(it) }
 
     protected fun saveFileOption(
         longname: String,
@@ -85,64 +85,64 @@ abstract class AbstractCLI(name: String, help: String) :
 
     protected fun idToFileOption() =
         saveFileOption(
-            cli.AbstractCLI.Companion.LONGNAME_ID_TO_FILE,
-            cli.AbstractCLI.Companion.mapperHelp("id", "file"), File(resultDir, "idToFile")
+            LONGNAME_ID_TO_FILE,
+            mapperHelp("id", "file"), File(resultDir, "idToFile")
         )
 
     protected fun fileToIdOption() =
         saveFileOption(
-            cli.AbstractCLI.Companion.LONGNAME_FILE_TO_ID,
-            cli.AbstractCLI.Companion.mapperHelp("file", "id"), File(resultDir, "fileToId")
+            LONGNAME_FILE_TO_ID,
+            mapperHelp("file", "id"), File(resultDir, "fileToId")
         )
 
     protected fun idToUserOption() =
         saveFileOption(
-            cli.AbstractCLI.Companion.LONGNAME_ID_TO_USER,
-            cli.AbstractCLI.Companion.mapperHelp("id", "user"), File(resultDir, "idToUser")
+            LONGNAME_ID_TO_USER,
+            mapperHelp("id", "user"), File(resultDir, "idToUser")
         )
 
     protected fun userToIdOption() =
         saveFileOption(
-            cli.AbstractCLI.Companion.LONGNAME_USER_TO_ID,
-            cli.AbstractCLI.Companion.mapperHelp("user", "id"), File(resultDir, "userToId")
+            LONGNAME_USER_TO_ID,
+            mapperHelp("user", "id"), File(resultDir, "userToId")
         )
 
     protected fun idToCommitOption() =
         saveFileOption(
-            cli.AbstractCLI.Companion.LONGNAME_ID_TO_COMMIT,
-            cli.AbstractCLI.Companion.mapperHelp("id", "commit"), File(resultDir, "idToCommit")
+            LONGNAME_ID_TO_COMMIT,
+            mapperHelp("id", "commit"), File(resultDir, "idToCommit")
         )
 
     protected fun commitToIdOption() =
         saveFileOption(
-            cli.AbstractCLI.Companion.LONGNAME_COMMIT_TO_ID,
-            cli.AbstractCLI.Companion.mapperHelp("commit", "id"), File(resultDir, "commitToId")
+            LONGNAME_COMMIT_TO_ID,
+            mapperHelp("commit", "id"), File(resultDir, "commitToId")
         )
 
-    protected fun branchesOption() = argument(help = cli.AbstractCLI.Companion.HELP_MULTIPLE_BRANCHES)
+    protected fun branchesOption() = argument(help = HELP_MULTIPLE_BRANCHES)
         .multiple()
         .unique()
         .validate {
             require((it - UtilGitMiner.getBranchesShortNames(Git(FileRepository(repositoryDirectory)))).isEmpty()) {
-                cli.AbstractCLI.Companion.checkBranchesArgsMsg(
+                checkBranchesArgsMsg(
                     FileRepository(repositoryDirectory)
                 )
             }
         }
 
-    protected fun oneBranchOption() = argument(help = cli.AbstractCLI.Companion.HELP_ONE_BRANCH)
+    protected fun oneBranchOption() = argument(help = HELP_ONE_BRANCH)
         .validate {
             require(it in UtilGitMiner.getBranchesShortNames(Git(FileRepository(repositoryDirectory)))) {
-                cli.AbstractCLI.Companion.checkBranchesArgsMsg(
+                checkBranchesArgsMsg(
                     FileRepository(repositoryDirectory)
                 )
             }
         }
 
     protected fun numOfThreadsOption() = option(
-        cli.AbstractCLI.Companion.SHORTNAME_NUM_THREADS,
-        cli.AbstractCLI.Companion.LONGNAME_NUM_THREADS,
-        help = cli.AbstractCLI.Companion.HELP_NUM_THREADS
+        SHORTNAME_NUM_THREADS,
+        LONGNAME_NUM_THREADS,
+        help = HELP_NUM_THREADS
     )
         .int()
         .default(ProjectConfig.DEFAULT_NUM_THREADS)

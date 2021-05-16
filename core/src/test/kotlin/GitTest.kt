@@ -2,18 +2,18 @@ import TestConfig.gitDir
 import TestConfig.repositoryDir
 import org.eclipse.jgit.api.Git
 import org.junit.Before
-import util.UtilFunctions
+import util.HelpFunctionsUtil
 
 interface GitTest {
 
     @Before
     fun `load repository`() {
 
-        if (UtilFunctions.isGitRepository(gitDir)) return
+        if (HelpFunctionsUtil.isGitRepository(gitDir)) return
 
         val repoURI = "https://github.com/cli/cli.git"
         println("Loading repository for tests $repoURI")
-        UtilFunctions.deleteDir(repositoryDir)
+        HelpFunctionsUtil.deleteDir(repositoryDir)
         repositoryDir.mkdirs()
 
         Git.cloneRepository()

@@ -1,7 +1,7 @@
 package calculations
 
 import org.nd4j.linalg.api.ndarray.INDArray
-import util.UtilFunctions
+import util.HelpFunctionsUtil
 
 
 class CoordinationNeedsMatrixCalculation(
@@ -14,6 +14,6 @@ class CoordinationNeedsMatrixCalculation(
 
     override fun run() {
         _coordinationNeeds = assignmentMatrix.mmul(fileDependencyMatrix).mmul(assignmentMatrix.transpose())
-        _coordinationNeeds?.let { UtilFunctions.normalizeMax(it) }
+        _coordinationNeeds?.let { HelpFunctionsUtil.normalizeMax(it) }
     }
 }

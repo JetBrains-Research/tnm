@@ -6,7 +6,7 @@ import dataProcessor.FileDependencyMatrixDataProcessor
 import miners.gitMiners.AssignmentMatrixMiner
 import miners.gitMiners.FileDependencyMatrixMiner
 import org.eclipse.jgit.internal.storage.file.FileRepository
-import util.UtilFunctions
+import util.HelpFunctionsUtil
 import java.io.File
 
 class CoordinationNeedsMatrixCalculationCLI : CalculationCLI(
@@ -46,8 +46,8 @@ class CoordinationNeedsMatrixCalculationCLI : CalculationCLI(
         fileDependencyMiner.run(fileDependencyDataProcessor)
 
         val numOfFiles = fileDependencyDataProcessor.idToFile.size
-        val fileDependencyMatrix = UtilFunctions.convertMapToArray(
-            UtilFunctions.changeKeysInMapOfMaps(
+        val fileDependencyMatrix = HelpFunctionsUtil.convertMapToArray(
+            HelpFunctionsUtil.changeKeysInMapOfMaps(
                 fileDependencyDataProcessor.fileDependencyMatrix,
                 fileDependencyDataProcessor.idToFile, assignmentMatrixDataProcessor.fileToId,
                 fileDependencyDataProcessor.idToFile, assignmentMatrixDataProcessor.fileToId
@@ -57,7 +57,7 @@ class CoordinationNeedsMatrixCalculationCLI : CalculationCLI(
             numOfFiles
         )
 
-        val assignmentMatrix = UtilFunctions.convertMapToArray(
+        val assignmentMatrix = HelpFunctionsUtil.convertMapToArray(
             assignmentMatrixDataProcessor.assignmentMatrix,
             numOfUsers,
             numOfFiles
@@ -69,17 +69,17 @@ class CoordinationNeedsMatrixCalculationCLI : CalculationCLI(
         )
         calculation.run()
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             coordinationNeedsJsonFile,
             calculation.coordinationNeeds
         )
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             idToUserJsonFile,
             assignmentMatrixDataProcessor.idToUser
         )
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             idToFileJsonFile,
             assignmentMatrixDataProcessor.idToFile
         )

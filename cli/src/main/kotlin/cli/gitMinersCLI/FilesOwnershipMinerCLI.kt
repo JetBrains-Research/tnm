@@ -4,7 +4,7 @@ import cli.gitMinersCLI.base.GitMinerMultithreadedOneBranchCLI
 import dataProcessor.FilesOwnershipDataProcessor
 import miners.gitMiners.FilesOwnershipMiner
 import org.eclipse.jgit.internal.storage.file.FileRepository
-import util.UtilFunctions
+import util.HelpFunctionsUtil
 import java.io.File
 
 class FilesOwnershipMinerCLI : GitMinerMultithreadedOneBranchCLI(
@@ -53,25 +53,25 @@ class FilesOwnershipMinerCLI : GitMinerMultithreadedOneBranchCLI(
         val miner = FilesOwnershipMiner(repository, branch, numThreads = numThreads)
         miner.run(dataProcessor)
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             developerKnowledgeJsonFile,
             dataProcessor.developerKnowledge
         )
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             filesOwnershipJsonFile,
             dataProcessor.filesOwnership
         )
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             potentialOwnershipJsonFile,
             dataProcessor.potentialAuthorship
         )
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             idToUserJsonFile,
             dataProcessor.idToUser
         )
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             idToFileJsonFile,
             dataProcessor.idToFile
         )

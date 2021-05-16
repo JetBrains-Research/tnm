@@ -14,7 +14,7 @@ import dataProcessor.ComplexityCodeChangesDataProcessor.Companion.DEFAULT_PERIOD
 import dataProcessor.ComplexityCodeChangesDataProcessor.PeriodType
 import miners.gitMiners.ComplexityCodeChangesMiner
 import org.eclipse.jgit.internal.storage.file.FileRepository
-import util.UtilFunctions
+import util.HelpFunctionsUtil
 import java.io.File
 
 class ComplexityCodeChangesCLI : GitMinerMultithreadedOneBranchCLI(
@@ -112,12 +112,12 @@ class ComplexityCodeChangesCLI : GitMinerMultithreadedOneBranchCLI(
         val miner = ComplexityCodeChangesMiner(repository, branch, numThreads = numThreads)
         miner.run(dataProcessor)
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             complexityCodeChangesJsonFile,
             dataProcessor.periodsToStats
         )
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             idToFileJsonFile,
             dataProcessor.idToFile
         )

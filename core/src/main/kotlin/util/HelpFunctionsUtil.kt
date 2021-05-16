@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
 import kotlin.math.log2
 
-object UtilFunctions {
+object HelpFunctionsUtil {
 
     fun isGitRepository(directory: File): Boolean {
         return RepositoryCache.FileKey.isGitRepository(directory, FS.DETECTED)
@@ -119,25 +119,6 @@ object UtilFunctions {
             result += value * log2(value.toDouble())
         }
         return -result
-    }
-
-    fun levenshtein(str1: String, str2: String): Int {
-        val Di_1 = IntArray(str2.length + 1)
-        val Di = IntArray(str2.length + 1)
-        for (j in 0..str2.length) {
-            Di[j] = j // (i == 0)
-        }
-        for (i in 1..str1.length) {
-            System.arraycopy(Di, 0, Di_1, 0, Di_1.size)
-            Di[0] = i // (j == 0)
-            for (j in 1..str2.length) {
-                val cost = if (str1[i - 1] != str2[j - 1]) 1 else 0
-                Di[j] = (Di_1[j] + 1)
-                    .coerceAtMost(Di[j - 1] + 1)
-                    .coerceAtMost(Di_1[j - 1] + cost)
-            }
-        }
-        return Di[Di.size - 1]
     }
 
     fun runInThreadPoolWithExceptionHandle(threadPool: ExecutorService, tasks: List<Runnable>) {

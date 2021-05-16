@@ -4,7 +4,7 @@ import cli.gitMinersCLI.base.GitMinerMultithreadedMultipleBranchesCLI
 import dataProcessor.WorkTimeDataProcessor
 import miners.gitMiners.WorkTimeMiner
 import org.eclipse.jgit.internal.storage.file.FileRepository
-import util.UtilFunctions
+import util.HelpFunctionsUtil
 import java.io.File
 
 class WorkTimeMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
@@ -33,12 +33,12 @@ class WorkTimeMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
         val miner = WorkTimeMiner(repository, branches, numThreads = numThreads)
         miner.run(dataProcessor)
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             workTimeJsonFile,
             dataProcessor.workTimeDistribution
         )
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             idToUserJsonFile,
             dataProcessor.idToUser
         )

@@ -9,8 +9,8 @@ import org.eclipse.jgit.diff.EditList
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
+import util.HelpFunctionsUtil
 import util.ProjectConfig
-import util.UtilFunctions
 import java.util.*
 import java.util.concurrent.*
 
@@ -153,7 +153,7 @@ class FilesOwnershipMiner(
 
         }
 
-        UtilFunctions.runInThreadPoolWithExceptionHandle(threadPool, tasks)
+        HelpFunctionsUtil.runInThreadPoolWithExceptionHandle(threadPool, tasks)
 
         println("End processing latest commit")
 

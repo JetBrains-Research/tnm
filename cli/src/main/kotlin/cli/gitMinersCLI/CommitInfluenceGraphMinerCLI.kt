@@ -4,7 +4,7 @@ import cli.gitMinersCLI.base.GitMinerMultithreadedMultipleBranchesCLI
 import dataProcessor.CommitInfluenceGraphDataProcessor
 import miners.gitMiners.CommitInfluenceGraphMiner
 import org.eclipse.jgit.internal.storage.file.FileRepository
-import util.UtilFunctions
+import util.HelpFunctionsUtil
 import java.io.File
 
 class CommitInfluenceGraphMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
@@ -31,12 +31,12 @@ class CommitInfluenceGraphMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
         val miner = CommitInfluenceGraphMiner(repository, branches, numThreads = numThreads)
         miner.run(dataProcessor)
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             commitsGraphJsonFile,
             dataProcessor.adjacencyMap
         )
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             idToCommitJsonFile,
             dataProcessor.idToCommit
         )

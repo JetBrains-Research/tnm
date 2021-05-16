@@ -4,7 +4,7 @@ import cli.gitMinersCLI.base.GitMinerMultithreadedOneBranchCLI
 import dataProcessor.CoEditNetworksDataProcessor
 import miners.gitMiners.CoEditNetworksMiner
 import org.eclipse.jgit.internal.storage.file.FileRepository
-import util.UtilFunctions
+import util.HelpFunctionsUtil
 import java.io.File
 
 class CoEditNetworksMinerCLI : GitMinerMultithreadedOneBranchCLI(
@@ -35,22 +35,22 @@ class CoEditNetworksMinerCLI : GitMinerMultithreadedOneBranchCLI(
         val miner = CoEditNetworksMiner(repository, branch, numThreads = numThreads)
         miner.run(dataProcessor)
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             coEditNetworksJsonFile,
             dataProcessor.coEdits
         )
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             idToUserJsonFile,
             dataProcessor.idToUser
         )
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             idToFileJsonFile,
             dataProcessor.idToFile
         )
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             idToCommitJsonFile,
             dataProcessor.idToCommit
         )

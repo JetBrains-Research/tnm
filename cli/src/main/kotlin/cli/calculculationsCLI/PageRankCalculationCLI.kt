@@ -11,7 +11,7 @@ import miners.gitMiners.UtilGitMiner
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
-import util.UtilFunctions
+import util.HelpFunctionsUtil
 import java.io.File
 
 class PageRankCalculationCLI : CalculationCLI(
@@ -62,12 +62,12 @@ class PageRankCalculationCLI : CalculationCLI(
         val calculation = PageRankCalculation(dataProcessor.adjacencyMap, numOfCommits, alpha)
         calculation.run()
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             pageRankJsonFile,
             calculation.pageRank
         )
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             idToCommitJsonFile,
             dataProcessor.idToCommit
         )

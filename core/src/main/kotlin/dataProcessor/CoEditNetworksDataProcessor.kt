@@ -5,7 +5,7 @@ import dataProcessor.inputData.entity.CommitInfo
 import dataProcessor.inputData.entity.FileEdit
 import kotlinx.serialization.Serializable
 import org.apache.commons.text.similarity.LevenshteinDistance
-import util.UtilFunctions
+import util.HelpFunctionsUtil
 import util.mappers.CommitMapper
 import util.mappers.UserMapper
 import java.util.concurrent.ConcurrentSkipListSet
@@ -100,8 +100,8 @@ class CoEditNetworksDataProcessor : DataProcessorMapped<CoEditInfo>() {
         val postLenInLines: Int = addBlock.size
         val preLenInChars = deleteString.length
         val postLenInChars = addString.length
-        val preEntropy: Double = UtilFunctions.entropy(countUTF8(deleteBlock))
-        val postEntropy: Double = UtilFunctions.entropy(countUTF8(addBlock))
+        val preEntropy: Double = HelpFunctionsUtil.entropy(countUTF8(deleteBlock))
+        val postEntropy: Double = HelpFunctionsUtil.entropy(countUTF8(addBlock))
 
         val levenshtein: Int = when (type) {
             ChangeType.ADD -> {

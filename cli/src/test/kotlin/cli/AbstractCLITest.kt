@@ -4,7 +4,7 @@ import GitTest
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.junit.Before
-import util.UtilFunctions.deleteDir
+import util.HelpFunctionsUtil.deleteDir
 import java.io.File
 import kotlin.test.assertTrue
 

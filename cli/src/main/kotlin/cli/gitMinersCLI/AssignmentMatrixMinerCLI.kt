@@ -4,7 +4,7 @@ import cli.gitMinersCLI.base.GitMinerMultithreadedMultipleBranchesCLI
 import dataProcessor.AssignmentMatrixDataProcessor
 import miners.gitMiners.AssignmentMatrixMiner
 import org.eclipse.jgit.internal.storage.file.FileRepository
-import util.UtilFunctions
+import util.HelpFunctionsUtil
 import java.io.File
 
 class AssignmentMatrixMinerCLI :
@@ -36,17 +36,17 @@ class AssignmentMatrixMinerCLI :
         val miner = AssignmentMatrixMiner(repository, branches, numThreads = numThreads)
         miner.run(dataProcessor)
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             assignmentMatrixJsonFile,
             dataProcessor.assignmentMatrix
         )
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             idToUserJsonFile,
             dataProcessor.idToUser
         )
 
-        UtilFunctions.saveToJson(
+        HelpFunctionsUtil.saveToJson(
             idToFileJsonFile,
             dataProcessor.idToFile
         )
