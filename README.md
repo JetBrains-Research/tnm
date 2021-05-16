@@ -1,4 +1,4 @@
-# TNM
+# TNM: A Tool for Mining of Socio-Technical Data from Git Repositories
 A tool and library for mining several types of data from git
 repositories. 
 Instead of implementing their own mining pipeline researchers can use
