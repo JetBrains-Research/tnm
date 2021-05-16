@@ -235,6 +235,8 @@ need to use Java Concurrent package for storing your results.
 class MyGitMiner(
     repository: FileRepository,
     neededBranches: Set<String>
-) : GitMiner<MyDataProcessor>(repository, neededBranches, numThreads = 1)
+) : GitMiner<MyDataProcessor>(repository, neededBranches, numThreads = 1) {
+    // ...
+}
 ```
 
