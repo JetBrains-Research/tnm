@@ -11,9 +11,9 @@ interface or abstract class for each task type, which make it easily extendable.
 
 Currently, tool got 4 types of classes:
 * Mapper - classes for mapping specified entity for the unique id.
-* GitMiner - classes for mining data for one task.
-* Calculation - classes for calculating complex dependencies in data.
-  Use data from GitMiners.
+* Miner - classes for mining data for one task.
+* DataProcessor - classes for processing mined data. Works as buffer for Miner classes.
+* Calculation - classes for calculating complex dependencies in data. Use data from GitMiners.
 * Visualization - classes for visualization proceed data.
 
 ### Git miners
@@ -114,33 +114,129 @@ Example of script usage:
 ```kotlin
 val localGitPath = "./your_repository_dir/.git"
 val repository = FileRepository(localGitPath)
+val numThreads = 4
+val branches = setOf("main", "dev")
 
-val miner = WorkTimeMiner(repository)
-miner.run()
+val dataProcessor = WorkTimeDataProcessor()
+val miner = WorkTimeMiner(repository, branches, numThreads = numThreads)
+miner.run(dataProcessor)
 
-val resultPath = "./path_where_to_store_results"
-miner.saveToJson(File(resultPath))
+val resultFile = File("./path_where_to_store_results")
+val idToUserFile = File("./path_where_to_store_idToUser")
+
+HelpFunctionsUtil.saveToJson(
+  resultFile,
+  dataProcessor.workTimeDistribution
+)
+
+HelpFunctionsUtil.saveToJson(
+  idToUserFile,
+  dataProcessor.idToUser
+)
 ```
 
 #### Calculation usage example
 
 ```kotlin
-val resourceDirectory = File(resourceDirectory)
+val repository = FileRepository(repositoryDirectory)
+val numThreads = 4
+val branches = setOf("main", "dev")
 
-// executed and saved results to same resourceDirectory
-// of AssignmentMatrixMiner and FileDependencyMatrixMiner
+val dataProcessor = CommitInfluenceGraphDataProcessor()
+val miner = CommitInfluenceGraphMiner(repository, branches, numThreads = numThreads)
+miner.run(dataProcessor)
 
-val calculation = CoordinationNeedsMatrixCalculation(resourceDirectory)
-calculation.run()
-calculation.saveToJson(resourceDirectory)
+val resultFile = File("./path_where_to_store_results")
+val idToCommitFile = File("./path_where_to_store_idToUser")
+
+HelpFunctionsUtil.saveToJson(
+  resultFile,
+  dataProcessor.adjacencyMap
+)
+
+HelpFunctionsUtil.saveToJson(
+  idToCommitFile,
+  dataProcessor.idToCommit
+)
 ```
-    
 
 ### Output format
-Miners, calculation and mapper classes use a JSON output format.
-JSON is easy to read and objects (such as hash maps and arrays) 
-serialized in the JSON format can be deserialized in another programming languages.
-Visualization classes generate interactive html graph which can be viewed 
-in any modern web browser and shared without worrying about dependencies. 
-The graph can be also edited manually to adjust its appearance if required. 
+
+Miners, calculation and mapper classes use a JSON output format. JSON is easy to read and objects (such as hash maps and
+arrays)
+serialized in the JSON format can be deserialized in another programming languages. Visualization classes generate
+interactive html graph which can be viewed in any modern web browser and shared without worrying about dependencies. The
+graph can be also edited manually to adjust its appearance if required.
+
+## Extend
+
+### Example of implementing own technique
+
+```kotlin
+// Mark processing data with marker interface InputData
+data class UserName(val email: String) : InputData
+
+// Extend data processor
+class MyDataProcessor : DataProcessorMapped<UserName>() {
+    // Using Java Concurrent package for storing results
+    private val _result = ConcurrentSkipListSet<Int>()
+    // Backing field for immutable public field
+    val result : Set<Int>
+        get() = _result
+
+    override fun processData(data: UserName) {
+        val userId = userMapper.add(data.email)
+        _result.add(userId)
+    }
+
+    override fun calculate() {
+        println("Calculation called!")
+    }
+}
+
+// Extend GitMiner and override function [process]
+class MyGitMiner(
+    repository: FileRepository,
+    neededBranches: Set<String>,
+    numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
+) : GitMiner<MyDataProcessor>(repository, neededBranches, numThreads = numThreads) {
+    override fun process(dataProcessor: MyDataProcessor, currCommit: RevCommit, prevCommit: RevCommit) {
+        val data = UserName(currCommit.authorIdent.emailAddress)
+        dataProcessor.processData(data)
+    }
+}
+
+fun main() {
+    val repository = FileRepository("./.git")
+    val branches = setOf("main")
+    val numThreads = 4
+
+    val miner = MyGitMiner(repository, branches, numThreads)
+    val dataProcessor = MyDataProcessor()
+    miner.run(dataProcessor)
+
+    println(dataProcessor.result)
+}
+```
+
+### FAQ
+
+#### I got data not from Git repository. How I can use implemented techniques?
+
+You can create your own miner class by extending the `Miner` interface with the needed `DataProcessor` as a generic
+type. Then all you need to do, is iteratively transmit data to `DataProcessor` in method `run(dataProcessor: T)`
+
+#### I don't know how to work with multithreading. Is there any way I can contribute my technique?
+
+Yes you can! Use the example above and when you extend `GitMiner`, set the parameter `numThreads` to 1. Also, you don't
+need to use Java Concurrent package for storing your results.
+
+```kotlin
+class MyGitMiner(
+    repository: FileRepository,
+    neededBranches: Set<String>
+) : GitMiner<MyDataProcessor>(repository, neededBranches, numThreads = 1) {
+    // ...
+}
+```
 
