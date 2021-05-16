@@ -40,6 +40,8 @@ dependencies {
     api("org.nd4j:nd4j-native-platform:1.0.0-beta6")
     api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")
     api("com.github.ajalt.clikt:clikt:3.1.0")
+    api("org.apache.commons:commons-text:1.9")
+
     testImplementation(kotlin("test-junit"))
 }
 

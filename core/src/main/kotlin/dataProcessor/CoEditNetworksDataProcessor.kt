@@ -4,6 +4,7 @@ import dataProcessor.inputData.CoEditInfo
 import dataProcessor.inputData.entity.CommitInfo
 import dataProcessor.inputData.entity.FileEdit
 import kotlinx.serialization.Serializable
+import org.apache.commons.text.similarity.LevenshteinDistance
 import util.UtilFunctions
 import util.mappers.CommitMapper
 import util.mappers.UserMapper
@@ -11,6 +12,11 @@ import java.util.concurrent.ConcurrentSkipListSet
 
 class CoEditNetworksDataProcessor : DataProcessorMapped<CoEditInfo>() {
     private val _coEdits = ConcurrentSkipListSet<CommitResult>()
+    private val threadLocalLevenshteinDistance = object : ThreadLocal<LevenshteinDistance>() {
+        override fun initialValue(): LevenshteinDistance {
+            return LevenshteinDistance()
+        }
+    }
 
     val coEdits: Set<CommitResult>
         get() = _coEdits
@@ -105,7 +111,7 @@ class CoEditNetworksDataProcessor : DataProcessorMapped<CoEditInfo>() {
                 preLenInChars
             }
             ChangeType.REPLACE -> {
-                UtilFunctions.levenshtein(deleteString, addString)
+                threadLocalLevenshteinDistance.get().apply(deleteString, addString)
             }
             else -> 0
         }
