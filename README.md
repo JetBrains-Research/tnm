@@ -9,7 +9,7 @@ our tool or integrate it in their own mining pipelines.
 The main idea behind the structure of the tool is that every class implement one
 interface or abstract class for each task type, which make it easily extendable.
 
-Currently, tool got 4 types of classes:
+There are the following base classes:
 * Mapper - classes for mapping specified entity for the unique id.
 * Miner - classes for mining data for one task.
 * DataProcessor - classes for processing mined data. Works as buffer for Miner classes.
