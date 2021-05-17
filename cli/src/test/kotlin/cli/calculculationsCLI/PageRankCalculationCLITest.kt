@@ -41,7 +41,7 @@ class PageRankCalculationCLITest : AbstractCLITest(testFolder) {
 
         checkIdToEntity(idToCommitJsonFile)
 
-        val pageRank = Json.decodeFromString<Array<FloatArray>>(pageRankJsonFile.readText())
+        val pageRank = Json.decodeFromString<Map<Int, Double>>(pageRankJsonFile.readText())
         assertTrue(pageRank.isNotEmpty())
     }
 }

@@ -4,13 +4,10 @@ import calculations.PageRankCalculation
 import calculations.PageRankCalculation.Companion.DEFAULT_ALPHA
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.types.float
+import com.github.ajalt.clikt.parameters.types.double
 import dataProcessor.CommitInfluenceGraphDataProcessor
 import miners.gitMiners.CommitInfluenceGraphMiner
-import miners.gitMiners.UtilGitMiner
-import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
-import org.eclipse.jgit.revwalk.RevCommit
 import util.HelpFunctionsUtil
 import java.io.File
 
@@ -31,7 +28,7 @@ class PageRankCalculationCLI : CalculationCLI(
     }
 
     private val alpha by option(SHORTNAME_ALPHA, LONGNAME_ALPHA, help = HELP_ALPHA)
-        .float()
+        .double()
         .default(DEFAULT_ALPHA)
 
     private val pageRankJsonFile by saveFileOption(
@@ -44,22 +41,13 @@ class PageRankCalculationCLI : CalculationCLI(
     private val numThreads by numOfThreadsOption()
     private val idToCommitJsonFile by idToCommitOption()
 
-    private fun countCommits(repository: FileRepository): Int {
-        val commits = HashSet<RevCommit>()
-        for (branch in branches) {
-            commits.addAll(UtilGitMiner.getCommits(Git(repository), repository, branch, false))
-        }
-        return commits.size
-    }
-
     override fun run() {
         val repository = FileRepository(repositoryDirectory)
-        val numOfCommits = countCommits(repository)
         val dataProcessor = CommitInfluenceGraphDataProcessor()
         val miner = CommitInfluenceGraphMiner(repository, branches, numThreads = numThreads)
         miner.run(dataProcessor)
 
-        val calculation = PageRankCalculation(dataProcessor.adjacencyMap, numOfCommits, alpha)
+        val calculation = PageRankCalculation(dataProcessor.adjacencyMap, alpha)
         calculation.run()
 
         HelpFunctionsUtil.saveToJson(

@@ -95,18 +95,6 @@ object HelpFunctionsUtil {
         return Nd4j.create(result)
     }
 
-    fun loadGraph(adjacencyMap: Map<Int, Set<Int>>, size: Int): INDArray {
-        val result = Array(size) { FloatArray(size) }
-        for (entry in adjacencyMap) {
-            val nodeFrom = entry.key
-            for (nodeTo in entry.value) {
-                result[nodeFrom][nodeTo] = 1F
-            }
-        }
-
-        return Nd4j.create(result)
-    }
-
     fun normalizeMax(matrix: INDArray) {
         val scaler = NormalizerMinMaxScaler()
         scaler.setFeatureStats(Nd4j.create(1).add(matrix.min()), Nd4j.create(1).add(matrix.max()))

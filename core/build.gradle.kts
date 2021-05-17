@@ -28,13 +28,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-html-assembly:0.7.1")
     implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.1")
     implementation("org.apache.commons:commons-text:1.9")
+    implementation("org.jgrapht:jgrapht-core:1.5.1")
 }
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
-}
-
-tasks.test {
-    useJUnit()
-    maxHeapSize = "3G"
 }
