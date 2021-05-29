@@ -153,4 +153,8 @@ abstract class GitMiner<T>(
         return result.toList()
     }
 
+    fun clearComparedCommitsHistory() {
+        comparedCommits.clear()
+    }
+
 }
