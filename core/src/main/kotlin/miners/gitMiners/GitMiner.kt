@@ -2,6 +2,7 @@ package miners.gitMiners
 
 import dataProcessor.DataProcessor
 import miners.Miner
+import miners.gitMiners.exceptions.NotGitRepositoryException
 import miners.gitMiners.exceptions.ProcessInThreadPoolException
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffFormatter
@@ -11,6 +12,7 @@ import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.util.io.DisabledOutputStream
+import util.HelpFunctionsUtil
 import util.ProjectConfig
 import java.io.File
 import java.util.concurrent.ExecutorService
@@ -23,6 +25,12 @@ abstract class GitMiner<T>(
     protected val reversed: Boolean = false,
     protected val numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : Miner<T> where T : DataProcessor<*> {
+
+    init {
+         if (!HelpFunctionsUtil.isGitRepository(repositoryFile)) {
+             throw NotGitRepositoryException("${repositoryFile.absolutePath} is not git repository")
+         }
+    }
 
     protected val repository = FileRepository(repositoryFile)
     protected val comparedCommits = HashMap<String, MutableSet<String>>()
