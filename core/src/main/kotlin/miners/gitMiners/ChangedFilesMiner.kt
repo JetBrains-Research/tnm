@@ -2,15 +2,15 @@ package miners.gitMiners
 
 import dataProcessor.ChangedFilesDataProcessor
 import dataProcessor.inputData.UserChangedFiles
-import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig
+import java.io.File
 
 class ChangedFilesMiner(
-    repository: FileRepository,
+    repositoryFile: File,
     neededBranches: Set<String>,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
-) : GitMiner<ChangedFilesDataProcessor>(repository, neededBranches, numThreads = numThreads) {
+) : GitMiner<ChangedFilesDataProcessor>(repositoryFile, neededBranches, numThreads = numThreads) {
 
     override fun process(dataProcessor: ChangedFilesDataProcessor, currCommit: RevCommit, prevCommit: RevCommit) {
         val git = threadLocalGit.get()

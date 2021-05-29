@@ -48,9 +48,8 @@ class FilesOwnershipMinerCLI : GitMinerMultithreadedOneBranchCLI(
     private val idToFileJsonFile by idToFileOption()
 
     override fun run() {
-        val repository = FileRepository(repositoryDirectory)
         val dataProcessor = FilesOwnershipDataProcessor()
-        val miner = FilesOwnershipMiner(repository, branch, numThreads = numThreads)
+        val miner = FilesOwnershipMiner(repositoryDirectory, branch, numThreads = numThreads)
         miner.run(dataProcessor)
 
         HelpFunctionsUtil.saveToJson(

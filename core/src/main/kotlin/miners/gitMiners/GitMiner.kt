@@ -12,16 +12,22 @@ import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.util.io.DisabledOutputStream
 import util.ProjectConfig
+import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.atomic.AtomicInteger
 
 abstract class GitMiner<T>(
-    protected val repository: FileRepository, val neededBranches: Set<String>,
+    repositoryFile: File, val neededBranches: Set<String>,
     protected val reversed: Boolean = false,
     protected val numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : Miner<T> where T : DataProcessor<*> {
+
+    protected val repository = FileRepository(repositoryFile)
+    protected val comparedCommits = HashMap<String, MutableSet<String>>()
+    protected val logFrequency = 100
+
     protected val threadLocalGit = object : ThreadLocal<Git>() {
         override fun initialValue(): Git {
             return Git(repository)
@@ -43,9 +49,6 @@ abstract class GitMiner<T>(
             return diffFormatter
         }
     }
-
-    protected val comparedCommits = HashMap<String, MutableSet<String>>()
-    protected val logFrequency = 100
 
     /**
      * Mine all needed data from pair of commits.

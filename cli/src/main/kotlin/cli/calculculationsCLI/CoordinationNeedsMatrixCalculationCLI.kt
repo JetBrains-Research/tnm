@@ -35,14 +35,13 @@ class CoordinationNeedsMatrixCalculationCLI : CalculationCLI(
     private val idToFileJsonFile by idToFileOption()
 
     override fun run() {
-        val repository = FileRepository(repositoryDirectory)
         val assignmentMatrixDataProcessor = AssignmentMatrixDataProcessor()
-        val assignmentMatrixMiner = AssignmentMatrixMiner(repository, branches, numThreads = numOfThreads)
+        val assignmentMatrixMiner = AssignmentMatrixMiner(repositoryDirectory, branches, numThreads = numOfThreads)
         assignmentMatrixMiner.run(assignmentMatrixDataProcessor)
         val numOfUsers = assignmentMatrixDataProcessor.idToUser.size
 
         val fileDependencyDataProcessor = FileDependencyMatrixDataProcessor()
-        val fileDependencyMiner = FileDependencyMatrixMiner(repository, branches, numThreads = numOfThreads)
+        val fileDependencyMiner = FileDependencyMatrixMiner(repositoryDirectory, branches, numThreads = numOfThreads)
         fileDependencyMiner.run(fileDependencyDataProcessor)
 
         val numOfFiles = fileDependencyDataProcessor.idToFile.size

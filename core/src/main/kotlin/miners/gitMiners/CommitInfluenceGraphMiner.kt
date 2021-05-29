@@ -9,6 +9,7 @@ import org.eclipse.jgit.diff.Edit
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig
+import java.io.File
 
 
 /**
@@ -18,11 +19,11 @@ import util.ProjectConfig
  * @constructor Create Page rank miner for [repository] and store the results
  */
 class CommitInfluenceGraphMiner(
-    repository: FileRepository,
+    repositoryFile: File,
     neededBranches: Set<String>,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner<CommitInfluenceGraphDataProcessor>(
-    repository,
+    repositoryFile,
     neededBranches,
     numThreads = numThreads,
     reversed = true

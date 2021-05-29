@@ -11,14 +11,15 @@ import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
 // TODO: hot spots: read line, levenshtein
 class CoEditNetworksMiner(
-    repository: FileRepository,
+    repositoryFile: File,
     private val neededBranch: String,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
-) : GitMiner<CoEditNetworksDataProcessor>(repository, setOf(neededBranch), numThreads = numThreads) {
+) : GitMiner<CoEditNetworksDataProcessor>(repositoryFile, setOf(neededBranch), numThreads = numThreads) {
     companion object {
         private const val ADD_MARK = '+'
         private const val DELETE_MARK = '-'

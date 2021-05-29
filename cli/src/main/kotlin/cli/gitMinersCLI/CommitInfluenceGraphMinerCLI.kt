@@ -26,9 +26,8 @@ class CommitInfluenceGraphMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
     private val idToCommitJsonFile by idToCommitOption()
 
     override fun run() {
-        val repository = FileRepository(repositoryDirectory)
         val dataProcessor = CommitInfluenceGraphDataProcessor()
-        val miner = CommitInfluenceGraphMiner(repository, branches, numThreads = numThreads)
+        val miner = CommitInfluenceGraphMiner(repositoryDirectory, branches, numThreads = numThreads)
         miner.run(dataProcessor)
 
         HelpFunctionsUtil.saveToJson(

@@ -1,7 +1,7 @@
 package miners.gitMiners
 
 import TestConfig.branches
-import TestConfig.repository
+import TestConfig.gitDir
 import dataProcessor.WorkTimeDataProcessor
 import org.junit.Test
 import util.ProjectConfig
@@ -19,7 +19,7 @@ internal class WorkTimeMinerTests : GitMinerTest {
 
     private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Map<String, Map<Int, Int>> {
         val dataProcessor = WorkTimeDataProcessor()
-        val miner = WorkTimeMiner(repository, numThreads = numThreads, neededBranches = branches)
+        val miner = WorkTimeMiner(gitDir, numThreads = numThreads, neededBranches = branches)
         miner.run(dataProcessor)
 
         val newMap = HashMap<String, HashMap<Int, Int>>()

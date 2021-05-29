@@ -11,15 +11,16 @@ import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.util.io.DisabledOutputStream
 import util.ProjectConfig
+import java.io.File
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 
 class ComplexityCodeChangesMiner(
-    repository: FileRepository,
+    repositoryFile: File,
     private val neededBranch: String,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS,
-) : GitMiner<ComplexityCodeChangesDataProcessor>(repository, setOf(neededBranch), numThreads = numThreads) {
+) : GitMiner<ComplexityCodeChangesDataProcessor>(repositoryFile, setOf(neededBranch), numThreads = numThreads) {
     // Mark each commit for period
     // [commitId][periodId]
     private val markedCommits = ConcurrentHashMap<String, Int>()

@@ -29,9 +29,8 @@ class ChangedFilesMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
     private val idToFileJsonFile by idToFileOption()
 
     override fun run() {
-        val repository = FileRepository(repositoryDirectory)
         val dataProcessor = ChangedFilesDataProcessor()
-        val miner = ChangedFilesMiner(repository, branches, numThreads = numThreads)
+        val miner = ChangedFilesMiner(repositoryDirectory, branches, numThreads = numThreads)
         miner.run(dataProcessor)
 
         HelpFunctionsUtil.saveToJson(

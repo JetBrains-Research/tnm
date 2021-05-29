@@ -5,6 +5,7 @@ import dataProcessor.inputData.FilesChangeset
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig
+import java.io.File
 
 /**
  * Class for mining  file dependency matrix
@@ -14,10 +15,10 @@ import util.ProjectConfig
  *
  */
 class FileDependencyMatrixMiner(
-    repository: FileRepository,
+    repositoryFile: File,
     neededBranches: Set<String>,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
-) : GitMiner<FileDependencyMatrixDataProcessor>(repository, neededBranches, numThreads = numThreads) {
+) : GitMiner<FileDependencyMatrixDataProcessor>(repositoryFile, neededBranches, numThreads = numThreads) {
     override fun process(
         dataProcessor: FileDependencyMatrixDataProcessor,
         currCommit: RevCommit,

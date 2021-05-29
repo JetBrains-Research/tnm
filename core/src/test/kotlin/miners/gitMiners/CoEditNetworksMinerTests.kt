@@ -1,7 +1,7 @@
 package miners.gitMiners
 
 import TestConfig.branch
-import TestConfig.repository
+import TestConfig.gitDir
 import dataProcessor.CoEditNetworksDataProcessor
 import dataProcessor.CoEditNetworksDataProcessor.ChangeType
 import dataProcessor.CoEditNetworksDataProcessor.CommitInfoEncoded
@@ -20,7 +20,7 @@ class CoEditNetworksMinerTests : GitMinerTest {
 
     private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Set<CommitResultWithoutId> {
         val dataProcessor = CoEditNetworksDataProcessor()
-        val miner = CoEditNetworksMiner(repository, numThreads = numThreads, neededBranch = branch)
+        val miner = CoEditNetworksMiner(gitDir, numThreads = numThreads, neededBranch = branch)
         miner.run(dataProcessor)
 
         assertTrue(dataProcessor.coEdits.isNotEmpty())

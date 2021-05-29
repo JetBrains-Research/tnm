@@ -1,7 +1,7 @@
 package miners.gitMiners
 
 import TestConfig.branch
-import TestConfig.repository
+import TestConfig.gitDir
 import dataProcessor.FilesOwnershipDataProcessor
 import org.junit.Test
 import util.ProjectConfig
@@ -20,7 +20,7 @@ internal class FilesOwnershipMinerTests : GitMinerTest {
         numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
     ): Map<String, Map<String, Double>> {
         val dataProcessor = FilesOwnershipDataProcessor()
-        val miner = FilesOwnershipMiner(repository, numThreads = numThreads, neededBranch = branch)
+        val miner = FilesOwnershipMiner(gitDir, numThreads = numThreads, neededBranch = branch)
         miner.run(dataProcessor)
 
         assertTrue(dataProcessor.developerKnowledge.isNotEmpty())

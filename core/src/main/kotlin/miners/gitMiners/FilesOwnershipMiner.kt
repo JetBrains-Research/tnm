@@ -11,14 +11,15 @@ import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.HelpFunctionsUtil
 import util.ProjectConfig
+import java.io.File
 import java.util.*
 import java.util.concurrent.*
 
 class FilesOwnershipMiner(
-    repository: FileRepository,
+    repositoryFile: File,
     private val neededBranch: String,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
-) : GitMiner<FilesOwnershipDataProcessor>(repository, setOf(neededBranch), numThreads = numThreads) {
+) : GitMiner<FilesOwnershipDataProcessor>(repositoryFile, setOf(neededBranch), numThreads = numThreads) {
 
     private data class FutureResult(
         val listOfEditsToFile: List<Pair<EditList, String>>,

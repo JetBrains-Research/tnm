@@ -31,9 +31,8 @@ class AssignmentMatrixMinerCLI :
     private val idToFileJsonFile by idToFileOption()
 
     override fun run() {
-        val repository = FileRepository(repositoryDirectory)
         val dataProcessor = AssignmentMatrixDataProcessor()
-        val miner = AssignmentMatrixMiner(repository, branches, numThreads = numThreads)
+        val miner = AssignmentMatrixMiner(repositoryDirectory, branches, numThreads = numThreads)
         miner.run(dataProcessor)
 
         HelpFunctionsUtil.saveToJson(

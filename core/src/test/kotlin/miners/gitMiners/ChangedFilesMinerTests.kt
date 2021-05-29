@@ -1,7 +1,7 @@
 package miners.gitMiners
 
 import TestConfig.branches
-import TestConfig.repository
+import TestConfig.gitDir
 import dataProcessor.ChangedFilesDataProcessor
 import org.junit.Test
 import util.ProjectConfig
@@ -18,7 +18,7 @@ internal class ChangedFilesMinerTests : GitMinerTest {
 
     private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Map<String, Set<String>> {
         val dataProcessor = ChangedFilesDataProcessor()
-        val miner = ChangedFilesMiner(repository, numThreads = numThreads, neededBranches = branches)
+        val miner = ChangedFilesMiner(gitDir, numThreads = numThreads, neededBranches = branches)
         miner.run(dataProcessor)
 
         assertTrue(dataProcessor.changedFilesByUsers.isNotEmpty())

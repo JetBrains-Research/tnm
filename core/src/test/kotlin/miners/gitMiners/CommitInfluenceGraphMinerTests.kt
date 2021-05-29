@@ -1,7 +1,7 @@
 package miners.gitMiners
 
 import TestConfig.branches
-import TestConfig.repository
+import TestConfig.gitDir
 import dataProcessor.CommitInfluenceGraphDataProcessor
 import org.junit.Test
 import util.ProjectConfig
@@ -17,7 +17,7 @@ class CommitInfluenceGraphMinerTests : GitMinerTest {
 
     private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Map<String, Set<String>> {
         val dataProcessor = CommitInfluenceGraphDataProcessor()
-        val miner = CommitInfluenceGraphMiner(repository, numThreads = numThreads, neededBranches = branches)
+        val miner = CommitInfluenceGraphMiner(gitDir, numThreads = numThreads, neededBranches = branches)
         miner.run(dataProcessor)
 
         assertTrue(dataProcessor.adjacencyMap.isNotEmpty())
