@@ -15,7 +15,7 @@ import org.junit.Test
 import util.ProjectConfig
 import java.io.File
 
-class ChangedFilesMinerCLITest : AbstractCLITest(testFolder) {
+class UserChangedFilesMinerCLITest : AbstractCLITest(testFolder) {
     companion object {
         private val testFolder = File(tmpCLITestFolder, "ChangedFilesMinerCLITest/")
     }

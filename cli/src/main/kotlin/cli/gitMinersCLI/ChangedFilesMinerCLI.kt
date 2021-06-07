@@ -2,8 +2,7 @@ package cli.gitMinersCLI
 
 import cli.gitMinersCLI.base.GitMinerMultithreadedMultipleBranchesCLI
 import dataProcessor.ChangedFilesDataProcessor
-import miners.gitMiners.ChangedFilesMiner
-import org.eclipse.jgit.internal.storage.file.FileRepository
+import miners.gitMiners.UserChangedFilesMiner
 import util.HelpFunctionsUtil
 import java.io.File
 
@@ -30,7 +29,7 @@ class ChangedFilesMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
 
     override fun run() {
         val dataProcessor = ChangedFilesDataProcessor()
-        val miner = ChangedFilesMiner(repositoryDirectory, branches, numThreads = numThreads)
+        val miner = UserChangedFilesMiner(repositoryDirectory, branches, numThreads = numThreads)
         miner.run(dataProcessor)
 
         HelpFunctionsUtil.saveToJson(

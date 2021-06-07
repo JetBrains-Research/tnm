@@ -2,8 +2,7 @@ package cli.gitMinersCLI
 
 import cli.gitMinersCLI.base.GitMinerMultithreadedMultipleBranchesCLI
 import dataProcessor.AssignmentMatrixDataProcessor
-import miners.gitMiners.AssignmentMatrixMiner
-import org.eclipse.jgit.internal.storage.file.FileRepository
+import miners.gitMiners.UserChangedFilesMiner
 import util.HelpFunctionsUtil
 import java.io.File
 
@@ -32,7 +31,7 @@ class AssignmentMatrixMinerCLI :
 
     override fun run() {
         val dataProcessor = AssignmentMatrixDataProcessor()
-        val miner = AssignmentMatrixMiner(repositoryDirectory, branches, numThreads = numThreads)
+        val miner = UserChangedFilesMiner(repositoryDirectory, branches, numThreads = numThreads)
         miner.run(dataProcessor)
 
         HelpFunctionsUtil.saveToJson(

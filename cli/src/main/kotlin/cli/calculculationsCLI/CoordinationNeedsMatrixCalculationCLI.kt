@@ -3,9 +3,8 @@ package cli.calculculationsCLI
 import calculations.CoordinationNeedsMatrixCalculation
 import dataProcessor.AssignmentMatrixDataProcessor
 import dataProcessor.FileDependencyMatrixDataProcessor
-import miners.gitMiners.AssignmentMatrixMiner
 import miners.gitMiners.FileDependencyMatrixMiner
-import org.eclipse.jgit.internal.storage.file.FileRepository
+import miners.gitMiners.UserChangedFilesMiner
 import util.HelpFunctionsUtil
 import java.io.File
 
@@ -36,8 +35,8 @@ class CoordinationNeedsMatrixCalculationCLI : CalculationCLI(
 
     override fun run() {
         val assignmentMatrixDataProcessor = AssignmentMatrixDataProcessor()
-        val assignmentMatrixMiner = AssignmentMatrixMiner(repositoryDirectory, branches, numThreads = numOfThreads)
-        assignmentMatrixMiner.run(assignmentMatrixDataProcessor)
+        val userChangedFilesMiner = UserChangedFilesMiner(repositoryDirectory, branches, numThreads = numOfThreads)
+        userChangedFilesMiner.run(assignmentMatrixDataProcessor)
         val numOfUsers = assignmentMatrixDataProcessor.idToUser.size
 
         val fileDependencyDataProcessor = FileDependencyMatrixDataProcessor()

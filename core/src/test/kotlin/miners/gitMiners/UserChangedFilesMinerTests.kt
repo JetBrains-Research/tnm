@@ -7,7 +7,7 @@ import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertTrue
 
-internal class ChangedFilesMinerTests : GitMinerTest {
+internal class UserChangedFilesMinerTests : GitMinerTest {
     @Test
     fun `test one thread and multithreading`() {
         val mapOneThread = runMiner(1)
@@ -18,7 +18,7 @@ internal class ChangedFilesMinerTests : GitMinerTest {
 
     private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Map<String, Set<String>> {
         val dataProcessor = ChangedFilesDataProcessor()
-        val miner = ChangedFilesMiner(gitDir, numThreads = numThreads, neededBranches = branches)
+        val miner = UserChangedFilesMiner(gitDir, numThreads = numThreads, neededBranches = branches)
         miner.run(dataProcessor)
 
         assertTrue(dataProcessor.changedFilesByUsers.isNotEmpty())
