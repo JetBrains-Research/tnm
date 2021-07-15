@@ -18,7 +18,7 @@ internal class FilesOwnershipMinerTests : GitMinerTest {
 
     private fun runMiner(
         numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
-    ): Map<String, Map<String, Double>> {
+    ): Map<String, Map<String, Float>> {
         val dataProcessor = FilesOwnershipDataProcessor()
         val miner = FilesOwnershipMiner(gitDir, numThreads = numThreads, neededBranch = branch)
         miner.run(dataProcessor)

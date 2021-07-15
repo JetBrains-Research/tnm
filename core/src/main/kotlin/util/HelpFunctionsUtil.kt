@@ -16,6 +16,7 @@ import java.util.concurrent.Future
 import kotlin.math.log2
 
 object HelpFunctionsUtil {
+    val json = Json { encodeDefaults = true }
 
     fun isGitRepository(directory: File): Boolean {
         return RepositoryCache.FileKey.isGitRepository(directory, FS.DETECTED)
@@ -29,13 +30,13 @@ object HelpFunctionsUtil {
     // TODO: try catch logic for encode and file
     inline fun <reified T> saveToJson(file: File, data: T) {
         createParentFolder(file)
-        val jsonString = Json.encodeToString(data)
+        val jsonString = json.encodeToString(data)
         file.writeText(jsonString)
     }
 
     inline fun <reified T> saveToJson(file: File, data: T, serializer: SerializationStrategy<T>) {
         createParentFolder(file)
-        val jsonString = Json.encodeToString(serializer, data)
+        val jsonString = json.encodeToString(serializer, data)
         file.writeText(jsonString)
     }
 
