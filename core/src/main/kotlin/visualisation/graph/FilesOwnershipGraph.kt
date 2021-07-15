@@ -1,14 +1,10 @@
 package visualisation.graph
 
-import dataProcessor.FilesOwnershipDataProcessor
-import miners.gitMiners.FilesOwnershipMiner
 import util.HeapNStorage
-import util.HelpFunctionsUtil
 import visualisation.entity.EdgeInfo
 import visualisation.entity.EdgeThreeJS
 import visualisation.entity.GraphDataThreeJS
 import visualisation.entity.NodeThreeJS
-import java.io.File
 
 class FilesOwnershipGraph(
     val data: Map<Int, Map<Int, Float>>,
