@@ -6,26 +6,25 @@ import visualisation.entity.EdgeThreeJS
 import visualisation.entity.GraphDataThreeJS
 import visualisation.entity.NodeThreeJS
 
-class FilesOwnershipGraph(
-    val data: Map<Int, Map<Int, Float>>,
+class CommunicationNeedsGraph(
+    val data: Array<out FloatArray>,
     val idToUser: Map<Int, String> = HashMap(),
-    val idToFile: Map<Int, String> = HashMap()
-) : GraphThreeJS("graph.js") {
+) :
+    GraphThreeJS("graphCN.js") {
 
     override fun generateData(size: Int, descending: Boolean): GraphDataThreeJS {
         val comparator = if (descending) compareByDescending<EdgeInfo> { it.weight } else compareBy { it.weight }
         val edgeStorage = HeapNStorage(size, comparator)
-        for (entry in data) {
-            val user = idToUser[entry.key] ?: "user: ${entry.key}"
-            for (entry2 in entry.value) {
-                val file = idToFile[entry2.key] ?: "file: ${entry2.key}"
-                val weight = entry2.value
+        for (i in 0..data.size) {
+            for (j in i + 1 until data.size) {
+                val user1 = idToUser[i] ?: "user: $i"
+                val user2 = idToUser[j] ?: "user: $j"
 
                 edgeStorage.add(
                     EdgeInfo(
-                        user,
-                        file,
-                        weight
+                        user1,
+                        user2,
+                        data[i][j]
                     )
                 )
             }
@@ -33,8 +32,8 @@ class FilesOwnershipGraph(
 
         val nodes = mutableSetOf<NodeThreeJS>()
         for (edge in edgeStorage) {
-            nodes.add(NodeThreeJS(edge.source, color = "#9eb8e6"))
-            nodes.add(NodeThreeJS(edge.target, shape = 1, color = "#d6c8a3"))
+            nodes.add(NodeThreeJS(edge.source))
+            nodes.add(NodeThreeJS(edge.target))
         }
 
         return GraphDataThreeJS(

@@ -7,10 +7,9 @@ import util.HelpFunctionsUtil
 import visualisation.entity.GraphDataThreeJS
 import java.io.File
 
-abstract class GraphThreeJS {
+abstract class GraphThreeJS(private val graphJsFileName: String) {
     companion object {
         private const val DATA_JS_FILENAME = "data.js"
-        private const val GRAPH_JS_FILENAME = "graph.js"
         private const val GRAPH_HTML_ID = "3d-graph"
         private const val HTML_FILENAME = "graph.html"
         private const val THREE_JS_LIB = "https://unpkg.com/three@0.130.1/build/three.js"
@@ -20,37 +19,8 @@ abstract class GraphThreeJS {
             return object {}.javaClass.getResource(path).readText()
         }
 
-        private fun createHTML(directory: File) {
-            val html = buildString {
-                appendLine("<!DOCTYPE html>")
-                appendHTML().html {
-                    body {
-                        div {
-                            id = GRAPH_HTML_ID
-                        }
-                        script {
-                            src = THREE_JS_LIB
-                        }
-                        script {
-                            src = GRAPH_JS_LIB
-                        }
-                        script {
-                            src = File(directory, DATA_JS_FILENAME).absolutePath
-                        }
-                        script {
-                            src = File(directory, GRAPH_JS_FILENAME).absolutePath
-                        }
-                    }
-                }
-            }
 
-            File(directory, HTML_FILENAME).writeText(html)
-        }
 
-        private fun createGraphJS(directory: File) {
-            val script = getResourceAsText("/$GRAPH_JS_FILENAME")
-            File(directory, GRAPH_JS_FILENAME).writeText(script)
-        }
 
         fun edgeColor(
             value: Float,
@@ -71,6 +41,38 @@ abstract class GraphThreeJS {
             return (value - min) / (max - min)
         }
 
+    }
+
+    private fun createGraphJS(directory: File) {
+        val script = getResourceAsText("/$graphJsFileName")
+        File(directory, graphJsFileName).writeText(script)
+    }
+
+    private fun createHTML(directory: File) {
+        val html = buildString {
+            appendLine("<!DOCTYPE html>")
+            appendHTML().html {
+                body {
+                    div {
+                        id = GRAPH_HTML_ID
+                    }
+                    script {
+                        src = THREE_JS_LIB
+                    }
+                    script {
+                        src = GRAPH_JS_LIB
+                    }
+                    script {
+                        src = File(directory, DATA_JS_FILENAME).absolutePath
+                    }
+                    script {
+                        src = File(directory, graphJsFileName).absolutePath
+                    }
+                }
+            }
+        }
+
+        File(directory, HTML_FILENAME).writeText(html)
     }
 
     abstract fun generateData(size: Int, descending: Boolean): GraphDataThreeJS

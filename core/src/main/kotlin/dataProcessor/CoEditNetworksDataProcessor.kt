@@ -155,7 +155,7 @@ class CoEditNetworksDataProcessor : DataProcessorMapped<CoEditInfo>() {
 
         for (line in block) {
             for (char in line) {
-                val id = char.toInt()
+                val id = char.code
                 if (id < 256) {
                     count.compute(id) { _, v -> if (v == null) 1 else v + 1 }
                 }
