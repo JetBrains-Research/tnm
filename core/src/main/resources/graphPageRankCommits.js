@@ -19,12 +19,6 @@ const meshes = [
 ]
 
 const Graph = ForceGraph3D()(elem)
-    .nodeThreeObject(({ shape, color }) =>
-        new THREE.Mesh(
-            meshes[shape % 2](),
-            materials[shape % 2]
-        )
-    )
     .graphData(data)
     .linkWidth(link => link.value)
     .linkColor(link => link.color)
@@ -34,7 +28,8 @@ const Graph = ForceGraph3D()(elem)
     .linkOpacity(1)
     .nodeOpacity(1)
     .nodeAutoColorBy('color')
-    .nodeLabel(node => `${node.id} `);
+    .nodeVal('value')
+    .nodeLabel(node => `${node.id}`);
 
 // fit to canvas when engine stops
 Graph.onEngineStop(() => Graph.zoomToFit(400));
