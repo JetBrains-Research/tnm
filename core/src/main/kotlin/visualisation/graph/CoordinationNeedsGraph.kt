@@ -6,7 +6,7 @@ import visualisation.entity.EdgeThreeJS
 import visualisation.entity.GraphDataThreeJS
 import visualisation.entity.NodeThreeJS
 
-class CommunicationNeedsGraph(
+class CoordinationNeedsGraph(
     val data: Array<out FloatArray>,
     val idToUser: Map<Int, String> = HashMap(),
 ) :
