@@ -44,7 +44,7 @@ class CoordinationNeedsMatrixCalculationCLI : CalculationCLI(
         fileDependencyMiner.run(fileDependencyDataProcessor)
 
         val numOfFiles = fileDependencyDataProcessor.idToFile.size
-        val fileDependencyMatrix = HelpFunctionsUtil.convertMapToArray(
+        val fileDependencyMatrix = HelpFunctionsUtil.convertMapToNd4jArray(
             HelpFunctionsUtil.changeKeysInMapOfMaps(
                 fileDependencyDataProcessor.fileDependencyMatrix,
                 fileDependencyDataProcessor.idToFile, assignmentMatrixDataProcessor.fileToId,
@@ -55,7 +55,7 @@ class CoordinationNeedsMatrixCalculationCLI : CalculationCLI(
             numOfFiles
         )
 
-        val assignmentMatrix = HelpFunctionsUtil.convertMapToArray(
+        val assignmentMatrix = HelpFunctionsUtil.convertMapToNd4jArray(
             assignmentMatrixDataProcessor.assignmentMatrix,
             numOfUsers,
             numOfFiles
