@@ -92,7 +92,7 @@ class ComplexityCodeChangesMiner(
 
     private fun splitInPeriods(dataProcessor: ComplexityCodeChangesDataProcessor): List<List<RevCommit>> {
         val git = threadLocalGit.get()
-        val commitsInBranch = UtilGitMiner.getCommits(git, repository, neededBranch, reversed)
+        val commitsInBranch = git.log().add(repository.resolve(neededBranch)).call().toList()
         if (commitsInBranch.isEmpty()) return listOf()
 
         return when (dataProcessor.periodType) {

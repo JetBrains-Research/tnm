@@ -158,19 +158,6 @@ object UtilGitMiner {
         return shortMsgContains || fullMsgContains
     }
 
-    fun getCommits(
-        git: Git,
-        repository: FileRepository,
-        branchName: String,
-        reversed: Boolean = false
-    ): List<RevCommit> {
-        return if (reversed) {
-            git.log().add(repository.resolve(branchName)).call().reversed()
-        } else {
-            git.log().add(repository.resolve(branchName)).call().toList()
-        }
-    }
-
     fun getAllFilePathsOnCommit(repository: FileRepository, commit: RevCommit): List<String> {
         val filePaths = mutableListOf<String>()
 

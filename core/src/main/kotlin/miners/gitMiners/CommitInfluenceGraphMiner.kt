@@ -24,8 +24,7 @@ class CommitInfluenceGraphMiner(
 ) : GitMiner<CommitInfluenceGraphDataProcessor>(
     repository,
     neededBranches,
-    numThreads = numThreads,
-    reversed = true
+    numThreads = numThreads
 ) {
 
     override fun process(

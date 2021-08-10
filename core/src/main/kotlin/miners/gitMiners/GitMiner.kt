@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicInteger
 
 abstract class GitMiner<T>(
     protected val repository: FileRepository, val neededBranches: Set<String>,
-    protected val reversed: Boolean = false,
     protected val numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : Miner<T> where T : DataProcessor<*> {
     protected val threadLocalGit = object : ThreadLocal<Git>() {
@@ -133,7 +132,8 @@ abstract class GitMiner<T>(
 
     protected fun getUnprocessedCommits(branchName: String): List<RevCommit> {
         val result = linkedSetOf<RevCommit>()
-        val commitsInBranch = UtilGitMiner.getCommits(threadLocalGit.get(), repository, branchName, reversed)
+        val git = threadLocalGit.get()
+        val commitsInBranch = git.log().add(repository.resolve(branchName)).call().toList()
         for ((currCommit, prevCommit) in commitsInBranch.windowed(2)) {
             if (checkProceedCommits(currCommit, prevCommit)) continue
             result.add(currCommit)
