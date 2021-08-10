@@ -36,6 +36,7 @@ class PageRankCommitsGraph(
                         bugCommitValue
                     )
                 )
+                addedNodesIds.add(bugId)
             }
 
             for (targetId in adjCommits) {
@@ -52,7 +53,6 @@ class PageRankCommitsGraph(
                 )
 
                 if (addedNodesIds.add(targetId)) {
-
                     if (targetId in bugFixIds) {
                         nodes.add(bugFixCommitNode(targetCommitJsId, targetCommitValue))
                     } else {
