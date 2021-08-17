@@ -33,8 +33,8 @@ class FilesOwnershipGraph(
 
         val nodes = mutableSetOf<NodeThreeJS>()
         for (edge in edgeStorage) {
-            nodes.add(NodeThreeJS(edge.source, color = "#9eb8e6"))
-            nodes.add(NodeThreeJS(edge.target, shape = 1, color = "#d6c8a3"))
+            nodes.add(NodeThreeJS(edge.source))
+            nodes.add(NodeThreeJS(edge.target, shape = 1))
         }
 
         return GraphDataThreeJS(

@@ -24,10 +24,10 @@ abstract class GraphThreeJS(private val graphJsFileName: String) {
 
         fun edgeColor(
             value: Float,
-            quantile1: String = "#0569E1",
-            quantile2: String = "#C1F823",
-            quantile3: String = "#FCAA05",
-            quantile4: String = "#EE5503"
+            quantile1: String = "#FFF9E0",
+            quantile2: String = "#F1C550",
+            quantile3: String = "#FF6600",
+            quantile4: String = "#CE2525"
         ): String {
             return when {
                 (value <= 0.25f) -> quantile1
