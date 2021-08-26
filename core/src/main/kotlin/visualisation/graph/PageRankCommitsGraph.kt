@@ -1,10 +1,16 @@
 package visualisation.graph
 
+import calculations.PageRankCalculation
+import dataProcessor.CommitInfluenceGraphDataProcessor
+import miners.gitMiners.CommitInfluenceGraphMiner
 import util.HeapNStorage
+import util.HelpFunctionsUtil
+import util.ProjectConfig
 import visualisation.entity.EdgeThreeJS
 import visualisation.entity.GraphDataThreeJS
 import visualisation.entity.NodeInfo
 import visualisation.entity.NodeThreeJS
+import java.io.File
 
 class PageRankCommitsGraph(
     val pageRank: Map<Int, Float>,
@@ -14,7 +20,7 @@ class PageRankCommitsGraph(
     override fun generateData(size: Int, descending: Boolean): GraphDataThreeJS {
         val comparator = if (descending) compareByDescending<NodeInfo> { it.value } else compareBy { it.value }
         val nodeStorage = HeapNStorage(size, comparator)
-        nodeStorage.addAll(commitInfluence.keys.map {
+        nodeStorage.addAll(commitInfluence.filter { it.value.isNotEmpty() }.keys.map {
             NodeInfo(it, pageRank[it]!!)
         })
 
@@ -27,7 +33,7 @@ class PageRankCommitsGraph(
         for (bugId in bugFixIds) {
             val adjCommits = commitInfluence[bugId]!!
             val bugCommitJsId = getCommitJsId(bugId)
-            val bugCommitValue = normalize(bugId, nodeStorage)
+            val bugCommitValue = pageRank[bugId]!!
 
             if (!addedNodesIds.contains(bugId) && adjCommits.isNotEmpty()) {
                 nodes.add(
@@ -41,7 +47,7 @@ class PageRankCommitsGraph(
 
             for (targetId in adjCommits) {
                 val targetCommitJsId = getCommitJsId(targetId)
-                val targetCommitValue = normalize(targetId, nodeStorage)
+                val targetCommitValue = pageRank[targetId]!!
 
                 edges.add(
                     EdgeThreeJS(
@@ -64,10 +70,6 @@ class PageRankCommitsGraph(
         }
 
         return GraphDataThreeJS(nodes.toList(), edges.toList())
-    }
-
-    private fun normalize(id: Int, nodeStorage: HeapNStorage<NodeInfo>): Float {
-        return 3 * normalizeMinMax(pageRank[id]!!, nodeStorage.low!!.value, nodeStorage.high!!.value)
     }
 
     private fun getCommitJsId(key: Int): String = idToCommit[key] ?: "commit: $key"
