@@ -16,6 +16,7 @@ import java.util.concurrent.Future
 import kotlin.math.log2
 
 object HelpFunctionsUtil {
+    val json = Json { encodeDefaults = true }
 
     fun isGitRepository(directory: File): Boolean {
         return RepositoryCache.FileKey.isGitRepository(directory, FS.DETECTED)
@@ -29,13 +30,13 @@ object HelpFunctionsUtil {
     // TODO: try catch logic for encode and file
     inline fun <reified T> saveToJson(file: File, data: T) {
         createParentFolder(file)
-        val jsonString = Json.encodeToString(data)
+        val jsonString = json.encodeToString(data)
         file.writeText(jsonString)
     }
 
     inline fun <reified T> saveToJson(file: File, data: T, serializer: SerializationStrategy<T>) {
         createParentFolder(file)
-        val jsonString = Json.encodeToString(serializer, data)
+        val jsonString = json.encodeToString(serializer, data)
         file.writeText(jsonString)
     }
 
@@ -85,7 +86,7 @@ object HelpFunctionsUtil {
         return result
     }
 
-    fun convertMapToArray(map: Map<Int, Map<Int, Int>>, rows: Int, columns: Int): INDArray {
+    fun convertMapToNd4jArray(map: Map<Int, Map<Int, Int>>, rows: Int, columns: Int): INDArray {
         val result = Array(rows) { FloatArray(columns) }
         for ((x, innerMap) in map) {
             for ((y, value) in innerMap) {
@@ -93,6 +94,16 @@ object HelpFunctionsUtil {
             }
         }
         return Nd4j.create(result)
+    }
+
+    fun convertMapToArray(map: Map<Int, Map<Int, Int>>, rows: Int, columns: Int): Array<FloatArray> {
+        val result = Array(rows) { FloatArray(columns) }
+        for ((x, innerMap) in map) {
+            for ((y, value) in innerMap) {
+                result[x][y] = value.toFloat()
+            }
+        }
+        return result
     }
 
     fun normalizeMax(matrix: INDArray) {

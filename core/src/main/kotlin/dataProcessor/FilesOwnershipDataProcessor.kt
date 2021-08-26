@@ -9,11 +9,11 @@ import java.util.concurrent.ConcurrentSkipListSet
 import java.util.concurrent.TimeUnit
 import kotlin.math.pow
 
-class FilesOwnershipDataProcessor(private val decayFactor: Double = DEFAULT_DECAY_FACTOR) :
+class FilesOwnershipDataProcessor(private val decayFactor: Float = DEFAULT_DECAY_FACTOR) :
     DataProcessorMappedWithInit<LatestCommitOwnedLines, FileLinesAddedByUser>() {
 
     companion object {
-        const val DEFAULT_DECAY_FACTOR = 0.01
+        const val DEFAULT_DECAY_FACTOR = 0.01f
     }
 
     private lateinit var latestCommitDate: Date
@@ -31,8 +31,8 @@ class FilesOwnershipDataProcessor(private val decayFactor: Double = DEFAULT_DECA
 
     // denoting the total potential authorship amount of all developers
     // [userId][fileId]
-    private val _developerKnowledge: HashMap<Int, HashMap<Int, Double>> = HashMap()
-    val developerKnowledge: Map<Int, Map<Int, Double>>
+    private val _developerKnowledge: HashMap<Int, HashMap<Int, Float>> = HashMap()
+    val developerKnowledge: Map<Int, Map<Int, Float>>
         get() = _developerKnowledge
 
     // [fileId][line] = set(userId, ...)
@@ -42,10 +42,10 @@ class FilesOwnershipDataProcessor(private val decayFactor: Double = DEFAULT_DECA
     @Serializable
     class UserData {
         private val ownedLines = mutableSetOf<Int>()
-        var authorship: Double = 0.0
+        var authorship: Float = 0f
             private set
 
-        fun calculateAuthorship(lines: IntRange, decay: Double) {
+        fun calculateAuthorship(lines: IntRange, decay: Float) {
             val newLines = lines - ownedLines
             if (newLines.isNotEmpty()) {
                 authorship += newLines.size * decay
@@ -62,7 +62,7 @@ class FilesOwnershipDataProcessor(private val decayFactor: Double = DEFAULT_DECA
             val fileId = fileMapper.add(entity.filePath)
             val userId = userMapper.add(entity.user)
 
-            calculateAuthorshipForLines(entity.lineNumber..entity.lineNumber, fileId, userId, 1.0)
+            calculateAuthorshipForLines(entity.lineNumber..entity.lineNumber, fileId, userId, 1.0f)
             addAuthorsForLines(entity.lineNumber..entity.lineNumber, fileId, userId)
         }
     }
@@ -95,7 +95,7 @@ class FilesOwnershipDataProcessor(private val decayFactor: Double = DEFAULT_DECA
             .addAll(lines)
     }
 
-    private fun calculateAuthorshipForLines(lines: IntRange, fileId: Int, userId: Int, decay: Double) {
+    private fun calculateAuthorshipForLines(lines: IntRange, fileId: Int, userId: Int, decay: Float) {
         _filesOwnership
             .computeIfAbsent(fileId) { ConcurrentHashMap() }
             .computeIfAbsent(userId) { UserData() }
