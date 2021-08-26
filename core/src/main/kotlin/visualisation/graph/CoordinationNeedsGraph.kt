@@ -1,10 +1,19 @@
 package visualisation.graph
 
+import calculations.CoordinationNeedsMatrixCalculation
+import dataProcessor.AssignmentMatrixDataProcessor
+import dataProcessor.FileDependencyMatrixDataProcessor
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import miners.gitMiners.FileDependencyMatrixMiner
+import miners.gitMiners.UserChangedFilesMiner
 import util.HeapNStorage
+import util.HelpFunctionsUtil
 import visualisation.entity.EdgeInfo
 import visualisation.entity.EdgeThreeJS
 import visualisation.entity.GraphDataThreeJS
 import visualisation.entity.NodeThreeJS
+import java.io.File
 
 class CoordinationNeedsGraph(
     val data: Array<out FloatArray>,
@@ -39,14 +48,12 @@ class CoordinationNeedsGraph(
         return GraphDataThreeJS(
             nodes.toList(),
             edgeStorage.map {
-                val value =
-                    normalizeMinMax(it.weight, edgeStorage.low!!.weight, edgeStorage.high!!.weight)
                 EdgeThreeJS(
                     it.source,
                     it.target,
                     it.weight,
-                    value = value,
-                    edgeColor(value)
+                    value = it.weight,
+                    edgeColor(it.weight)
                 )
             })
     }
