@@ -17,8 +17,9 @@ import java.util.concurrent.*
 
 class FilesOwnershipMiner(
     repositoryFile: File,
-    private val neededBranch: String,
-    numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
+    val neededBranch: String,
+    numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS,
+    val filesToProceed: Set<String>? = null
 ) : GitMiner<FilesOwnershipDataProcessor>(repositoryFile, setOf(neededBranch), numThreads = numThreads) {
 
     private data class FutureResult(
@@ -50,8 +51,10 @@ class FilesOwnershipMiner(
 
                     val list = mutableListOf<Pair<EditList, String>>()
                     for (diff in diffs) {
-                        val editList = diffFormatter.toFileHeader(diff).toEditList()
                         val filePath = diff.oldPath
+                        if (isNotNeededFilePath(filePath)) continue
+
+                        val editList = diffFormatter.toFileHeader(diff).toEditList()
                         list.add(editList to filePath)
                     }
 
@@ -82,7 +85,7 @@ class FilesOwnershipMiner(
             return
         }
 
-        val latestCommit = commitsInBranch.iterator().next()
+        val latestCommit = commitsInBranch.first()
         val latestCommitDate = latestCommit.authorIdent.getWhen()
 
         val threadPool = Executors.newFixedThreadPool(numThreads)
@@ -124,6 +127,7 @@ class FilesOwnershipMiner(
 
         val tasks = mutableListOf<Runnable>()
         for (filePath in filePaths) {
+            if (isNotNeededFilePath(filePath)) continue
 
             val runnable = Runnable {
                 try {
@@ -159,6 +163,13 @@ class FilesOwnershipMiner(
         println("End processing latest commit")
 
         return concurrentLinkedQueue.toList()
+    }
+
+    private fun isNotNeededFilePath(filePath: String): Boolean {
+        if (filesToProceed != null) {
+            return filePath !in filesToProceed
+        }
+        return false
     }
 
 }
