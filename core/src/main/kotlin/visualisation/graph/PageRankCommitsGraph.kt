@@ -9,7 +9,8 @@ import visualisation.entity.NodeThreeJS
 class PageRankCommitsGraph(
     val pageRank: Map<Int, Float>,
     val commitInfluence: Map<Int, Set<Int>>,
-    val idToCommit: Map<Int, String> = HashMap()
+    val idToCommit: Map<Int, String> = HashMap(),
+    val commitToMsg: Map<String, String> = HashMap()
 ) : GraphThreeJS("graphPageRankCommits.js") {
     override fun generateData(size: Int, descending: Boolean): GraphDataThreeJS {
         val comparator = if (descending) compareByDescending<NodeInfo> { it.value } else compareBy { it.value }
@@ -81,6 +82,7 @@ class PageRankCommitsGraph(
     private fun commitNode(commitId: String, value: Float) =
         NodeThreeJS(
             commitId,
-            value
+            value,
+            msg = commitToMsg[commitId] ?: commitId
         )
 }
