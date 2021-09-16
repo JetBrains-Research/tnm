@@ -192,4 +192,11 @@ object UtilGitMiner {
         return filePaths
     }
 
+    fun isNotNeededFilePath(filePath: String, filesToProceed: Set<String>?): Boolean {
+        if (filesToProceed != null) {
+            return filePath !in filesToProceed
+        }
+        return false
+    }
+
 }

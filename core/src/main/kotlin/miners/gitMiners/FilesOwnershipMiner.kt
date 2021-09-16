@@ -4,6 +4,7 @@ import dataProcessor.FilesOwnershipDataProcessor
 import dataProcessor.initData.LatestCommitOwnedLines
 import dataProcessor.initData.entity.FileLineOwnedByUser
 import dataProcessor.inputData.FileLinesAddedByUser
+import miners.gitMiners.UtilGitMiner.isNotNeededFilePath
 import miners.gitMiners.exceptions.ProcessInThreadPoolException
 import org.eclipse.jgit.diff.EditList
 import org.eclipse.jgit.diff.RawTextComparator
@@ -51,7 +52,7 @@ class FilesOwnershipMiner(
                     val list = mutableListOf<Pair<EditList, String>>()
                     for (diff in diffs) {
                         val filePath = UtilGitMiner.getFilePath(diff)
-                        if (isNotNeededFilePath(filePath)) continue
+                        if (isNotNeededFilePath(filePath, filesToProceed)) continue
 
                         val editList = diffFormatter.toFileHeader(diff).toEditList()
                         list.add(editList to filePath)
@@ -126,7 +127,7 @@ class FilesOwnershipMiner(
 
         val tasks = mutableListOf<Runnable>()
         for (filePath in filePaths) {
-            if (isNotNeededFilePath(filePath)) continue
+            if (isNotNeededFilePath(filePath, filesToProceed)) continue
 
             val runnable = Runnable {
                 try {
@@ -163,12 +164,4 @@ class FilesOwnershipMiner(
 
         return concurrentLinkedQueue.toList()
     }
-
-    private fun isNotNeededFilePath(filePath: String): Boolean {
-        if (filesToProceed != null) {
-            return filePath !in filesToProceed
-        }
-        return false
-    }
-
 }

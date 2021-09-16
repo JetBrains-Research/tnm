@@ -5,6 +5,7 @@ import dataProcessor.ComplexityCodeChangesDataProcessor.ChangeType
 import dataProcessor.ComplexityCodeChangesDataProcessor.PeriodType
 import dataProcessor.inputData.FileModification
 import miners.gitMiners.UtilGitMiner.isBugFixCommit
+import miners.gitMiners.UtilGitMiner.isNotNeededFilePath
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.revwalk.RevCommit
@@ -19,6 +20,7 @@ class ComplexityCodeChangesMiner(
     repositoryFile: File,
     private val neededBranch: String,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS,
+    val filesToProceed: Set<String>? = null
 ) : GitMiner<ComplexityCodeChangesDataProcessor>(repositoryFile, setOf(neededBranch), numThreads = numThreads) {
     // Mark each commit for period
     // [commitId][periodId]
@@ -46,6 +48,7 @@ class ComplexityCodeChangesMiner(
 
                 for (diff in diffs) {
                     val filePath = UtilGitMiner.getFilePath(diff)
+                    if (isNotNeededFilePath(filePath, filesToProceed)) continue
 
                     val editList = diffFormatter.toFileHeader(diff).toEditList()
                     for (edit in editList) {
@@ -69,6 +72,8 @@ class ComplexityCodeChangesMiner(
                 }
 
                 for (filePath in changedFiles) {
+                    if (isNotNeededFilePath(filePath, filesToProceed)) continue
+
                     val data = FileModification(periodId, filePath, 1)
                     dataProcessor.processData(data)
                 }
