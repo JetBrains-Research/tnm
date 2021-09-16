@@ -68,7 +68,7 @@ class CommitInfluenceGraphMiner(
         val filesCommits = mutableMapOf<String, List<String>>()
         for (diff in diffs) {
             if (diff.changeType != DiffEntry.ChangeType.MODIFY) continue
-            val fileName = diff.oldPath
+            val fileName = UtilGitMiner.getFilePath(diff)
 
             var prevCommitBlame = listOf<String>()
 

@@ -45,7 +45,7 @@ class ComplexityCodeChangesMiner(
                 diffFormatter.isDetectRenames = true
 
                 for (diff in diffs) {
-                    val filePath = diff.oldPath
+                    val filePath = UtilGitMiner.getFilePath(diff)
 
                     val editList = diffFormatter.toFileHeader(diff).toEditList()
                     for (edit in editList) {

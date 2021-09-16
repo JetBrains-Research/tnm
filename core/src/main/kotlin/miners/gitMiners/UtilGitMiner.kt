@@ -66,10 +66,18 @@ object UtilGitMiner {
         userMapper.add(userEmail)
 
         for (entry in diffs) {
-            val fileId = fileMapper.add(entry.oldPath)
+            val fileId = fileMapper.add(getFilePath(entry))
             result.add(fileId)
         }
         return result
+    }
+
+    fun getFilePath(diffEntry: DiffEntry): String {
+        return if (diffEntry.changeType == DiffEntry.ChangeType.DELETE) {
+            diffEntry.oldPath
+        } else {
+            diffEntry.newPath
+        }
     }
 
     fun getChangedFiles(
@@ -81,7 +89,7 @@ object UtilGitMiner {
         val diffs = getDiffsWithoutText(commit, reader, git)
 
         for (entry in diffs) {
-            result.add(entry.oldPath)
+            result.add(getFilePath(entry))
         }
         return result
     }

@@ -50,7 +50,7 @@ class FilesOwnershipMiner(
 
                     val list = mutableListOf<Pair<EditList, String>>()
                     for (diff in diffs) {
-                        val filePath = diff.oldPath
+                        val filePath = UtilGitMiner.getFilePath(diff)
                         if (isNotNeededFilePath(filePath)) continue
 
                         val editList = diffFormatter.toFileHeader(diff).toEditList()
