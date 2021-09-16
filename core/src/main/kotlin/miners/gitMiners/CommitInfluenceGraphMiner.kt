@@ -6,7 +6,6 @@ import miners.gitMiners.UtilGitMiner.isBugFixCommit
 import org.eclipse.jgit.api.BlameCommand
 import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.diff.Edit
-import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig
 import java.io.File
@@ -25,23 +24,23 @@ class CommitInfluenceGraphMiner(
 ) : GitMiner<CommitInfluenceGraphDataProcessor>(
     repositoryFile,
     neededBranches,
-    numThreads = numThreads,
-    reversed = true
+    numThreads = numThreads
 ) {
 
     override fun process(
         dataProcessor: CommitInfluenceGraphDataProcessor,
-        currCommit: RevCommit,
-        prevCommit: RevCommit
+        commit: RevCommit
     ) {
-        if (isBugFixCommit(currCommit)) {
+        if (isBugFixCommit(commit)) {
             val git = threadLocalGit.get()
             val reader = threadLocalReader.get()
+            // TODO: strange case
+            val prevCommit = if (commit.parents.isNotEmpty()) commit.parents[0] else return
             val diffs =
-                reader.use { UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, it, git) }
+                reader.use { UtilGitMiner.getDiffsWithoutText(commit, it, git) }
 
             val adjCommits = getCommitsAdj(diffs, prevCommit)
-            val data = CommitInfluenceInfo(currCommit.name, prevCommit.name, adjCommits)
+            val data = CommitInfluenceInfo(commit.name, prevCommit.name, adjCommits)
             dataProcessor.processData(data)
         }
     }

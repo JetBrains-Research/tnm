@@ -9,31 +9,34 @@ import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.treewalk.CanonicalTreeParser
+import org.eclipse.jgit.treewalk.EmptyTreeIterator
 import org.eclipse.jgit.treewalk.TreeWalk
 import util.mappers.FileMapper
 import util.mappers.UserMapper
 
 object UtilGitMiner {
     /**
-     * Get diffs between [commit1] and [commit2].
+     * Get diffs for [commit].
      *
-     * @param commit1 RevCommit
-     * @param commit2 RevCommit
+     * @param commit RevCommit
      * @param reader must be created from the same Repository as [git]
      * @param git must be created from the same Repository as [reader]
-     * @return List of DiffEntry's between [commit1] and [commit2].
+     * @return List of DiffEntry's for [commit].
      */
     fun getDiffsWithoutText(
-        commit1: RevCommit,
-        commit2: RevCommit,
+        commit: RevCommit,
         reader: ObjectReader,
         git: Git
     ): List<DiffEntry> {
-        val oldTreeIter = CanonicalTreeParser()
-        oldTreeIter.reset(reader, commit2.tree)
+        val oldTreeIter = if (commit.parents.isNotEmpty()) {
+            val firstParent = commit.parents[0]
+            val treeParser = CanonicalTreeParser()
+            treeParser.reset(reader, firstParent.tree)
+            treeParser
+        } else EmptyTreeIterator()
 
         val newTreeIter = CanonicalTreeParser()
-        newTreeIter.reset(reader, commit1.tree)
+        newTreeIter.reset(reader, commit.tree)
 
         return git.diff()
             .setNewTree(newTreeIter)
@@ -43,25 +46,23 @@ object UtilGitMiner {
     }
 
     /**
-     * Get changed files between [commit1] and [commit2].
+     * Get changed files between [commit].
      *
-     * @param commit1 RevCommit
-     * @param commit2 RevCommit
+     * @param commit RevCommit
      * @param reader must be created from the same Repository as git
      * @param git must be created from the same Repository as [reader]
      * @return set of changed files ids
      */
     fun getChangedFiles(
-        commit1: RevCommit,
-        commit2: RevCommit,
+        commit: RevCommit,
         reader: ObjectReader,
         git: Git,
         userMapper: UserMapper,
         fileMapper: FileMapper
     ): Set<Int> {
         val result = mutableSetOf<Int>()
-        val diffs = getDiffsWithoutText(commit1, commit2, reader, git)
-        val userEmail = commit1.authorIdent.emailAddress
+        val diffs = getDiffsWithoutText(commit, reader, git)
+        val userEmail = commit.authorIdent.emailAddress
         userMapper.add(userEmail)
 
         for (entry in diffs) {
@@ -72,13 +73,12 @@ object UtilGitMiner {
     }
 
     fun getChangedFiles(
-        commit1: RevCommit,
-        commit2: RevCommit,
+        commit: RevCommit,
         reader: ObjectReader,
         git: Git
     ): Set<String> {
         val result = mutableSetOf<String>()
-        val diffs = getDiffsWithoutText(commit1, commit2, reader, git)
+        val diffs = getDiffsWithoutText(commit, reader, git)
 
         for (entry in diffs) {
             result.add(entry.oldPath)
@@ -161,15 +161,9 @@ object UtilGitMiner {
     fun getCommits(
         git: Git,
         repository: FileRepository,
-        branchName: String,
-        reversed: Boolean = false
-    ): List<RevCommit> {
-        return if (reversed) {
-            git.log().add(repository.resolve(branchName)).call().reversed()
-        } else {
-            git.log().add(repository.resolve(branchName)).call().toList()
-        }
-    }
+        branchName: String
+    ): List<RevCommit> = git.log().add(repository.resolve(branchName)).call().toList()
+
 
     fun getAllFilePathsOnCommit(repository: FileRepository, commit: RevCommit): List<String> {
         val filePaths = mutableListOf<String>()

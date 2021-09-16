@@ -7,7 +7,6 @@ import dataProcessor.inputData.FileLinesAddedByUser
 import miners.gitMiners.exceptions.ProcessInThreadPoolException
 import org.eclipse.jgit.diff.EditList
 import org.eclipse.jgit.diff.RawTextComparator
-import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.HelpFunctionsUtil
 import util.ProjectConfig
@@ -34,8 +33,8 @@ class FilesOwnershipMiner(
     ): List<Future<FutureResult>> {
         // TODO: Refactor
         val futures = ArrayList<Future<FutureResult>>()
-        for ((currCommit, prevCommit) in commitsInBranch.windowed(2)) {
-            if (!addProceedCommits(currCommit, prevCommit)) continue
+        for (commit in commitsInBranch) {
+            if (!addProceedCommits(commit)) continue
 
             val callable = Callable {
                 try {
@@ -43,10 +42,10 @@ class FilesOwnershipMiner(
                     val reader = threadLocalReader.get()
                     val diffFormatter = threadLocalDiffFormatter.get()
 
-                    val diffs = reader.use { UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, it, git) }
-                    val email = currCommit.authorIdent.emailAddress
+                    val diffs = reader.use { UtilGitMiner.getDiffsWithoutText(commit, it, git) }
+                    val email = commit.authorIdent.emailAddress
 
-                    val commitDate = currCommit.authorIdent.getWhen()
+                    val commitDate = commit.authorIdent.getWhen()
 
 
                     val list = mutableListOf<Pair<EditList, String>>()
@@ -60,7 +59,7 @@ class FilesOwnershipMiner(
 
                     FutureResult(list, commitDate, email)
                 } catch (e: Exception) {
-                    val msg = "Got error while processing commits ${currCommit.name} and ${prevCommit.name}"
+                    val msg = "Got error while processing commit ${commit.name}"
                     throw ProcessInThreadPoolException(msg, e)
                 }
             }
@@ -71,7 +70,7 @@ class FilesOwnershipMiner(
         return futures
     }
 
-    override fun process(dataProcessor: FilesOwnershipDataProcessor, currCommit: RevCommit, prevCommit: RevCommit) {}
+    override fun process(dataProcessor: FilesOwnershipDataProcessor, commit: RevCommit) {}
 
     override fun run(dataProcessor: FilesOwnershipDataProcessor) {
         val git = threadLocalGit.get()
@@ -107,7 +106,7 @@ class FilesOwnershipMiner(
             }
 
             if (num % logFrequency == 0 || num == futures.size) {
-                println("Processed $num pairs of commits out of ${futures.size}")
+                println("Processed $num commits out of ${futures.size}")
             }
             num++
 

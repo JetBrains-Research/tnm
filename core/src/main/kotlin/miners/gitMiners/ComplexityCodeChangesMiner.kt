@@ -7,7 +7,6 @@ import dataProcessor.inputData.FileModification
 import miners.gitMiners.UtilGitMiner.isBugFixCommit
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
-import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.util.io.DisabledOutputStream
 import util.ProjectConfig
@@ -27,19 +26,18 @@ class ComplexityCodeChangesMiner(
 
     override fun process(
         dataProcessor: ComplexityCodeChangesDataProcessor,
-        currCommit: RevCommit,
-        prevCommit: RevCommit
+        commit: RevCommit
     ) {
-        if (!isFeatureIntroductionCommit(currCommit)) return
+        if (!isFeatureIntroductionCommit(commit)) return
 
         val git = threadLocalGit.get()
         val reader = threadLocalReader.get()
 
-        val periodId = markedCommits[currCommit.name]!!
+        val periodId = markedCommits[commit.name]!!
 
         when (dataProcessor.changeType) {
             ChangeType.LINES -> {
-                val diffs = reader.use { UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, it, git) }
+                val diffs = reader.use { UtilGitMiner.getDiffsWithoutText(commit, it, git) }
 
                 val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
                 diffFormatter.setRepository(repository)
@@ -66,7 +64,7 @@ class ComplexityCodeChangesMiner(
             ChangeType.FILE -> {
                 val changedFiles = reader.use {
                     UtilGitMiner.getChangedFiles(
-                        currCommit, prevCommit, it, git
+                        commit, it, git
                     )
                 }
 
@@ -93,7 +91,7 @@ class ComplexityCodeChangesMiner(
 
     private fun splitInPeriods(dataProcessor: ComplexityCodeChangesDataProcessor): List<List<RevCommit>> {
         val git = threadLocalGit.get()
-        val commitsInBranch = UtilGitMiner.getCommits(git, repository, neededBranch, reversed)
+        val commitsInBranch = UtilGitMiner.getCommits(git, repository, neededBranch)
         if (commitsInBranch.isEmpty()) return listOf()
 
         return when (dataProcessor.periodType) {

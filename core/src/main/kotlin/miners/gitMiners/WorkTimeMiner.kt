@@ -2,7 +2,6 @@ package miners.gitMiners
 
 import dataProcessor.WorkTimeDataProcessor
 import dataProcessor.inputData.UserCommitDate
-import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig
 import java.io.File
@@ -23,9 +22,9 @@ class WorkTimeMiner(
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner<WorkTimeDataProcessor>(repositoryFile, neededBranches, numThreads = numThreads) {
 
-    override fun process(dataProcessor: WorkTimeDataProcessor, currCommit: RevCommit, prevCommit: RevCommit) {
-        val user = currCommit.authorIdent.emailAddress
-        val date = Date(currCommit.commitTime * 1000L)
+    override fun process(dataProcessor: WorkTimeDataProcessor, commit: RevCommit) {
+        val user = commit.authorIdent.emailAddress
+        val date = Date(commit.commitTime * 1000L)
 
         val data = UserCommitDate(user, date)
         dataProcessor.processData(data)

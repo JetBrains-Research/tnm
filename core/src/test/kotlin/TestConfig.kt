@@ -1,4 +1,3 @@
-import org.eclipse.jgit.internal.storage.file.FileRepository
 import java.io.File
 
 object TestConfig {
