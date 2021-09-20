@@ -190,28 +190,28 @@ class MyDataProcessor : DataProcessorMapped<UserName>() {
     }
 
     override fun calculate() {
-        println("Calculation called!")
+      println("Calculation called!")
     }
 }
 
 // Extend GitMiner and override function [process]
 class MyGitMiner(
-    repository: FileRepository,
-    neededBranches: Set<String>,
-    numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
+  repository: File,
+  neededBranches: Set<String>,
+  numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner<MyDataProcessor>(repository, neededBranches, numThreads = numThreads) {
-    override fun process(dataProcessor: MyDataProcessor, currCommit: RevCommit, prevCommit: RevCommit) {
-        val data = UserName(currCommit.authorIdent.emailAddress)
-        dataProcessor.processData(data)
-    }
+  override fun process(dataProcessor: MyDataProcessor, commit: RevCommit) {
+    val data = UserName(commit.authorIdent.emailAddress)
+    dataProcessor.processData(data)
+  }
 }
 
 fun main() {
-    val repository = FileRepository("./.git")
-    val branches = setOf("main")
-    val numThreads = 4
+  val repository = File("./.git")
+  val branches = setOf("main")
+  val numThreads = 4
 
-    val miner = MyGitMiner(repository, branches, numThreads)
+  val miner = MyGitMiner(repository, branches, numThreads)
     val dataProcessor = MyDataProcessor()
     miner.run(dataProcessor)
 

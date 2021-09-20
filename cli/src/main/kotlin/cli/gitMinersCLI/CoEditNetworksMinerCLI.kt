@@ -30,9 +30,8 @@ class CoEditNetworksMinerCLI : GitMinerMultithreadedOneBranchCLI(
     private val idToCommitJsonFile by idToCommitOption()
 
     override fun run() {
-        val repository = FileRepository(repositoryDirectory)
         val dataProcessor = CoEditNetworksDataProcessor()
-        val miner = CoEditNetworksMiner(repository, branch, numThreads = numThreads)
+        val miner = CoEditNetworksMiner(repositoryDirectory, branch, numThreads = numThreads)
         miner.run(dataProcessor)
 
         HelpFunctionsUtil.saveToJson(

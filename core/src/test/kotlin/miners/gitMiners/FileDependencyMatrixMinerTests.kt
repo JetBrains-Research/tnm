@@ -1,7 +1,7 @@
 package miners.gitMiners
 
 import TestConfig.branches
-import TestConfig.repository
+import TestConfig.gitDir
 import dataProcessor.FileDependencyMatrixDataProcessor
 import org.junit.Test
 import util.ProjectConfig
@@ -20,7 +20,7 @@ internal class FileDependencyMatrixMinerTests : GitMinerTest {
     private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Map<String, Map<String, Int>> {
         val dataProcessor = FileDependencyMatrixDataProcessor()
 
-        val miner = FileDependencyMatrixMiner(repository, numThreads = numThreads, neededBranches = branches)
+        val miner = FileDependencyMatrixMiner(gitDir, numThreads = numThreads, neededBranches = branches)
         miner.run(dataProcessor)
 
         assertTrue(dataProcessor.fileDependencyMatrix.isNotEmpty())

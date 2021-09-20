@@ -28,9 +28,8 @@ class WorkTimeMinerCLI : GitMinerMultithreadedMultipleBranchesCLI(
     private val idToUserJsonFile by idToUserOption()
 
     override fun run() {
-        val repository = FileRepository(repositoryDirectory)
         val dataProcessor = WorkTimeDataProcessor()
-        val miner = WorkTimeMiner(repository, branches, numThreads = numThreads)
+        val miner = WorkTimeMiner(repositoryDirectory, branches, numThreads = numThreads)
         miner.run(dataProcessor)
 
         HelpFunctionsUtil.saveToJson(

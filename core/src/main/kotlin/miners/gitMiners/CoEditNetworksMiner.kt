@@ -7,18 +7,18 @@ import dataProcessor.inputData.entity.FileEdit
 import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
-import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
 // TODO: hot spots: read line, levenshtein
 class CoEditNetworksMiner(
-    repository: FileRepository,
+    repositoryFile: File,
     private val neededBranch: String,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
-) : GitMiner<CoEditNetworksDataProcessor>(repository, setOf(neededBranch), numThreads = numThreads) {
+) : GitMiner<CoEditNetworksDataProcessor>(repositoryFile, setOf(neededBranch), numThreads = numThreads) {
     companion object {
         private const val ADD_MARK = '+'
         private const val DELETE_MARK = '-'
@@ -47,13 +47,13 @@ class CoEditNetworksMiner(
     private val prevAndNextCommit: ConcurrentHashMap<String, Pair<CommitInfo, CommitInfo>> = ConcurrentHashMap()
 
     // TODO: file_renaming, binary_file_change, cyclomatic_complexity
-    override fun process(dataProcessor: CoEditNetworksDataProcessor, currCommit: RevCommit, prevCommit: RevCommit) {
+    override fun process(dataProcessor: CoEditNetworksDataProcessor, commit: RevCommit) {
         val git = threadLocalGit.get()
         val reader = threadLocalReader.get()
 
         // get all diffs and then proceed separately
         val diffs = reader.let {
-            UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, it, git)
+            UtilGitMiner.getDiffsWithoutText(commit, it, git)
         }
 
         val edits = mutableListOf<FileEdit>()
@@ -125,9 +125,8 @@ class CoEditNetworksMiner(
             out.reset()
         }
 
-        val hashCurr = currCommit.name
-        val (prevCommitInfo, nextCommitInfo) = prevAndNextCommit.computeIfAbsent(hashCurr) { CommitInfo() to CommitInfo() }
-        val commitInfo = CommitInfo(currCommit)
+        val (prevCommitInfo, nextCommitInfo) = prevAndNextCommit.computeIfAbsent(commit.name) { CommitInfo() to CommitInfo() }
+        val commitInfo = CommitInfo(commit)
 
         val data = CoEditInfo(prevCommitInfo, commitInfo, nextCommitInfo, edits)
 

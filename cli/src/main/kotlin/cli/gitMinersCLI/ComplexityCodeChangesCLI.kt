@@ -101,7 +101,6 @@ class ComplexityCodeChangesCLI : GitMinerMultithreadedOneBranchCLI(
     private val idToFileJsonFile by idToFileOption()
 
     override fun run() {
-        val repository = FileRepository(repositoryDirectory)
         val dataProcessor = ComplexityCodeChangesDataProcessor(
             numOfMonthInPeriod = numOfMonth,
             numOfCommitsInPeriod = numOfCommits,
@@ -109,7 +108,7 @@ class ComplexityCodeChangesCLI : GitMinerMultithreadedOneBranchCLI(
             periodType = periodTypeStringToEnum[periodType]!!
         )
 
-        val miner = ComplexityCodeChangesMiner(repository, branch, numThreads = numThreads)
+        val miner = ComplexityCodeChangesMiner(repositoryDirectory, branch, numThreads = numThreads)
         miner.run(dataProcessor)
 
         HelpFunctionsUtil.saveToJson(

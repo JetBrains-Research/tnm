@@ -3,9 +3,8 @@ package cli.calculculationsCLI
 import calculations.CoordinationNeedsMatrixCalculation
 import dataProcessor.AssignmentMatrixDataProcessor
 import dataProcessor.FileDependencyMatrixDataProcessor
-import miners.gitMiners.AssignmentMatrixMiner
 import miners.gitMiners.FileDependencyMatrixMiner
-import org.eclipse.jgit.internal.storage.file.FileRepository
+import miners.gitMiners.UserChangedFilesMiner
 import util.HelpFunctionsUtil
 import java.io.File
 
@@ -35,18 +34,17 @@ class CoordinationNeedsMatrixCalculationCLI : CalculationCLI(
     private val idToFileJsonFile by idToFileOption()
 
     override fun run() {
-        val repository = FileRepository(repositoryDirectory)
         val assignmentMatrixDataProcessor = AssignmentMatrixDataProcessor()
-        val assignmentMatrixMiner = AssignmentMatrixMiner(repository, branches, numThreads = numOfThreads)
-        assignmentMatrixMiner.run(assignmentMatrixDataProcessor)
+        val userChangedFilesMiner = UserChangedFilesMiner(repositoryDirectory, branches, numThreads = numOfThreads)
+        userChangedFilesMiner.run(assignmentMatrixDataProcessor)
         val numOfUsers = assignmentMatrixDataProcessor.idToUser.size
 
         val fileDependencyDataProcessor = FileDependencyMatrixDataProcessor()
-        val fileDependencyMiner = FileDependencyMatrixMiner(repository, branches, numThreads = numOfThreads)
+        val fileDependencyMiner = FileDependencyMatrixMiner(repositoryDirectory, branches, numThreads = numOfThreads)
         fileDependencyMiner.run(fileDependencyDataProcessor)
 
         val numOfFiles = fileDependencyDataProcessor.idToFile.size
-        val fileDependencyMatrix = HelpFunctionsUtil.convertMapToArray(
+        val fileDependencyMatrix = HelpFunctionsUtil.convertMapToNd4jArray(
             HelpFunctionsUtil.changeKeysInMapOfMaps(
                 fileDependencyDataProcessor.fileDependencyMatrix,
                 fileDependencyDataProcessor.idToFile, assignmentMatrixDataProcessor.fileToId,
@@ -57,7 +55,7 @@ class CoordinationNeedsMatrixCalculationCLI : CalculationCLI(
             numOfFiles
         )
 
-        val assignmentMatrix = HelpFunctionsUtil.convertMapToArray(
+        val assignmentMatrix = HelpFunctionsUtil.convertMapToNd4jArray(
             assignmentMatrixDataProcessor.assignmentMatrix,
             numOfUsers,
             numOfFiles

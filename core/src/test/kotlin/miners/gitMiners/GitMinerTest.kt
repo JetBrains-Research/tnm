@@ -76,8 +76,8 @@ internal interface GitMinerTest : GitTest {
     }
 
     fun compareMapsOfMapsDouble(
-        mapOneThread: Map<String, Map<String, Double>>,
-        mapMultithreading: Map<String, Map<String, Double>>
+        mapOneThread: Map<String, Map<String, Float>>,
+        mapMultithreading: Map<String, Map<String, Float>>
     ) {
 
         for (entry1 in mapOneThread.entries) {
@@ -91,7 +91,7 @@ internal interface GitMinerTest : GitTest {
                 val v2 = mapMultithreading[k1]?.get(k2)
                 assertNotNull(v2, "got null in v2 : [$k1][$k2]")
 
-                Assert.assertEquals(v1, v2, 0.0001)
+                Assert.assertEquals(v1, v2, 0.0001f)
             }
         }
     }

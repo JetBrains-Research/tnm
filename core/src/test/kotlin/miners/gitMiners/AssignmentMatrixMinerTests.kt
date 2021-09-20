@@ -1,7 +1,7 @@
 package miners.gitMiners
 
 import TestConfig.branches
-import TestConfig.repository
+import TestConfig.gitDir
 import dataProcessor.AssignmentMatrixDataProcessor
 import org.junit.Test
 import util.ProjectConfig
@@ -19,7 +19,7 @@ internal class AssignmentMatrixMinerTests : GitMinerTest {
 
     private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Map<String, Map<String, Int>> {
         val dataProcessor = AssignmentMatrixDataProcessor()
-        val miner = AssignmentMatrixMiner(repository, numThreads = numThreads, neededBranches = branches)
+        val miner = UserChangedFilesMiner(gitDir, numThreads = numThreads, neededBranches = branches)
         miner.run(dataProcessor)
 
         assertTrue(dataProcessor.assignmentMatrix.isNotEmpty())

@@ -5,40 +5,41 @@ import dataProcessor.ComplexityCodeChangesDataProcessor.ChangeType
 import dataProcessor.ComplexityCodeChangesDataProcessor.PeriodType
 import dataProcessor.inputData.FileModification
 import miners.gitMiners.UtilGitMiner.isBugFixCommit
+import miners.gitMiners.UtilGitMiner.isNotNeededFilePath
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
-import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.util.io.DisabledOutputStream
 import util.ProjectConfig
+import java.io.File
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 
 class ComplexityCodeChangesMiner(
-    repository: FileRepository,
+    repositoryFile: File,
     private val neededBranch: String,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS,
-) : GitMiner<ComplexityCodeChangesDataProcessor>(repository, setOf(neededBranch), numThreads = numThreads) {
+    val filesToProceed: Set<String>? = null
+) : GitMiner<ComplexityCodeChangesDataProcessor>(repositoryFile, setOf(neededBranch), numThreads = numThreads) {
     // Mark each commit for period
     // [commitId][periodId]
     private val markedCommits = ConcurrentHashMap<String, Int>()
 
     override fun process(
         dataProcessor: ComplexityCodeChangesDataProcessor,
-        currCommit: RevCommit,
-        prevCommit: RevCommit
+        commit: RevCommit
     ) {
-        if (!isFeatureIntroductionCommit(currCommit)) return
+        if (!isFeatureIntroductionCommit(commit)) return
 
         val git = threadLocalGit.get()
         val reader = threadLocalReader.get()
 
-        val periodId = markedCommits[currCommit.name]!!
+        val periodId = markedCommits[commit.name]!!
 
         when (dataProcessor.changeType) {
             ChangeType.LINES -> {
-                val diffs = reader.use { UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, it, git) }
+                val diffs = reader.use { UtilGitMiner.getDiffsWithoutText(commit, it, git) }
 
                 val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
                 diffFormatter.setRepository(repository)
@@ -46,7 +47,8 @@ class ComplexityCodeChangesMiner(
                 diffFormatter.isDetectRenames = true
 
                 for (diff in diffs) {
-                    val filePath = diff.oldPath
+                    val filePath = UtilGitMiner.getFilePath(diff)
+                    if (isNotNeededFilePath(filePath, filesToProceed)) continue
 
                     val editList = diffFormatter.toFileHeader(diff).toEditList()
                     for (edit in editList) {
@@ -65,11 +67,13 @@ class ComplexityCodeChangesMiner(
             ChangeType.FILE -> {
                 val changedFiles = reader.use {
                     UtilGitMiner.getChangedFiles(
-                        currCommit, prevCommit, it, git
+                        commit, it, git
                     )
                 }
 
                 for (filePath in changedFiles) {
+                    if (isNotNeededFilePath(filePath, filesToProceed)) continue
+
                     val data = FileModification(periodId, filePath, 1)
                     dataProcessor.processData(data)
                 }
@@ -92,7 +96,7 @@ class ComplexityCodeChangesMiner(
 
     private fun splitInPeriods(dataProcessor: ComplexityCodeChangesDataProcessor): List<List<RevCommit>> {
         val git = threadLocalGit.get()
-        val commitsInBranch = git.log().add(repository.resolve(neededBranch)).call().toList()
+        val commitsInBranch = UtilGitMiner.getCommits(git, repository, neededBranch)
         if (commitsInBranch.isEmpty()) return listOf()
 
         return when (dataProcessor.periodType) {

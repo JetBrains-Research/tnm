@@ -28,9 +28,8 @@ class FileDependencyMatrixMinerCLI :
     private val idToFileJsonFile by idToFileOption()
 
     override fun run() {
-        val repository = FileRepository(repositoryDirectory)
         val dataProcessor = FileDependencyMatrixDataProcessor()
-        val miner = FileDependencyMatrixMiner(repository, branches, numThreads = numThreads)
+        val miner = FileDependencyMatrixMiner(repositoryDirectory, branches, numThreads = numThreads)
         miner.run(dataProcessor)
 
         HelpFunctionsUtil.saveToJson(

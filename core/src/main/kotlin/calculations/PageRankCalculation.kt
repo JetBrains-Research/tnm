@@ -13,8 +13,8 @@ class PageRankCalculation(
         const val DEFAULT_ALPHA = 0.85
     }
 
-    private var _pageRank: Map<Int, Double>? = null
-    val pageRank: Map<Int, Double>
+    private var _pageRank: Map<Int, Float>? = null
+    val pageRank: Map<Int, Float>
         get() = _pageRank ?: HashMap()
 
     override fun run() {
@@ -35,7 +35,7 @@ class PageRankCalculation(
         }
 
         val finalGraph = graphBuilder.build()
-        _pageRank = PageRank(finalGraph, alpha).scores
+        _pageRank = PageRank(finalGraph, alpha).scores.mapValues { it.value.toFloat() }
     }
 
 }

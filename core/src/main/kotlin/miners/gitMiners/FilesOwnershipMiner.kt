@@ -4,21 +4,23 @@ import dataProcessor.FilesOwnershipDataProcessor
 import dataProcessor.initData.LatestCommitOwnedLines
 import dataProcessor.initData.entity.FileLineOwnedByUser
 import dataProcessor.inputData.FileLinesAddedByUser
+import miners.gitMiners.UtilGitMiner.isNotNeededFilePath
 import miners.gitMiners.exceptions.ProcessInThreadPoolException
 import org.eclipse.jgit.diff.EditList
 import org.eclipse.jgit.diff.RawTextComparator
-import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.HelpFunctionsUtil
 import util.ProjectConfig
+import java.io.File
 import java.util.*
 import java.util.concurrent.*
 
 class FilesOwnershipMiner(
-    repository: FileRepository,
-    private val neededBranch: String,
-    numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
-) : GitMiner<FilesOwnershipDataProcessor>(repository, setOf(neededBranch), numThreads = numThreads) {
+    repositoryFile: File,
+    val neededBranch: String,
+    numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS,
+    val filesToProceed: Set<String>? = null
+) : GitMiner<FilesOwnershipDataProcessor>(repositoryFile, setOf(neededBranch), numThreads = numThreads) {
 
     private data class FutureResult(
         val listOfEditsToFile: List<Pair<EditList, String>>,
@@ -32,8 +34,8 @@ class FilesOwnershipMiner(
     ): List<Future<FutureResult>> {
         // TODO: Refactor
         val futures = ArrayList<Future<FutureResult>>()
-        for ((currCommit, prevCommit) in commitsInBranch.windowed(2)) {
-            if (!addProceedCommits(currCommit, prevCommit)) continue
+        for (commit in commitsInBranch) {
+            if (!addProceedCommits(commit)) continue
 
             val callable = Callable {
                 try {
@@ -41,22 +43,24 @@ class FilesOwnershipMiner(
                     val reader = threadLocalReader.get()
                     val diffFormatter = threadLocalDiffFormatter.get()
 
-                    val diffs = reader.use { UtilGitMiner.getDiffsWithoutText(currCommit, prevCommit, it, git) }
-                    val email = currCommit.authorIdent.emailAddress
+                    val diffs = reader.use { UtilGitMiner.getDiffsWithoutText(commit, it, git) }
+                    val email = commit.authorIdent.emailAddress
 
-                    val commitDate = currCommit.authorIdent.getWhen()
+                    val commitDate = commit.authorIdent.getWhen()
 
 
                     val list = mutableListOf<Pair<EditList, String>>()
                     for (diff in diffs) {
+                        val filePath = UtilGitMiner.getFilePath(diff)
+                        if (isNotNeededFilePath(filePath, filesToProceed)) continue
+
                         val editList = diffFormatter.toFileHeader(diff).toEditList()
-                        val filePath = diff.oldPath
                         list.add(editList to filePath)
                     }
 
                     FutureResult(list, commitDate, email)
                 } catch (e: Exception) {
-                    val msg = "Got error while processing commits ${currCommit.name} and ${prevCommit.name}"
+                    val msg = "Got error while processing commit ${commit.name}"
                     throw ProcessInThreadPoolException(msg, e)
                 }
             }
@@ -67,7 +71,7 @@ class FilesOwnershipMiner(
         return futures
     }
 
-    override fun process(dataProcessor: FilesOwnershipDataProcessor, currCommit: RevCommit, prevCommit: RevCommit) {}
+    override fun process(dataProcessor: FilesOwnershipDataProcessor, commit: RevCommit) {}
 
     override fun run(dataProcessor: FilesOwnershipDataProcessor) {
         val git = threadLocalGit.get()
@@ -81,7 +85,7 @@ class FilesOwnershipMiner(
             return
         }
 
-        val latestCommit = commitsInBranch.iterator().next()
+        val latestCommit = commitsInBranch.first()
         val latestCommitDate = latestCommit.authorIdent.getWhen()
 
         val threadPool = Executors.newFixedThreadPool(numThreads)
@@ -103,7 +107,7 @@ class FilesOwnershipMiner(
             }
 
             if (num % logFrequency == 0 || num == futures.size) {
-                println("Processed $num pairs of commits out of ${futures.size}")
+                println("Processed $num commits out of ${futures.size}")
             }
             num++
 
@@ -123,6 +127,7 @@ class FilesOwnershipMiner(
 
         val tasks = mutableListOf<Runnable>()
         for (filePath in filePaths) {
+            if (isNotNeededFilePath(filePath, filesToProceed)) continue
 
             val runnable = Runnable {
                 try {
@@ -159,5 +164,4 @@ class FilesOwnershipMiner(
 
         return concurrentLinkedQueue.toList()
     }
-
 }
