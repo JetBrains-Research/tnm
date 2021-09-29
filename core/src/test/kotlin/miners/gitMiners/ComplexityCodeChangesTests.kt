@@ -19,7 +19,7 @@ class ComplexityCodeChangesTests : GitMinerTest {
 
     private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): ComplexityCodeChangesDataProcessor {
         val dataProcessor = ComplexityCodeChangesDataProcessor()
-        val miner = ComplexityCodeChangesMiner(gitDir, numThreads = numThreads, neededBranch = branch)
+        val miner = ComplexityCodeChangesMiner(gitDir, neededBranch = branch, numThreads = numThreads)
         miner.run(dataProcessor)
 
         assertTrue(dataProcessor.periodsToStats.isNotEmpty())

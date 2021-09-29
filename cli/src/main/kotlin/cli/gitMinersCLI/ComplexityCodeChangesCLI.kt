@@ -13,7 +13,6 @@ import dataProcessor.ComplexityCodeChangesDataProcessor.Companion.DEFAULT_NUM_MO
 import dataProcessor.ComplexityCodeChangesDataProcessor.Companion.DEFAULT_PERIOD_TYPE
 import dataProcessor.ComplexityCodeChangesDataProcessor.PeriodType
 import miners.gitMiners.ComplexityCodeChangesMiner
-import org.eclipse.jgit.internal.storage.file.FileRepository
 import util.HelpFunctionsUtil
 import java.io.File
 

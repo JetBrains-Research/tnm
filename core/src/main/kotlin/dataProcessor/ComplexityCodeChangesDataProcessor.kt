@@ -36,10 +36,18 @@ class ComplexityCodeChangesDataProcessor(
     // Counter of changed files of period
     // [period][fileId] = num of changes
     private val periodToFileChanges = ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>>()
-    private val _periodsToStats = HashMap<Int, PeriodStats>()
 
+    private val _periodsToStats = HashMap<Int, PeriodStats>()
     val periodsToStats: Map<Int, PeriodStats>
         get() = _periodsToStats
+
+    private val _commitsInPeriod = ConcurrentHashMap<Int, Int>()
+    val commitsInPeriod: Map<Int, Int>
+        get() = _commitsInPeriod
+
+    fun incNumOfCommits(period: Int) {
+        _commitsInPeriod.compute(period) { _, v -> if (v == null) 1 else v + 1 }
+    }
 
     override fun processData(data: FileModification) {
         val fileId = fileMapper.add(data.filePath)

@@ -19,12 +19,17 @@ import java.util.concurrent.ConcurrentHashMap
 class ComplexityCodeChangesMiner(
     repositoryFile: File,
     private val neededBranch: String,
-    numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS,
-    val filesToProceed: Set<String>? = null
-) : GitMiner<ComplexityCodeChangesDataProcessor>(repositoryFile, setOf(neededBranch), numThreads = numThreads) {
+    val filesToProceed: Set<String>? = null,
+    numOfCommits: Int? = null,
+    numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
+) : GitMiner<ComplexityCodeChangesDataProcessor>(repositoryFile, setOf(neededBranch), numOfCommits, numThreads) {
     // Mark each commit for period
     // [commitId][periodId]
     private val markedCommits = ConcurrentHashMap<String, Int>()
+
+    private val _periodToDate = mutableMapOf<Int, Date>()
+    val periodToDate: Map<Int, Date>
+        get() = _periodToDate
 
     override fun process(
         dataProcessor: ComplexityCodeChangesDataProcessor,
@@ -36,6 +41,8 @@ class ComplexityCodeChangesMiner(
         val reader = threadLocalReader.get()
 
         val periodId = markedCommits[commit.name]!!
+
+        var containsNeededFiles = false
 
         when (dataProcessor.changeType) {
             ChangeType.LINES -> {
@@ -49,6 +56,7 @@ class ComplexityCodeChangesMiner(
                 for (diff in diffs) {
                     val filePath = UtilGitMiner.getFilePath(diff)
                     if (isNotNeededFilePath(filePath, filesToProceed)) continue
+                    containsNeededFiles = true
 
                     val editList = diffFormatter.toFileHeader(diff).toEditList()
                     for (edit in editList) {
@@ -59,7 +67,6 @@ class ComplexityCodeChangesMiner(
 
                         val data = FileModification(periodId, filePath, modifiedLines)
                         dataProcessor.processData(data)
-
                     }
                 }
             }
@@ -73,11 +80,16 @@ class ComplexityCodeChangesMiner(
 
                 for (filePath in changedFiles) {
                     if (isNotNeededFilePath(filePath, filesToProceed)) continue
+                    containsNeededFiles = true
 
                     val data = FileModification(periodId, filePath, 1)
                     dataProcessor.processData(data)
                 }
             }
+        }
+
+        if (containsNeededFiles) {
+            dataProcessor.incNumOfCommits(periodId)
         }
 
     }
@@ -148,6 +160,8 @@ class ComplexityCodeChangesMiner(
     private fun markCommits(dataProcessor: ComplexityCodeChangesDataProcessor) {
         val periods = splitInPeriods(dataProcessor)
         for ((i, period) in periods.withIndex()) {
+            val month = getTrimDate(period.first())
+            _periodToDate[i] = month
             for (commit in period) {
                 markedCommits[commit.name] = i
             }
