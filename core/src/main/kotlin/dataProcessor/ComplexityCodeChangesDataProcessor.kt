@@ -68,7 +68,7 @@ class ComplexityCodeChangesDataProcessor(
             var periodEntropy = 0.0
             for ((fileId, numOfChanges) in changes) {
                 val p = numOfChanges.toDouble() / numOfAllChanges
-                val entropy = -p * log2(p)
+                val entropy = -p * log2(p) / log2(numOfAllChanges.toDouble())
                 periodEntropy += entropy
                 filesEntropy.add(Triple(fileId, entropy, p))
             }
