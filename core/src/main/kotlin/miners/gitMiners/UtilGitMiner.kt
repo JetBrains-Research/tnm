@@ -169,8 +169,13 @@ object UtilGitMiner {
     fun getCommits(
         git: Git,
         repository: FileRepository,
-        branchName: String
-    ): List<RevCommit> = git.log().add(repository.resolve(branchName)).call().toList()
+        branchName: String,
+        maxCount: Int? = null
+    ): List<RevCommit> {
+        val command = git.log().add(repository.resolve(branchName))
+        maxCount?.let { command.setMaxCount(it) }
+        return command.call().toList()
+    }
 
 
     fun getAllFilePathsOnCommit(repository: FileRepository, commit: RevCommit): List<String> {
