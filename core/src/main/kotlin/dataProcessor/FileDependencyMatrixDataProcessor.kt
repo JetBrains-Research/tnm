@@ -1,39 +1,29 @@
 package dataProcessor
 
+import dataProcessor.entity.LowerTriangularMatrixCounter
 import dataProcessor.inputData.FilesChangeset
-import java.util.concurrent.ConcurrentHashMap
 
+/**
+ * Class for file dependency matrix
+ * For example:
+ * Change sets {A,B,C} and {A,B} the dependency matrix entries in D would be
+ * D[A,B] = 2, D[A,C] = 1, and D[B,C] = 1
+ *
+ */
 class FileDependencyMatrixDataProcessor : DataProcessorMapped<FilesChangeset>() {
 
-    private val _fileDependencyMatrix: ConcurrentHashMap<Int, ConcurrentHashMap<Int, Int>> =
-        ConcurrentHashMap()
-
-    val fileDependencyMatrix: Map<Int, Map<Int, Int>>
-        get() = _fileDependencyMatrix
+    val counter = LowerTriangularMatrixCounter()
 
     override fun processData(data: FilesChangeset) {
-        val dataList = data.changeset.toList()
+        val dataList = data.changeset.map { fileMapper.add(it) }
 
-        for ((index, currFile) in dataList.withIndex()) {
-            val currFileId = fileMapper.add(currFile)
-            for (otherFile in dataList.subList(index, dataList.lastIndex)) {
-                val otherFileId = fileMapper.add(otherFile)
-
-                if (currFileId == otherFileId)
-                    continue
-
-
-                increment(currFileId, otherFileId)
-                increment(otherFileId, currFileId)
+        for ((index, currFileId) in dataList.withIndex()) {
+            for (otherFileId in dataList.subList(index, dataList.lastIndex)) {
+                counter.increment(currFileId, otherFileId)
             }
         }
     }
 
     override fun calculate() {}
 
-    private fun increment(fileId1: Int, fileId2: Int) {
-        _fileDependencyMatrix
-            .computeIfAbsent(fileId1) { ConcurrentHashMap() }
-            .compute(fileId2) { _, v -> if (v == null) 1 else v + 1 }
-    }
 }

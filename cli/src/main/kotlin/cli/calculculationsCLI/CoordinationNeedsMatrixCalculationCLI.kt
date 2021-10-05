@@ -3,7 +3,7 @@ package cli.calculculationsCLI
 import calculations.CoordinationNeedsMatrixCalculation
 import dataProcessor.AssignmentMatrixDataProcessor
 import dataProcessor.FileDependencyMatrixDataProcessor
-import miners.gitMiners.FileDependencyMatrixMiner
+import miners.gitMiners.FilesChangesetMiner
 import miners.gitMiners.UserChangedFilesMiner
 import util.HelpFunctionsUtil
 import java.io.File
@@ -40,13 +40,13 @@ class CoordinationNeedsMatrixCalculationCLI : CalculationCLI(
         val numOfUsers = assignmentMatrixDataProcessor.idToUser.size
 
         val fileDependencyDataProcessor = FileDependencyMatrixDataProcessor()
-        val fileDependencyMiner = FileDependencyMatrixMiner(repositoryDirectory, branches, numThreads = numOfThreads)
-        fileDependencyMiner.run(fileDependencyDataProcessor)
+        val filesChangesetMiner = FilesChangesetMiner(repositoryDirectory, branches, numThreads = 1)
+        filesChangesetMiner.run(fileDependencyDataProcessor)
 
         val numOfFiles = fileDependencyDataProcessor.idToFile.size
-        val fileDependencyMatrix = HelpFunctionsUtil.convertMapToNd4jArray(
+        val fileDependencyMatrix = HelpFunctionsUtil.convertLowerTriangleMapToNd4jArray(
             HelpFunctionsUtil.changeKeysInMapOfMaps(
-                fileDependencyDataProcessor.fileDependencyMatrix,
+                fileDependencyDataProcessor.counter.toMap(),
                 fileDependencyDataProcessor.idToFile, assignmentMatrixDataProcessor.fileToId,
                 fileDependencyDataProcessor.idToFile, assignmentMatrixDataProcessor.fileToId
 
