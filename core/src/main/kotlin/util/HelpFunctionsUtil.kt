@@ -86,27 +86,6 @@ object HelpFunctionsUtil {
         return result
     }
 
-    fun convertMapToNd4jArray(map: Map<Int, Map<Int, Int>>, rows: Int, columns: Int): INDArray {
-        val result = Array(rows) { FloatArray(columns) }
-        for ((x, innerMap) in map) {
-            for ((y, value) in innerMap) {
-                result[x][y] = value.toFloat()
-            }
-        }
-        return Nd4j.create(result)
-    }
-
-    fun convertLowerTriangleMapToNd4jArray(map: Map<Int, Map<Int, Int>>, rows: Int, columns: Int): INDArray {
-        val result = Array(rows) { FloatArray(columns) }
-        for ((x, innerMap) in map) {
-            for ((y, value) in innerMap) {
-                result[x][y] = value.toFloat()
-                result[y][x] = value.toFloat()
-            }
-        }
-        return Nd4j.create(result)
-    }
-
     fun convertMapToArray(map: Map<Int, Map<Int, Int>>, rows: Int, columns: Int): Array<FloatArray> {
         val result = Array(rows) { FloatArray(columns) }
         for ((x, innerMap) in map) {
@@ -115,6 +94,27 @@ object HelpFunctionsUtil {
             }
         }
         return result
+    }
+
+    fun convertMapToNd4jArray(map: Map<Int, Map<Int, Int>>, rows: Int, columns: Int): INDArray {
+        val result = convertMapToArray(map, rows, columns)
+        return Nd4j.create(result)
+    }
+
+    fun convertLowerTriangleMapToArray(map: Map<Int, Map<Int, Int>>, rows: Int, columns: Int): Array<FloatArray> {
+        val result = Array(rows) { FloatArray(columns) }
+        for ((x, innerMap) in map) {
+            for ((y, value) in innerMap) {
+                result[x][y] = value.toFloat()
+                result[y][x] = value.toFloat()
+            }
+        }
+        return result
+    }
+
+    fun convertLowerTriangleMapToNd4jArray(map: Map<Int, Map<Int, Int>>, rows: Int, columns: Int): INDArray {
+        val result = convertLowerTriangleMapToArray(map, rows, columns)
+        return Nd4j.create(result)
     }
 
     fun normalizeMax(matrix: INDArray) {
