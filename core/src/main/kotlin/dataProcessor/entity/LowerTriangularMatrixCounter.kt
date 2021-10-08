@@ -13,11 +13,19 @@ class LowerTriangularMatrixCounter(val chunkSize: Int = 10_000) {
     private fun getIndex(row: Int, column: Int): Int {
         val (i, j) =
             if (row > column) {
-                row to column
+                row + 1 to column + 1
             } else {
-                column to row
+                column + 1 to row + 1
             }
-        return Math.addExact(Math.multiplyExact(i, i - 1) / 2, j)
+        return Math.addExact(Math.multiplyExact(i, i - 1) / 2, j) - 1
+    }
+
+    private fun getRow(index: Int) =
+        ((1.0 + sqrt((1.0 + Math.multiplyExact(8, (index).toLong())))) / 2).toInt()
+
+    private fun getColumn(index: Int, row: Int): Int {
+        val rowL = row.toLong()
+        return index - (Math.multiplyExact(rowL, rowL - 1) / 2).toInt() + 1
     }
 
     private fun extendChunks(index: Int) {
@@ -53,11 +61,14 @@ class LowerTriangularMatrixCounter(val chunkSize: Int = 10_000) {
 
                 val index = chunkId * chunkSize + valueId
 
-                val row = ((1.0 + sqrt((1.0 + 8 * index))) / 2).toInt()
-                val column = index - Math.multiplyExact(row, row - 1) / 2
+                val row = getRow(index)
+                val column = getColumn(index, row)
+
+                val fileId1 = row - 1
+                val fileId2 = column - 1
 
                 result
-                    .computeIfAbsent(row) { HashMap() }[column] = value
+                    .computeIfAbsent(fileId1) { HashMap() }[fileId2] = value
             }
         }
 
