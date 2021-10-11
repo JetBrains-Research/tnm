@@ -88,8 +88,7 @@ abstract class GitMiner<T>(
             println("Start mining for branch ${UtilGitMiner.getShortBranchName(branch.name)}")
 
             val commitsInBranch = getUnprocessedCommits(branch.name)
-            val commitsPairsCount = commitsInBranch.size - 1
-            if (commitsPairsCount == 0 || commitsPairsCount == -1) {
+            if (commitsInBranch.isEmpty()) {
                 println("Nothing to proceed in branch $branch")
                 continue
             }
@@ -109,8 +108,8 @@ abstract class GitMiner<T>(
                         throw ProcessInThreadPoolException(msg, e)
                     } finally {
                         val num = proceedCommits.incrementAndGet()
-                        if (num % logFrequency == 0 || num == commitsPairsCount) {
-                            println("Processed $num commits out of $commitsPairsCount")
+                        if (num % logFrequency == 0 || num == commitsInBranch.size) {
+                            println("Processed $num commits out of ${commitsInBranch.size}")
                         }
 
                     }
