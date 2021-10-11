@@ -4,7 +4,7 @@ import dataProcessor.entity.LowerTriangularMatrixCounter
 import dataProcessor.inputData.FilesChangeset
 import util.mappers.Mapper
 
-class DifferentImportDataProcessor(val modules: Set<String>) : DataProcessorMapped<FilesChangeset>() {
+class DifferentModulesDataProcessor(val modules: Set<String>) : DataProcessorMapped<FilesChangeset>() {
     class ModuleMapper : Mapper() {
         val moduleToId: Map<String, Int>
             get() = entityToId
