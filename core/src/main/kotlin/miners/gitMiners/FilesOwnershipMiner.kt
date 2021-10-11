@@ -79,8 +79,7 @@ class FilesOwnershipMiner(
 
         // TODO: Refactor, code
         val commitsInBranch = getUnprocessedCommits(branch.name)
-        val commitsPairsCount = commitsInBranch.size - 1
-        if (commitsPairsCount == 0 || commitsPairsCount == -1) {
+        if (commitsInBranch.isEmpty()) {
             println("Nothing to proceed in branch $branch")
             return
         }
