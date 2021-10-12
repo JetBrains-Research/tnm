@@ -1,26 +1,34 @@
 package calculations
 
-import org.nd4j.linalg.api.ndarray.INDArray
-import org.nd4j.linalg.factory.Nd4j
-import util.HelpFunctionsUtil
+import org.jetbrains.kotlinx.multik.api.linalg.dot
+import org.jetbrains.kotlinx.multik.api.mk
+import org.jetbrains.kotlinx.multik.api.ndarray
+import org.jetbrains.kotlinx.multik.ndarray.data.D2Array
+import org.jetbrains.kotlinx.multik.ndarray.operations.div
+import org.jetbrains.kotlinx.multik.ndarray.operations.max
 
 
 class CoordinationNeedsMatrixCalculation(
-    private val fileDependencyMatrix: INDArray,
-    private val assignmentMatrix: INDArray
+    fileDependencyMatrix: FloatArray,
+    assignmentMatrix: FloatArray,
+    numOfUsers: Int,
+    numOfFiles: Int
 ) : Calculation {
 
-    constructor(fileDependencyArray: Array<FloatArray>, assignmentArray: Array<FloatArray>) : this(
-        Nd4j.create(fileDependencyArray),
-        Nd4j.create(assignmentArray)
-    )
+    private val arrFDM: D2Array<Float>
+    private val arrAM: D2Array<Float>
 
-    private var _coordinationNeeds: INDArray? = null
-    val coordinationNeeds: Array<out FloatArray>
-        get() = _coordinationNeeds?.toFloatMatrix() ?: emptyArray()
+    init {
+        arrFDM = mk.ndarray(fileDependencyMatrix, numOfFiles, numOfFiles)
+        arrAM = mk.ndarray(assignmentMatrix, numOfUsers, numOfFiles)
+    }
+
+    private var _coordinationNeeds: D2Array<Float>? = null
+    val coordinationNeeds: D2Array<Float>?
+        get() = _coordinationNeeds
 
     override fun run() {
-        _coordinationNeeds = assignmentMatrix.mmul(fileDependencyMatrix).mmul(assignmentMatrix.transpose())
-        _coordinationNeeds?.let { HelpFunctionsUtil.normalizeMax(it) }
+        val result = mk.linalg.dot(mk.linalg.dot(arrAM, arrFDM), arrAM.transpose())
+        _coordinationNeeds = result / result.max()!!
     }
 }
