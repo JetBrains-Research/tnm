@@ -61,17 +61,16 @@ class CoordinationNeedsMatrixCalculationCLI : CalculationCLI(
             numOfFiles
         )
 
-        val calculation = CoordinationNeedsMatrixCalculation(
+        val coordinationNeeds = CoordinationNeedsMatrixCalculation.run(
             fileDependencyMatrix,
             assignmentMatrix,
             numOfUsers,
             numOfFiles
         )
-        calculation.run()
 
         HelpFunctionsUtil.saveToJson(
             coordinationNeedsJsonFile,
-            calculation.coordinationNeeds.toString()
+            coordinationNeeds
         )
 
         HelpFunctionsUtil.saveToJson(

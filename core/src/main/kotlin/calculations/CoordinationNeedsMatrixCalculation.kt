@@ -8,27 +8,29 @@ import org.jetbrains.kotlinx.multik.ndarray.operations.div
 import org.jetbrains.kotlinx.multik.ndarray.operations.max
 
 
-class CoordinationNeedsMatrixCalculation(
-    fileDependencyMatrix: FloatArray,
-    assignmentMatrix: FloatArray,
-    numOfUsers: Int,
-    numOfFiles: Int
-) : Calculation {
+object CoordinationNeedsMatrixCalculation {
 
-    private val arrFDM: D2Array<Float>
-    private val arrAM: D2Array<Float>
+    fun run(
+        fileDependencyMatrix: FloatArray,
+        assignmentMatrix: FloatArray,
+        numOfUsers: Int,
+        numOfFiles: Int
+    ): Array<FloatArray> {
+        val D: D2Array<Float> = mk.ndarray(fileDependencyMatrix, numOfFiles, numOfFiles)
+        val A: D2Array<Float> = mk.ndarray(assignmentMatrix, numOfUsers, numOfFiles)
+        val CN = mk.linalg.dot(mk.linalg.dot(A, D), A.transpose())
+        val coordinationNeeds = CN / CN.max()!!
 
-    init {
-        arrFDM = mk.ndarray(fileDependencyMatrix, numOfFiles, numOfFiles)
-        arrAM = mk.ndarray(assignmentMatrix, numOfUsers, numOfFiles)
+        // TODO: possible memory problems
+        val result = Array(numOfUsers) { FloatArray(numOfUsers) { 0f } }
+        var idx = 0
+        for (value in coordinationNeeds) {
+            val row = idx / numOfUsers
+            val column = idx % numOfUsers
+            result[row][column] = value
+            idx++
+        }
+        return result
     }
 
-    private var _coordinationNeeds: D2Array<Float>? = null
-    val coordinationNeeds: D2Array<Float>?
-        get() = _coordinationNeeds
-
-    override fun run() {
-        val result = mk.linalg.dot(mk.linalg.dot(arrAM, arrFDM), arrAM.transpose())
-        _coordinationNeeds = result / result.max()!!
-    }
 }

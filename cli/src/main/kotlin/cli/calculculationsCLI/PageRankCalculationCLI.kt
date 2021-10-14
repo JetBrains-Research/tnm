@@ -1,20 +1,19 @@
 package cli.calculculationsCLI
 
 import calculations.PageRankCalculation
-import calculations.PageRankCalculation.Companion.DEFAULT_ALPHA
+import calculations.PageRankCalculation.DEFAULT_ALPHA
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.double
 import dataProcessor.CommitInfluenceGraphDataProcessor
 import miners.gitMiners.CommitInfluenceGraphMiner
-import org.eclipse.jgit.internal.storage.file.FileRepository
 import util.HelpFunctionsUtil
 import java.io.File
 
 class PageRankCalculationCLI : CalculationCLI(
     "PageRankCalculation",
     "Computes PageRank vector which contains importance rankings (in the bug-fixing and bug creation context) " +
-            "for each commit. The computation results are saved to a $HELP_PAGE_RANK."
+        "for each commit. The computation results are saved to a $HELP_PAGE_RANK."
 ) {
 
     companion object {
@@ -46,12 +45,11 @@ class PageRankCalculationCLI : CalculationCLI(
         val miner = CommitInfluenceGraphMiner(repositoryDirectory, branches, numThreads = numThreads)
         miner.run(dataProcessor)
 
-        val calculation = PageRankCalculation(dataProcessor.adjacencyMap, alpha)
-        calculation.run()
+        val pageRank = PageRankCalculation.run(dataProcessor.adjacencyMap, alpha)
 
         HelpFunctionsUtil.saveToJson(
             pageRankJsonFile,
-            calculation.pageRank
+            pageRank
         )
 
         HelpFunctionsUtil.saveToJson(

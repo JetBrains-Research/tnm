@@ -2,25 +2,19 @@ package calculations
 
 import util.Graph
 
-/**
- * Calc mirror congruence
- *
- * @property artifactsRelations
- * @property assignmentMatrix
- * @constructor Create empty Calc mirror congruence
- */
-class MirrorCongruenceCalculation(
-    private val artifactsRelations: Array<Array<Int>>,
-    private val assignmentMatrix: Array<Array<Int>>,
-    private val developersRelations: Array<Array<Int>>
-) : Calculation {
-    var congruence: Float? = null
-        private set
+object MirrorCongruenceCalculation {
 
-    override fun run() {
+    fun run(
+        artifactsRelations: Array<Array<Int>>,
+        assignmentMatrix: Array<Array<Int>>,
+        developersRelations: Array<Array<Int>>
+    ): Float {
         val Gs = createGraph(artifactsRelations)
         val Gp = createGraph(developersRelations)
-        val J = createJ()
+        val J = createJ(
+            artifactsRelations,
+            assignmentMatrix
+        )
 
         var y = 0
         var k = 0
@@ -38,7 +32,9 @@ class MirrorCongruenceCalculation(
                 }
             }
         }
-        congruence = k.toFloat() / y.toFloat()
+
+        val congruence = k.toFloat() / y.toFloat()
+        return congruence
     }
 
     private fun createGraph(adjacencyMatrix: Array<Array<Int>>): Graph<Int> {
@@ -57,7 +53,10 @@ class MirrorCongruenceCalculation(
         return result
     }
 
-    private fun createJ(): Graph<Int> {
+    private fun createJ(
+        artifactsRelations: Array<Array<Int>>,
+        assignmentMatrix: Array<Array<Int>>,
+    ): Graph<Int> {
         val result = Graph<Int>()
         val numOfArtifacts = artifactsRelations.size
         val numOfUsers = assignmentMatrix.size
@@ -68,4 +67,5 @@ class MirrorCongruenceCalculation(
         }
         return result
     }
+
 }
