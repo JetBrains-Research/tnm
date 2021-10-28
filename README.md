@@ -7,17 +7,13 @@ Instead of implementing their own mining pipeline, researchers can use our tool 
 
 TNM incorporates implementations of several established data mining techniques, or individual miners. Every class implements one interface or abstract class for each task type, which makes it easily extendable.
 
-There are the following base classes:
-* Mapper - classes for mapping a specified entity for the unique ID.
-
-[//]: # "for the unique ID?"
-
-* Miner - classes for mining data for one task.
-* DataProcessor - classes for processing mined data. Work as a buffer for `Miner` classes.
-* Calculation - classes for calculating complex dependencies in data. Use data from [GitMiners](#Git+miners).
-  
-[//]: # "Why are GitMiners not listed as base classes? How are they related to Miners?"
-* Visualization - classes for the visualization of processed data.
+Base classes:
+* `Mapper` - assign unique IDs to specific entities, e.g., users.
+* `Miner` - mine data from various sources for one task.
+* [`GitMiner`](#Git+miners) - extend the `Miner` interface. Use specifically Git repositories as the source of data.
+* `DataProcessor` - process mined data. Work as a buffer for `Miner` classes.
+* [`Calculation`](#Calculation) - calculate complex dependencies in data. Use data from GitMiners.
+* [`Visualization`](#Visualization) - visualize processed data.
 
 ### Git miners
 
@@ -53,15 +49,10 @@ The current version of TNM includes the following `GitMiner` implementations:
   Yields a JSON file with a dict of periods that includes the period's entropy and the stats of files changed in that period.
   Each file stat includes entropy and History Complexity Period Factors, such as HCPF2 and HCPF3.
   
-[//]: # "correct? that includes the period's entropy and the stats of files changed in that period."
-
 * `WorkTimeMiner` is a simple miner for mining the distribution of commits over time in the week.
   This data can be used, e.g., to improve work scheduling by finding intersections in the time distributions between different developers.
   
-* `ChangedFilesMiner` is a simple miner for mining sets of changed files for each developer. It can be used, 
-  for example, to derive sets of files edited in common between multiple developers.
-
-[//]: # "edited in common between? = edited by??"
+* `UserChangedFilesMiner` is a simple miner for mining sets of changed files for each developer. It can be used, for example, to count how many times a certain file was edited by specific developers.
 
 ### Calculation
 Some forms of data require non-trivial computations. To ensure extensibility, processing code is separated from the miners into dedicated classes.
