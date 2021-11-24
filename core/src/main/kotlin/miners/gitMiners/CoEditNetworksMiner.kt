@@ -53,7 +53,7 @@ class CoEditNetworksMiner(
 
         // get all diffs and then proceed separately
         val diffs = reader.let {
-            UtilGitMiner.getDiffsWithoutText(commit, it, git)
+            GitMinerUtil.getDiffsWithoutText(commit, it, git)
         }
 
         val edits = mutableListOf<FileEdit>()
@@ -140,7 +140,7 @@ class CoEditNetworksMiner(
 
     private fun getPrevAndNextCommits() {
         val git = threadLocalGit.get()
-        val branch = UtilGitMiner.findNeededBranch(git, neededBranch)
+        val branch = GitMinerUtil.findNeededBranch(git, neededBranch)
 
         val commitsInBranch = getUnprocessedCommits(branch.name)
         for ((next, curr, prev) in commitsInBranch.windowed(3)) {

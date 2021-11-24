@@ -14,7 +14,7 @@ import org.eclipse.jgit.treewalk.TreeWalk
 import util.mappers.FileMapper
 import util.mappers.UserMapper
 
-object UtilGitMiner {
+object GitMinerUtil {
     /**
      * Get diffs for [commit].
      *

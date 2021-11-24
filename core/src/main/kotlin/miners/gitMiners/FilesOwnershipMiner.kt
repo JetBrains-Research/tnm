@@ -4,7 +4,7 @@ import dataProcessor.FilesOwnershipDataProcessor
 import dataProcessor.initData.LatestCommitOwnedLines
 import dataProcessor.initData.entity.FileLineOwnedByUser
 import dataProcessor.inputData.FileLinesAddedByUser
-import miners.gitMiners.UtilGitMiner.isNotNeededFilePath
+import miners.gitMiners.GitMinerUtil.isNotNeededFilePath
 import miners.gitMiners.exceptions.ProcessInThreadPoolException
 import org.eclipse.jgit.diff.EditList
 import org.eclipse.jgit.diff.RawTextComparator
@@ -43,7 +43,7 @@ class FilesOwnershipMiner(
                     val reader = threadLocalReader.get()
                     val diffFormatter = threadLocalDiffFormatter.get()
 
-                    val diffs = reader.use { UtilGitMiner.getDiffsWithoutText(commit, it, git) }
+                    val diffs = reader.use { GitMinerUtil.getDiffsWithoutText(commit, it, git) }
                     val email = commit.authorIdent.emailAddress
 
                     val commitDate = commit.authorIdent.getWhen()
@@ -51,7 +51,7 @@ class FilesOwnershipMiner(
 
                     val list = mutableListOf<Pair<EditList, String>>()
                     for (diff in diffs) {
-                        val filePath = UtilGitMiner.getFilePath(diff)
+                        val filePath = GitMinerUtil.getFilePath(diff)
                         if (isNotNeededFilePath(filePath, filesToProceed)) continue
 
                         val editList = diffFormatter.toFileHeader(diff).toEditList()
@@ -75,7 +75,7 @@ class FilesOwnershipMiner(
 
     override fun run(dataProcessor: FilesOwnershipDataProcessor) {
         val git = threadLocalGit.get()
-        val branch = UtilGitMiner.findNeededBranch(git, neededBranch)
+        val branch = GitMinerUtil.findNeededBranch(git, neededBranch)
 
         // TODO: Refactor, code
         val commitsInBranch = getUnprocessedCommits(branch.name)
@@ -120,7 +120,7 @@ class FilesOwnershipMiner(
     private fun processLatestCommit(latestCommit: RevCommit, threadPool: ExecutorService): List<FileLineOwnedByUser> {
         println("Start processing latest commit")
 
-        val filePaths = UtilGitMiner.getAllFilePathsOnCommit(repository, latestCommit)
+        val filePaths = GitMinerUtil.getAllFilePathsOnCommit(repository, latestCommit)
 
         val concurrentLinkedQueue = ConcurrentLinkedQueue<FileLineOwnedByUser>()
 

@@ -2,7 +2,7 @@ package miners.gitMiners
 
 import dataProcessor.CommitInfluenceGraphDataProcessor
 import dataProcessor.inputData.CommitInfluenceInfo
-import miners.gitMiners.UtilGitMiner.isBugFixCommit
+import miners.gitMiners.GitMinerUtil.isBugFixCommit
 import org.eclipse.jgit.api.BlameCommand
 import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.diff.Edit
@@ -37,7 +37,7 @@ class CommitInfluenceGraphMiner(
             // TODO: strange case
             val prevCommit = if (commit.parents.isNotEmpty()) commit.parents[0] else return
             val diffs =
-                reader.use { UtilGitMiner.getDiffsWithoutText(commit, it, git) }
+                reader.use { GitMinerUtil.getDiffsWithoutText(commit, it, git) }
 
             val adjCommits = getCommitsAdj(diffs, prevCommit)
             val data = CommitInfluenceInfo(commit.name, prevCommit.name, adjCommits)
@@ -68,7 +68,7 @@ class CommitInfluenceGraphMiner(
         val filesCommits = mutableMapOf<String, List<String>>()
         for (diff in diffs) {
             if (diff.changeType != DiffEntry.ChangeType.MODIFY) continue
-            val fileName = UtilGitMiner.getFilePath(diff)
+            val fileName = GitMinerUtil.getFilePath(diff)
 
             var prevCommitBlame = listOf<String>()
 

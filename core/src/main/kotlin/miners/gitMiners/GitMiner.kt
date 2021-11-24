@@ -76,7 +76,7 @@ abstract class GitMiner<T>(
      *
      */
     override fun run(dataProcessor: T) {
-        val branches = UtilGitMiner.findNeededBranches(threadLocalGit.get(), neededBranches)
+        val branches = GitMinerUtil.findNeededBranches(threadLocalGit.get(), neededBranches)
         val threadPool = Executors.newFixedThreadPool(numThreads)
         processAllCommitsInThreadPool(branches, dataProcessor, threadPool)
         threadPool.shutdown()
@@ -85,7 +85,7 @@ abstract class GitMiner<T>(
 
     private fun processAllCommitsInThreadPool(branches: Set<Ref>, dataProcessor: T, threadPool: ExecutorService) {
         for (branch in branches) {
-            println("Start mining for branch ${UtilGitMiner.getShortBranchName(branch.name)}")
+            println("Start mining for branch ${GitMinerUtil.getShortBranchName(branch.name)}")
 
             val commitsInBranch = getUnprocessedCommits(branch.name)
             if (commitsInBranch.isEmpty()) {
@@ -129,7 +129,7 @@ abstract class GitMiner<T>(
             }
 
 
-            println("End mining for branch ${UtilGitMiner.getShortBranchName(branch.name)}")
+            println("End mining for branch ${GitMinerUtil.getShortBranchName(branch.name)}")
         }
     }
 
@@ -151,7 +151,7 @@ abstract class GitMiner<T>(
 
     protected fun getUnprocessedCommits(branchName: String): List<RevCommit> {
         val result = linkedSetOf<RevCommit>()
-        val commitsInBranch = UtilGitMiner.getCommits(threadLocalGit.get(), repository, branchName, numOfCommits)
+        val commitsInBranch = GitMinerUtil.getCommits(threadLocalGit.get(), repository, branchName, numOfCommits)
         for (commit in commitsInBranch) {
             if (checkProceedCommits(commit)) continue
             result.add(commit)

@@ -25,7 +25,7 @@ class FilesChangesetMiner(
         val reader = repository.newObjectReader()
 
         val changedFiles = reader.use {
-            UtilGitMiner.getChangedFiles(commit, it, git)
+            GitMinerUtil.getChangedFiles(commit, it, git)
         }
 
         maxNumOfFiles?.let { if (changedFiles.size > it) return }

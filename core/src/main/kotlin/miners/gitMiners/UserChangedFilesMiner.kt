@@ -20,7 +20,7 @@ class UserChangedFilesMiner(
 
         val changedFiles =
             reader.use {
-                UtilGitMiner.getChangedFiles(commit, it, git)
+                GitMinerUtil.getChangedFiles(commit, it, git)
             }
 
         val data = UserChangedFiles(user, changedFiles)

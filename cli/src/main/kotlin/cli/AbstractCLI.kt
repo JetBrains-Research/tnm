@@ -8,7 +8,7 @@ import com.github.ajalt.clikt.parameters.arguments.validate
 import com.github.ajalt.clikt.parameters.options.*
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.int
-import miners.gitMiners.UtilGitMiner
+import miners.gitMiners.GitMinerUtil
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import util.HelpFunctionsUtil
@@ -44,7 +44,7 @@ abstract class AbstractCLI(name: String, help: String) :
         fun checkBranchesArgsMsg(repository: FileRepository?): String {
             repository ?: return ""
 
-            val branchesShortNames = UtilGitMiner.getBranchesShortNames(Git(repository))
+            val branchesShortNames = GitMinerUtil.getBranchesShortNames(Git(repository))
             return buildString {
                 appendLine("Chose from following branches:")
                 branchesShortNames.forEach { appendLine(it) }
@@ -123,7 +123,7 @@ abstract class AbstractCLI(name: String, help: String) :
         .multiple()
         .unique()
         .validate {
-            require((it - UtilGitMiner.getBranchesShortNames(Git(FileRepository(repositoryDirectory)))).isEmpty()) {
+            require((it - GitMinerUtil.getBranchesShortNames(Git(FileRepository(repositoryDirectory)))).isEmpty()) {
                 checkBranchesArgsMsg(
                     FileRepository(repositoryDirectory)
                 )
@@ -132,7 +132,7 @@ abstract class AbstractCLI(name: String, help: String) :
 
     protected fun oneBranchOption() = argument(help = HELP_ONE_BRANCH)
         .validate {
-            require(it in UtilGitMiner.getBranchesShortNames(Git(FileRepository(repositoryDirectory)))) {
+            require(it in GitMinerUtil.getBranchesShortNames(Git(FileRepository(repositoryDirectory)))) {
                 checkBranchesArgsMsg(
                     FileRepository(repositoryDirectory)
                 )
