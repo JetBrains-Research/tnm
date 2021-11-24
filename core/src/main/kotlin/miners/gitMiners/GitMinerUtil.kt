@@ -7,6 +7,7 @@ import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.lib.Ref
+import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.treewalk.CanonicalTreeParser
 import org.eclipse.jgit.treewalk.EmptyTreeIterator
@@ -178,7 +179,7 @@ object GitMinerUtil {
     }
 
 
-    fun getAllFilePathsOnCommit(repository: FileRepository, commit: RevCommit): List<String> {
+    fun getAllFilePathsOnCommit(repository: Repository, commit: RevCommit): List<String> {
         val filePaths = mutableListOf<String>()
 
         val treeWalk = TreeWalk(repository)

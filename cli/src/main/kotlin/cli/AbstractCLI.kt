@@ -11,6 +11,7 @@ import com.github.ajalt.clikt.parameters.types.int
 import miners.gitMiners.GitMinerUtil
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
+import org.eclipse.jgit.lib.Repository
 import util.HelpFunctionsUtil
 import util.ProjectConfig
 import java.io.File
@@ -41,7 +42,7 @@ abstract class AbstractCLI(name: String, help: String) :
         const val HELP_ONE_BRANCH = "Branch which need to be proceeded "
         const val HELP_MULTIPLE_BRANCHES = "Set of branches which need to be proceeded "
 
-        fun checkBranchesArgsMsg(repository: FileRepository?): String {
+        fun checkBranchesArgsMsg(repository: Repository?): String {
             repository ?: return ""
 
             val branchesShortNames = GitMinerUtil.getBranchesShortNames(Git(repository))
