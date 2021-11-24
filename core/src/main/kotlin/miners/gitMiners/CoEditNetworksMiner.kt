@@ -3,10 +3,7 @@ package miners.gitMiners
 import dataProcessor.CoEditNetworksDataProcessor
 import dataProcessor.inputData.CoEditInfo
 import dataProcessor.inputData.entity.CommitInfo
-import dataProcessor.inputData.entity.FileEdit
-import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.diff.DiffFormatter
-import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig
 import java.io.ByteArrayOutputStream
@@ -19,13 +16,6 @@ class CoEditNetworksMiner(
     private val neededBranch: String,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner<CoEditNetworksDataProcessor>(repositoryFile, setOf(neededBranch), numThreads = numThreads) {
-    companion object {
-        private const val ADD_MARK = '+'
-        private const val DELETE_MARK = '-'
-        private const val DIFF_MARK = '@'
-        private val regex = Regex("@@ -(\\d+)(,\\d+)? \\+(\\d+)(,\\d+)? @@")
-
-    }
 
     private val threadLocalByteArrayOutputStream = object : ThreadLocal<ByteArrayOutputStream>() {
         override fun initialValue(): ByteArrayOutputStream {
@@ -35,12 +25,7 @@ class CoEditNetworksMiner(
 
     private val threadLocalDiffFormatterWithBuffer = object : ThreadLocal<DiffFormatter>() {
         override fun initialValue(): DiffFormatter {
-            val diffFormatter = DiffFormatter(threadLocalByteArrayOutputStream.get())
-            diffFormatter.setRepository(repository)
-            diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
-            diffFormatter.isDetectRenames = true
-            diffFormatter.setContext(0)
-            return diffFormatter
+            return GitMinerUtil.getDiffFormatterWithBuffer(repository, threadLocalByteArrayOutputStream.get())
         }
     }
 
@@ -50,84 +35,11 @@ class CoEditNetworksMiner(
     override fun process(dataProcessor: CoEditNetworksDataProcessor, commit: RevCommit) {
         val git = threadLocalGit.get()
         val reader = threadLocalReader.get()
-
-        // get all diffs and then proceed separately
-        val diffs = reader.let {
-            GitMinerUtil.getDiffsWithoutText(commit, it, git)
-        }
-
-        val edits = mutableListOf<FileEdit>()
-
         val out = threadLocalByteArrayOutputStream.get()
         val diffFormatter = threadLocalDiffFormatterWithBuffer.get()
-
-        for (diff in diffs) {
-            val deleteBlock = mutableListOf<String>()
-            val addBlock = mutableListOf<String>()
-
-            var start = false
-            diffFormatter.format(diff)
-            val diffText = out.toString("UTF-8").split("\n")
-            var preStartLineNum = 0
-            var postStartLineNum = 0
-
-            val oldPath = getFilePath(diff.oldPath)
-            val newPath = getFilePath(diff.newPath)
-
-            for (line in diffText) {
-                if (line.isEmpty()) continue
-
-                val mark = line[0]
-
-                // pass until diffs
-                if (!start) {
-                    if (mark == DIFF_MARK) {
-                        start = true
-                    } else {
-                        continue
-                    }
-                }
-
-                when (mark) {
-                    ADD_MARK -> {
-                        addBlock.add(line.substring(1))
-                    }
-                    DELETE_MARK -> {
-                        deleteBlock.add(line.substring(1))
-                    }
-                    DIFF_MARK -> {
-                        if (addBlock.isNotEmpty() || deleteBlock.isNotEmpty()) {
-                            val data = FileEdit(
-                                addBlock.toList(), deleteBlock.toList(), preStartLineNum,
-                                postStartLineNum, oldPath, newPath
-                            )
-                            edits.add(data)
-
-                            addBlock.clear()
-                            deleteBlock.clear()
-                        }
-
-                        val match = regex.find(line)!!
-                        preStartLineNum = match.groupValues[1].toInt()
-                        postStartLineNum = match.groupValues[3].toInt()
-                    }
-                }
-
-            }
-
-            val data = FileEdit(
-                addBlock, deleteBlock, preStartLineNum,
-                postStartLineNum, oldPath, newPath
-            )
-            edits.add(data)
-
-
-            out.reset()
-        }
-
+        val edits = GitMinerUtil.getFileEdits(commit, repository, reader, git, out, diffFormatter)
         val (prevCommitInfo, nextCommitInfo) = prevAndNextCommit.computeIfAbsent(commit.name) { CommitInfo() to CommitInfo() }
         val commitInfo = CommitInfo(commit)
-
         val data = CoEditInfo(prevCommitInfo, commitInfo, nextCommitInfo, edits)
 
         dataProcessor.processData(data)
@@ -165,12 +77,6 @@ class CoEditNetworksMiner(
                 prevAndNextCommit[hashCommit] = CommitInfo() to CommitInfo()
             }
         }
-    }
-
-    private fun getFilePath(path: String): String {
-        if (path == DiffEntry.DEV_NULL) return ""
-        // delete prefixes a/, b/ of DiffFormatter
-        return path.substring(2)
     }
 
 }

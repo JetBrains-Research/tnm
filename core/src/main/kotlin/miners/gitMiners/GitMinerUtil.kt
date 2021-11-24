@@ -1,10 +1,12 @@
 package miners.gitMiners
 
+import dataProcessor.inputData.entity.FileEdit
 import miners.gitMiners.exceptions.BranchNotExistsException
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.ListBranchCommand
 import org.eclipse.jgit.diff.DiffEntry
-import org.eclipse.jgit.internal.storage.file.FileRepository
+import org.eclipse.jgit.diff.DiffFormatter
+import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.lib.Repository
@@ -14,8 +16,14 @@ import org.eclipse.jgit.treewalk.EmptyTreeIterator
 import org.eclipse.jgit.treewalk.TreeWalk
 import util.mappers.FileMapper
 import util.mappers.UserMapper
+import java.io.ByteArrayOutputStream
 
 object GitMinerUtil {
+    private const val ADD_MARK = '+'
+    private const val DELETE_MARK = '-'
+    private const val DIFF_MARK = '@'
+    private val regex = Regex("@@ -(\\d+)(,\\d+)? \\+(\\d+)(,\\d+)? @@")
+
     /**
      * Get diffs for [commit].
      *
@@ -169,7 +177,7 @@ object GitMinerUtil {
 
     fun getCommits(
         git: Git,
-        repository: FileRepository,
+        repository: Repository,
         branchName: String,
         maxCount: Int? = null
     ): List<RevCommit> {
@@ -205,4 +213,106 @@ object GitMinerUtil {
         return false
     }
 
+    fun getDiffFormatterWithBuffer(
+        repository: Repository,
+        out: ByteArrayOutputStream
+    ): DiffFormatter {
+        val diffFormatter = DiffFormatter(out)
+        diffFormatter.setRepository(repository)
+        diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
+        diffFormatter.isDetectRenames = true
+        diffFormatter.setContext(0)
+        return diffFormatter
+    }
+
+    fun getFileEdits(
+        commit: RevCommit,
+        repository: Repository,
+        reader: ObjectReader,
+        git: Git,
+        out: ByteArrayOutputStream? = null,
+        diffFormatter: DiffFormatter? = null
+    ): List<FileEdit> {
+        val out = out ?: ByteArrayOutputStream()
+        val diffFormatter = diffFormatter ?: getDiffFormatterWithBuffer(repository, out)
+
+        // get all diffs and then proceed separately
+        val diffs = reader.use {
+            getDiffsWithoutText(commit, it, git)
+        }
+
+        val edits = mutableListOf<FileEdit>()
+
+        for (diff in diffs) {
+            val deleteBlock = mutableListOf<String>()
+            val addBlock = mutableListOf<String>()
+
+            var start = false
+            diffFormatter.format(diff)
+            val diffText = out.toString("UTF-8").split("\n")
+            var preStartLineNum = 0
+            var postStartLineNum = 0
+
+            val oldPath = getFilePath(diff.oldPath)
+            val newPath = getFilePath(diff.newPath)
+
+            for (line in diffText) {
+                if (line.isEmpty()) continue
+
+                val mark = line[0]
+
+                // pass until diffs
+                if (!start) {
+                    if (mark == DIFF_MARK) {
+                        start = true
+                    } else {
+                        continue
+                    }
+                }
+
+                when (mark) {
+                    ADD_MARK -> {
+                        addBlock.add(line.substring(1))
+                    }
+                    DELETE_MARK -> {
+                        deleteBlock.add(line.substring(1))
+                    }
+                    DIFF_MARK -> {
+                        if (addBlock.isNotEmpty() || deleteBlock.isNotEmpty()) {
+                            val data = FileEdit(
+                                addBlock.toList(), deleteBlock.toList(), preStartLineNum,
+                                postStartLineNum, oldPath, newPath
+                            )
+                            edits.add(data)
+
+                            addBlock.clear()
+                            deleteBlock.clear()
+                        }
+
+                        val match = regex.find(line)!!
+                        preStartLineNum = match.groupValues[1].toInt()
+                        postStartLineNum = match.groupValues[3].toInt()
+                    }
+                }
+
+            }
+
+            val data = FileEdit(
+                addBlock, deleteBlock, preStartLineNum,
+                postStartLineNum, oldPath, newPath
+            )
+            edits.add(data)
+
+
+            out.reset()
+        }
+
+        return edits
+    }
+
+    private fun getFilePath(path: String): String {
+        if (path == DiffEntry.DEV_NULL) return ""
+        // delete prefixes a/, b/ of DiffFormatter
+        return path.substring(2)
+    }
 }
