@@ -96,11 +96,11 @@ class FilesOwnershipMiner(
         var num = 0
         for (future in futures) {
 
-            val (listsToFileId, diffDays, userId) = future.get()
+            val (listsToFileId, commitDate, user) = future.get()
 
-            for ((editList, fileId) in listsToFileId) {
+            for ((editList, filePath) in listsToFileId) {
                 for (edit in editList) {
-                    val data = FileLinesAddedByUser(edit.beginB..edit.endB, fileId, userId, diffDays)
+                    val data = FileLinesAddedByUser(edit.beginB..edit.endB, filePath, user, commitDate)
                     dataProcessor.processData(data)
                 }
             }
