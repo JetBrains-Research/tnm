@@ -37,7 +37,7 @@ class CoEditNetworksMiner(
         val reader = threadLocalReader.get()
         val out = threadLocalByteArrayOutputStream.get()
         val diffFormatter = threadLocalDiffFormatterWithBuffer.get()
-        val edits = GitMinerUtil.getFileEdits(commit, repository, reader, git, out, diffFormatter)
+        val edits = GitMinerUtil.getFileEdits(commit, reader, git, out, diffFormatter)
         val (prevCommitInfo, nextCommitInfo) = prevAndNextCommit.computeIfAbsent(commit.name) { CommitInfo() to CommitInfo() }
         val commitInfo = CommitInfo(commit)
         val data = CoEditInfo(prevCommitInfo, commitInfo, nextCommitInfo, edits)

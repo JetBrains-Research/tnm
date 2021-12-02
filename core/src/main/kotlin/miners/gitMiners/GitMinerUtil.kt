@@ -2,10 +2,12 @@ package miners.gitMiners
 
 import dataProcessor.inputData.entity.FileEdit
 import miners.gitMiners.exceptions.BranchNotExistsException
+import org.eclipse.jgit.api.BlameCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.ListBranchCommand
 import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.diff.DiffFormatter
+import org.eclipse.jgit.diff.Edit
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.lib.Ref
@@ -230,12 +232,19 @@ object GitMinerUtil {
         repository: Repository,
         reader: ObjectReader,
         git: Git,
-        out: ByteArrayOutputStream? = null,
-        diffFormatter: DiffFormatter? = null
     ): List<FileEdit> {
-        val out = out ?: ByteArrayOutputStream()
-        val diffFormatter = diffFormatter ?: getDiffFormatterWithBuffer(repository, out)
+        val out = ByteArrayOutputStream()
+        val diffFormatter = getDiffFormatterWithBuffer(repository, out)
+        return getFileEdits(commit, reader, git, out, diffFormatter)
+    }
 
+    fun getFileEdits(
+        commit: RevCommit,
+        reader: ObjectReader,
+        git: Git,
+        out: ByteArrayOutputStream,
+        diffFormatter: DiffFormatter
+    ): List<FileEdit> {
         // get all diffs and then proceed separately
         val diffs = reader.use {
             getDiffsWithoutText(commit, it, git)
@@ -315,4 +324,57 @@ object GitMinerUtil {
         // delete prefixes a/, b/ of DiffFormatter
         return path.substring(2)
     }
+
+    private fun getCommitsForLines(repository: Repository, commit: RevCommit, fileName: String): List<String> {
+        val result = ArrayList<String>()
+
+        val blamer = BlameCommand(repository)
+        blamer.setStartCommit(commit.id)
+        blamer.setFilePath(fileName)
+        val blame = blamer.call()
+
+        val resultContents = blame.resultContents
+
+        for (i in 0 until resultContents.size()) {
+            val commitOfLine = blame.getSourceCommit(i)
+            result.add(commitOfLine.name)
+        }
+
+        return result
+    }
+
+
+    fun getCommitsAdj(diffs: List<DiffEntry>, prevCommit: RevCommit, repository: Repository, diffFormatter: DiffFormatter): Set<String> {
+        val commitsAdj = mutableSetOf<String>()
+        val filesCommits = mutableMapOf<String, List<String>>()
+        for (diff in diffs) {
+            if (diff.changeType != DiffEntry.ChangeType.MODIFY) continue
+            val fileName = getFilePath(diff)
+
+            var prevCommitBlame = listOf<String>()
+
+            if (!filesCommits.containsKey(fileName)) {
+                prevCommitBlame = getCommitsForLines(repository, prevCommit, fileName)
+                filesCommits[fileName] = prevCommitBlame
+            } else {
+                val list = filesCommits[fileName]
+                if (list != null) {
+                    prevCommitBlame = list
+                }
+            }
+
+            val editList = diffFormatter.toFileHeader(diff).toEditList()
+            for (edit in editList) {
+                if (edit.type != Edit.Type.REPLACE && edit.type != Edit.Type.DELETE) continue
+                val lines = edit.beginA until edit.endA
+
+                for (line in lines) {
+                    commitsAdj.add(prevCommitBlame[line])
+                }
+            }
+
+        }
+        return commitsAdj
+    }
+
 }

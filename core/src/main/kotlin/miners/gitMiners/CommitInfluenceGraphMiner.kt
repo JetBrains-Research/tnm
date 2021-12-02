@@ -3,9 +3,6 @@ package miners.gitMiners
 import dataProcessor.CommitInfluenceGraphDataProcessor
 import dataProcessor.inputData.CommitInfluenceInfo
 import miners.gitMiners.GitMinerUtil.isBugFixCommit
-import org.eclipse.jgit.api.BlameCommand
-import org.eclipse.jgit.diff.DiffEntry
-import org.eclipse.jgit.diff.Edit
 import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig
 import java.io.File
@@ -39,62 +36,11 @@ class CommitInfluenceGraphMiner(
             val diffs =
                 reader.use { GitMinerUtil.getDiffsWithoutText(commit, it, git) }
 
-            val adjCommits = getCommitsAdj(diffs, prevCommit)
+            val adjCommits = GitMinerUtil.getCommitsAdj(diffs, prevCommit, repository, threadLocalDiffFormatter.get())
             val data = CommitInfluenceInfo(commit.name, prevCommit.name, adjCommits)
             dataProcessor.processData(data)
         }
     }
 
-    private fun getCommitsForLines(commit: RevCommit, fileName: String): List<String> {
-        val result = ArrayList<String>()
 
-        val blamer = BlameCommand(repository)
-        blamer.setStartCommit(commit.id)
-        blamer.setFilePath(fileName)
-        val blame = blamer.call()
-
-        val resultContents = blame.resultContents
-
-        for (i in 0 until resultContents.size()) {
-            val commitOfLine = blame.getSourceCommit(i)
-            result.add(commitOfLine.name)
-        }
-
-        return result
-    }
-
-    private fun getCommitsAdj(diffs: List<DiffEntry>, prevCommit: RevCommit): Set<String> {
-        val commitsAdj = mutableSetOf<String>()
-        val filesCommits = mutableMapOf<String, List<String>>()
-        for (diff in diffs) {
-            if (diff.changeType != DiffEntry.ChangeType.MODIFY) continue
-            val fileName = GitMinerUtil.getFilePath(diff)
-
-            var prevCommitBlame = listOf<String>()
-
-            if (!filesCommits.containsKey(fileName)) {
-                prevCommitBlame = getCommitsForLines(prevCommit, fileName)
-                filesCommits[fileName] = prevCommitBlame
-            } else {
-                val list = filesCommits[fileName]
-                if (list != null) {
-                    prevCommitBlame = list
-                }
-            }
-
-            val diffFormatter = threadLocalDiffFormatter.get()
-
-            val editList = diffFormatter.toFileHeader(diff).toEditList()
-            for (edit in editList) {
-                if (edit.type != Edit.Type.REPLACE && edit.type != Edit.Type.DELETE) continue
-                val lines = edit.beginA until edit.endA
-
-                for (line in lines) {
-                    commitsAdj.add(prevCommitBlame[line])
-                }
-            }
-
-        }
-        return commitsAdj
-    }
 }
