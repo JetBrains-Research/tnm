@@ -24,7 +24,8 @@ object GitMinerUtil {
     private const val ADD_MARK = '+'
     private const val DELETE_MARK = '-'
     private const val DIFF_MARK = '@'
-    private val regex = Regex("@@ -(\\d+)(,\\d+)? \\+(\\d+)(,\\d+)? @@")
+    private val changeLinesRegex = Regex("@@ -(\\d+)(,\\d+)? \\+(\\d+)(,\\d+)? @@")
+    private val bugFixRegex = Regex("\\b[Ff]ix:?\\b")
 
     /**
      * Get diffs for [commit].
@@ -169,11 +170,13 @@ object GitMinerUtil {
         throw BranchNotExistsException(listOf(neededBranch), allShortBranches)
     }
 
-
     fun isBugFixCommit(commit: RevCommit): Boolean {
-        val regex = "\\b[Ff]ix:?\\b".toRegex()
-        val shortMsgContains = regex.find(commit.shortMessage) != null
-        val fullMsgContains = regex.find(commit.fullMessage) != null
+        return isBugFixCommit(commit.shortMessage, commit.fullMessage)
+    }
+
+    fun isBugFixCommit(shortMessage: String, fullMessage: String): Boolean {
+        val shortMsgContains = bugFixRegex.find(shortMessage) != null
+        val fullMsgContains = bugFixRegex.find(fullMessage) != null
         return shortMsgContains || fullMsgContains
     }
 
@@ -298,7 +301,7 @@ object GitMinerUtil {
                             deleteBlock.clear()
                         }
 
-                        val match = regex.find(line)!!
+                        val match = changeLinesRegex.find(line)!!
                         preStartLineNum = match.groupValues[1].toInt()
                         postStartLineNum = match.groupValues[3].toInt()
                     }
