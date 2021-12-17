@@ -11,8 +11,8 @@ import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.util.io.DisabledOutputStream
 import util.ProjectConfig
+import util.TrimmedDate
 import java.io.File
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 
@@ -27,8 +27,8 @@ class ComplexityCodeChangesMiner(
     // [commitId][periodId]
     private val markedCommits = ConcurrentHashMap<String, Int>()
 
-    private val _periodToDate = mutableMapOf<Int, Date>()
-    val periodToDate: Map<Int, Date>
+    private val _periodToDate = mutableMapOf<Int, TrimmedDate>()
+    val periodToDate: Map<Int, TrimmedDate>
         get() = _periodToDate
 
     override fun process(
@@ -113,54 +113,41 @@ class ComplexityCodeChangesMiner(
 
         return when (dataProcessor.periodType) {
             PeriodType.TIME_BASED -> {
-                val firstDate = getTrimDate(commitsInBranch.first())
                 val periods = mutableListOf<List<RevCommit>>()
-
-                var upperThreshold = addMonths(firstDate, -dataProcessor.numOfMonthInPeriod)
                 var period = mutableListOf<RevCommit>()
-                for (commit in commitsInBranch) {
-                    val commitDate = Date(commit.commitTime * 1000L)
-                    if (commitDate < upperThreshold) {
+                val sortedByDayCommits = commitsInBranch.sortedBy { TrimmedDate.getTrimDate(it) }
+                for ((commit1, commit2) in sortedByDayCommits.windowed(2)) {
+                    period.add(commit1)
+                    if (!isSameTimePeriod(commit1, commit2, dataProcessor.numOfMonthInPeriod)) {
                         periods.add(period)
                         period = mutableListOf()
-                        upperThreshold = addMonths(upperThreshold, -dataProcessor.numOfMonthInPeriod)
                     }
-                    period.add(commit)
                 }
 
-                if (period.isNotEmpty()) {
+                val lastCommit = sortedByDayCommits.last()
+                if (isSameTimePeriod(period.last(), lastCommit, dataProcessor.numOfMonthInPeriod)) {
+                    period.add(lastCommit)
+                } else {
                     periods.add(period)
+                    period = mutableListOf(lastCommit)
                 }
-
+                periods.add(period)
                 periods
             }
             PeriodType.MODIFICATION_LIMIT -> commitsInBranch.chunked(dataProcessor.numOfCommitsInPeriod)
         }
     }
 
-    private fun getTrimDate(commit: RevCommit): Date {
-        val date = Date(commit.commitTime * 1000L)
-
-        val calendar = Calendar.getInstance()
-        calendar.time = date
-        calendar[Calendar.MILLISECOND] = 0
-        calendar[Calendar.SECOND] = 0
-        calendar[Calendar.MINUTE] = 0
-        calendar[Calendar.HOUR_OF_DAY] = 0
-        return calendar.time
-    }
-
-    private fun addMonths(date: Date, numOfMonth: Int): Date {
-        val calendar = Calendar.getInstance()
-        calendar.time = date
-        calendar.add(Calendar.MONTH, numOfMonth)
-        return calendar.time
+    private fun isSameTimePeriod(commit1: RevCommit, commit2: RevCommit, monthThreshold: Int): Boolean {
+        val trimDate1 = TrimmedDate.getTrimDate(commit1)
+        val trimDate2 = TrimmedDate.getTrimDate(commit2)
+        return trimDate1.diffInMonth(trimDate2) < monthThreshold
     }
 
     private fun markCommits(dataProcessor: ComplexityCodeChangesDataProcessor) {
         val periods = splitInPeriods(dataProcessor)
         for ((i, period) in periods.withIndex()) {
-            val month = getTrimDate(period.first())
+            val month = TrimmedDate.getTrimDate(period.first())
             _periodToDate[i] = month
             for (commit in period) {
                 markedCommits[commit.name] = i
