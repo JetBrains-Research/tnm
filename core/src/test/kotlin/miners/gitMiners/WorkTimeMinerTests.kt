@@ -7,6 +7,7 @@ import org.junit.Test
 import util.ProjectConfig
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 internal class WorkTimeMinerTests : GitMinerTest {
     @Test
@@ -21,6 +22,8 @@ internal class WorkTimeMinerTests : GitMinerTest {
         val dataProcessor = WorkTimeDataProcessor()
         val miner = WorkTimeMiner(gitDir, numThreads = numThreads, neededBranches = branches)
         miner.run(dataProcessor)
+
+        assertTrue(dataProcessor.workTimeDistribution.isNotEmpty())
 
         val newMap = HashMap<String, HashMap<Int, Int>>()
         for (entry1 in dataProcessor.workTimeDistribution.entries) {
