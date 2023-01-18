@@ -1,6 +1,7 @@
 package cli.calculculationsCLI
 
 import calculations.CoordinationNeedsMatrixCalculation
+import cli.AbstractRepoCLI
 import dataProcessor.AssignmentMatrixDataProcessor
 import dataProcessor.FileDependencyMatrixDataProcessor
 import miners.gitMiners.FilesChangesetMiner
@@ -8,7 +9,7 @@ import miners.gitMiners.UserChangedFilesMiner
 import util.HelpFunctionsUtil
 import java.io.File
 
-class CoordinationNeedsMatrixCalculationCLI : CalculationCLI(
+class CoordinationNeedsMatrixCalculationCLI : AbstractRepoCLI(
     "CoordinationNeedsMatrixCalculation",
     "Calculation of coordination needed between developers. Needs results from " +
         "AssignmentMatrixMiner and FileDependencyMatrixMiner in resource folder." +

@@ -39,9 +39,6 @@ abstract class AbstractCLI(name: String, help: String) :
         const val SHORTNAME_NUM_THREADS = "-n"
         const val LONGNAME_NUM_THREADS = "--num-threads"
 
-        const val HELP_ONE_BRANCH = "Branch which need to be proceeded "
-        const val HELP_MULTIPLE_BRANCHES = "Set of branches which need to be proceeded "
-
         fun checkBranchesArgsMsg(repository: Repository?): String {
             repository ?: return ""
 
@@ -59,10 +56,6 @@ abstract class AbstractCLI(name: String, help: String) :
 
     protected val resultDir = File("./result")
 
-    protected val repositoryDirectory by option(LONGNAME_REPOSITORY, help = HELP_REPOSITORY)
-        .file(mustExist = true, canBeDir = true, canBeFile = false)
-        .required()
-        .check(ERR_NOT_GIT_REPO) { HelpFunctionsUtil.isGitRepository(it) }
 
     protected fun saveFileOption(
         longname: String,
@@ -76,12 +69,13 @@ abstract class AbstractCLI(name: String, help: String) :
         .default(defaultFile)
 
 
-    protected fun loadFileOption(longname: String, help: String): NullableOption<File, File> {
+    protected fun loadFileOption(longname: String, help: String): OptionWithValues<File, File, File> {
         return option(
             longname,
             help = help
         )
             .file(mustExist = true, canBeDir = false, canBeFile = true)
+            .required()
     }
 
     protected fun idToFileOption() =
@@ -119,26 +113,6 @@ abstract class AbstractCLI(name: String, help: String) :
             LONGNAME_COMMIT_TO_ID,
             mapperHelp("commit", "id"), File(resultDir, "commitToId")
         )
-
-    protected fun branchesOption() = argument(help = HELP_MULTIPLE_BRANCHES)
-        .multiple()
-        .unique()
-        .validate {
-            require((it - GitMinerUtil.getBranchesShortNames(Git(FileRepository(repositoryDirectory)))).isEmpty()) {
-                checkBranchesArgsMsg(
-                    FileRepository(repositoryDirectory)
-                )
-            }
-        }
-
-    protected fun oneBranchOption() = argument(help = HELP_ONE_BRANCH)
-        .validate {
-            require(it in GitMinerUtil.getBranchesShortNames(Git(FileRepository(repositoryDirectory)))) {
-                checkBranchesArgsMsg(
-                    FileRepository(repositoryDirectory)
-                )
-            }
-        }
 
     protected fun numOfThreadsOption() = option(
         SHORTNAME_NUM_THREADS,

@@ -2,6 +2,7 @@ package cli.calculculationsCLI
 
 import calculations.PageRankCalculation
 import calculations.PageRankCalculation.DEFAULT_ALPHA
+import cli.AbstractRepoCLI
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.double
@@ -10,7 +11,7 @@ import miners.gitMiners.CommitInfluenceGraphMiner
 import util.HelpFunctionsUtil
 import java.io.File
 
-class PageRankCalculationCLI : CalculationCLI(
+class PageRankCalculationCLI : AbstractRepoCLI(
     "PageRankCalculation",
     "Computes PageRank vector which contains importance rankings (in the bug-fixing and bug creation context) " +
         "for each commit. The computation results are saved to a $HELP_PAGE_RANK."

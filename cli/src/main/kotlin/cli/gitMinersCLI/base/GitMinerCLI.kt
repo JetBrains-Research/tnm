@@ -1,5 +1,5 @@
 package cli.gitMinersCLI.base
 
-import cli.AbstractCLI
+import cli.AbstractRepoCLI
 
-abstract class GitMinerCLI(name: String, help: String) : AbstractCLI(name, help)
+abstract class GitMinerCLI(name: String, help: String) : AbstractRepoCLI(name, help)
