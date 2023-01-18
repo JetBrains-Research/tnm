@@ -64,7 +64,7 @@ Some forms of data require non-trivial computations. To ensure extensibility, pr
   need between the two individuals.
   
 * `MirrorCongruenceCalculation` computes the socio-technical congruence according to 
-  [paper](https://ieeexplore.ieee.org/abstract/document/4228662), using the data yielded by `CoordinationNeedsMatrixCalculation`.
+  [paper](https://ieeexplore.ieee.org/abstract/document/4228662).
   Its output is a single number in the **[0, 1]** range with higher values corresponding to higher socio-technical congruence.
   
 * `PageRankCalculation` computes a PageRank vector according to the algorithm of Suzuki et al. 
