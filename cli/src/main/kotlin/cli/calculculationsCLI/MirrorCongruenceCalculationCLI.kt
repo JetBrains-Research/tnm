@@ -11,7 +11,8 @@ class MirrorCongruenceCalculationCLI: AbstractCLI(
   "MirrorCongruenceCalculationCLI",
   "Calculation of the socio-technical congruence. Needs Gp - adjacency map Map<Int, Set<Int>> where `Gp[userId] = Set(userId1, userId2...)` is " +
       "set of user ids representing undirected connection between developers. Gs - adjacency map Map<Int, Set<Int>> where `Gs[fileId] = Set(fileId1, fileId2...)` " +
-      "set of file ids representing directed connection between files. J - adjacency map Map<Int, Set<Int>> where `J[userId] = Set(fileId1, fileId2...)`"
+      "set of file ids representing direct connection between files. J - adjacency map Map<Int, Set<Int>> where `J[userId] = Set(fileId1, fileId2...)` " +
+      "set of file ids representing direct connections from users to files"
 ) {
 
   private val GpFile by loadFileOption("--Gp-map", "Gp - adjacency map Map<Int, Set<Int>> where `Gp[userId] = Set(userId1, userId2...)`. Can be triangular.")
