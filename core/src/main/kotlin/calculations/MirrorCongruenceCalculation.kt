@@ -46,7 +46,6 @@ object MirrorCongruenceCalculation {
                 if (i == j) continue
                 if (adjacencyMatrix[i][j] != 0) {
                     result.addEdge(i, j)
-                    result.addEdge(j, i)
                 }
             }
         }
