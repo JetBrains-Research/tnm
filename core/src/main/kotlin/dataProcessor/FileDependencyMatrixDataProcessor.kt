@@ -18,7 +18,7 @@ class FileDependencyMatrixDataProcessor : DataProcessorMapped<FilesChangeset>() 
         val dataList = data.changeset.map { fileMapper.add(it) }
 
         for ((index, currFileId) in dataList.withIndex()) {
-            for (otherFileId in dataList.subList(index, dataList.lastIndex)) {
+            for (otherFileId in dataList.subList(index + 1, dataList.lastIndex + 1)) {
                 counter.increment(currFileId, otherFileId)
             }
         }
