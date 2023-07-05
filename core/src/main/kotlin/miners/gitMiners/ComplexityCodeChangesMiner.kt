@@ -37,16 +37,13 @@ class ComplexityCodeChangesMiner(
     ) {
         if (!isFeatureIntroductionCommit(commit)) return
 
-        val git = threadLocalGit.get()
         val reader = threadLocalReader.get()
-
         val periodId = markedCommits[commit.name]!!
-
         var containsNeededFiles = false
 
         when (dataProcessor.changeType) {
             ChangeType.LINES -> {
-                val diffs = reader.use { GitMinerUtil.getDiffsWithoutText(commit, it, git) }
+                val diffs = reader.use { GitMinerUtil.getDiffsWithoutText(commit, it, repository) }
 
                 val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
                 diffFormatter.setRepository(repository)
@@ -74,7 +71,7 @@ class ComplexityCodeChangesMiner(
             ChangeType.FILE -> {
                 val changedFiles = reader.use {
                     GitMinerUtil.getChangedFiles(
-                        commit, it, git
+                        commit, it, repository
                     )
                 }
 

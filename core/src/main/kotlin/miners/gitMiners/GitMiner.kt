@@ -97,6 +97,7 @@ abstract class GitMiner<T>(
             val futures = mutableListOf<Future<*>>()
 
             for (commit in commitsInBranch) {
+                if (commit.parents.size > 1) continue
                 // TODO: need change
                 if (!addProceedCommits(commit)) continue
 

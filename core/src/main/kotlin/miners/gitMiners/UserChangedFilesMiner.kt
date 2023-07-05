@@ -13,14 +13,13 @@ class UserChangedFilesMiner(
 ) : GitMiner<DataProcessor<UserChangedFiles>>(repositoryFile, neededBranches, numThreads = numThreads) {
 
     override fun process(dataProcessor: DataProcessor<UserChangedFiles>, commit: RevCommit) {
-        val git = threadLocalGit.get()
         val reader = threadLocalReader.get()
 
         val user = commit.authorIdent.emailAddress
 
         val changedFiles =
             reader.use {
-                GitMinerUtil.getChangedFiles(commit, it, git)
+                GitMinerUtil.getChangedFiles(commit, it, repository)
             }
 
         val data = UserChangedFiles(user, changedFiles)

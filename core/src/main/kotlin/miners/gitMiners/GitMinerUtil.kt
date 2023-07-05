@@ -5,10 +5,7 @@ import miners.gitMiners.exceptions.BranchNotExistsException
 import org.eclipse.jgit.api.BlameCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.ListBranchCommand
-import org.eclipse.jgit.diff.DiffEntry
-import org.eclipse.jgit.diff.DiffFormatter
-import org.eclipse.jgit.diff.Edit
-import org.eclipse.jgit.diff.RawTextComparator
+import org.eclipse.jgit.diff.*
 import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.lib.Repository
@@ -27,34 +24,31 @@ object GitMinerUtil {
     private val changeLinesRegex = Regex("@@ -(\\d+)(,\\d+)? \\+(\\d+)(,\\d+)? @@")
     private val bugFixRegex = Regex("\\b[Ff]ix:?\\b")
 
-    /**
-     * Get diffs for [commit].
-     *
-     * @param commit RevCommit
-     * @param reader must be created from the same Repository as [git]
-     * @param git must be created from the same Repository as [reader]
-     * @return List of DiffEntry's for [commit].
-     */
     fun getDiffsWithoutText(
         commit: RevCommit,
         reader: ObjectReader,
-        git: Git
+        repository: Repository
     ): List<DiffEntry> {
         val oldTreeIter = if (commit.parents.isNotEmpty()) {
             val firstParent = commit.parents[0]
             val treeParser = CanonicalTreeParser()
             treeParser.reset(reader, firstParent.tree)
             treeParser
-        } else EmptyTreeIterator()
-
+        } else {
+            EmptyTreeIterator()
+        }
         val newTreeIter = CanonicalTreeParser()
         newTreeIter.reset(reader, commit.tree)
 
-        return git.diff()
-            .setNewTree(newTreeIter)
-            .setOldTree(oldTreeIter)
-            .setShowNameAndStatusOnly(true)
-            .call()
+        val treeWalk = TreeWalk(repository)
+        treeWalk.isRecursive = true
+        treeWalk.addTree(oldTreeIter)
+        treeWalk.addTree(newTreeIter)
+
+        val renameDetector = RenameDetector(repository)
+        renameDetector.addAll(DiffEntry.scan(treeWalk))
+
+        return renameDetector.compute(treeWalk.objectReader, null)
     }
 
     /**
@@ -68,12 +62,12 @@ object GitMinerUtil {
     fun getChangedFiles(
         commit: RevCommit,
         reader: ObjectReader,
-        git: Git,
+        repository: Repository,
         userMapper: UserMapper,
         fileMapper: FileMapper
     ): Set<Int> {
         val result = mutableSetOf<Int>()
-        val diffs = getDiffsWithoutText(commit, reader, git)
+        val diffs = getDiffsWithoutText(commit, reader, repository)
         val userEmail = commit.authorIdent.emailAddress
         userMapper.add(userEmail)
 
@@ -85,20 +79,20 @@ object GitMinerUtil {
     }
 
     fun getFilePath(diffEntry: DiffEntry): String {
-        return if (diffEntry.changeType == DiffEntry.ChangeType.DELETE) {
-            diffEntry.oldPath
-        } else {
-            diffEntry.newPath
+        return when (diffEntry.changeType) {
+//        TODO: is it bug from jgit for RENAME?
+            DiffEntry.ChangeType.DELETE, DiffEntry.ChangeType.RENAME -> diffEntry.oldPath
+            else -> diffEntry.newPath
         }
     }
 
     fun getChangedFiles(
         commit: RevCommit,
         reader: ObjectReader,
-        git: Git
+        repository: Repository
     ): Set<String> {
         val result = mutableSetOf<String>()
-        val diffs = getDiffsWithoutText(commit, reader, git)
+        val diffs = getDiffsWithoutText(commit, reader, repository)
 
         for (entry in diffs) {
             result.add(getFilePath(entry))
@@ -234,23 +228,22 @@ object GitMinerUtil {
         commit: RevCommit,
         repository: Repository,
         reader: ObjectReader,
-        git: Git,
     ): List<FileEdit> {
         val out = ByteArrayOutputStream()
         val diffFormatter = getDiffFormatterWithBuffer(repository, out)
-        return getFileEdits(commit, reader, git, out, diffFormatter)
+        return getFileEdits(commit, reader, repository, out, diffFormatter)
     }
 
     fun getFileEdits(
         commit: RevCommit,
         reader: ObjectReader,
-        git: Git,
+        repository: Repository,
         out: ByteArrayOutputStream,
         diffFormatter: DiffFormatter
     ): List<FileEdit> {
         // get all diffs and then proceed separately
         val diffs = reader.use {
-            getDiffsWithoutText(commit, it, git)
+            getDiffsWithoutText(commit, it, repository)
         }
 
         val edits = mutableListOf<FileEdit>()
@@ -286,9 +279,11 @@ object GitMinerUtil {
                     ADD_MARK -> {
                         addBlock.add(line.substring(1))
                     }
+
                     DELETE_MARK -> {
                         deleteBlock.add(line.substring(1))
                     }
+
                     DIFF_MARK -> {
                         if (addBlock.isNotEmpty() || deleteBlock.isNotEmpty()) {
                             val data = FileEdit(
@@ -347,28 +342,31 @@ object GitMinerUtil {
     }
 
 
-    fun getCommitsAdj(diffs: List<DiffEntry>, prevCommit: RevCommit, repository: Repository, diffFormatter: DiffFormatter): Set<String> {
+    fun getCommitsAdj(
+        diffs: List<DiffEntry>,
+        prevCommit: RevCommit,
+        repository: Repository,
+        diffFormatter: DiffFormatter
+    ): Set<String> {
         val commitsAdj = mutableSetOf<String>()
         val filesCommits = mutableMapOf<String, List<String>>()
         for (diff in diffs) {
             if (diff.changeType != DiffEntry.ChangeType.MODIFY) continue
             val fileName = getFilePath(diff)
 
-            var prevCommitBlame = listOf<String>()
-
-            if (!filesCommits.containsKey(fileName)) {
-                prevCommitBlame = getCommitsForLines(repository, prevCommit, fileName)
-                filesCommits[fileName] = prevCommitBlame
+            val prevCommitBlame = if (!filesCommits.containsKey(fileName)) {
+                val prevBlame = getCommitsForLines(repository, prevCommit, fileName)
+                filesCommits[fileName] = prevBlame
+                prevBlame
             } else {
                 val list = filesCommits[fileName]
-                if (list != null) {
-                    prevCommitBlame = list
-                }
+                list ?: emptyList()
             }
 
             val editList = diffFormatter.toFileHeader(diff).toEditList()
             for (edit in editList) {
-                if (edit.type != Edit.Type.REPLACE && edit.type != Edit.Type.DELETE) continue
+                if (edit.type != Edit.Type.REPLACE) continue
+                // TODO: why it's starting from 0 but git blame provides edit.endA - 1
                 val lines = edit.beginA until edit.endA
 
                 for (line in lines) {

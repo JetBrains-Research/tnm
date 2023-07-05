@@ -39,11 +39,10 @@ class FilesOwnershipMiner(
 
             val callable = Callable {
                 try {
-                    val git = threadLocalGit.get()
                     val reader = threadLocalReader.get()
                     val diffFormatter = threadLocalDiffFormatter.get()
 
-                    val diffs = reader.use { GitMinerUtil.getDiffsWithoutText(commit, it, git) }
+                    val diffs = reader.use { GitMinerUtil.getDiffsWithoutText(commit, it, repository) }
                     val email = commit.authorIdent.emailAddress
 
                     val commitDate = commit.authorIdent.getWhen()

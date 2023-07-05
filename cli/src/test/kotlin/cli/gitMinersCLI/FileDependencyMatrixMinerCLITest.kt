@@ -27,7 +27,6 @@ class FileDependencyMatrixMinerCLITest : AbstractCLITest(testFolder) {
 
     private val nonRequiredOptions = listOf(
         LONGNAME_FILE_DEPENDENCY_MATRIX to fileDependencyMatrixJsonFile.absolutePath,
-        LONGNAME_NUM_THREADS to ProjectConfig.DEFAULT_NUM_THREADS.toString(),
         LONGNAME_ID_TO_FILE to idToFileJsonFile.absolutePath,
     )
 

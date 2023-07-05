@@ -21,11 +21,10 @@ class FilesChangesetMiner(
     numOfCommits = numOfCommits
 ) {
     override fun process(dataProcessor: DataProcessor<FilesChangeset>, commit: RevCommit) {
-        val git = threadLocalGit.get()
         val reader = repository.newObjectReader()
 
         val changedFiles = reader.use {
-            GitMinerUtil.getChangedFiles(commit, it, git)
+            GitMinerUtil.getChangedFiles(commit, it, repository)
         }
 
         maxNumOfFiles?.let { if (changedFiles.size > it) return }

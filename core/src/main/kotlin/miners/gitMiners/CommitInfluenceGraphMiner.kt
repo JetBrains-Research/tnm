@@ -3,6 +3,8 @@ package miners.gitMiners
 import dataProcessor.CommitInfluenceGraphDataProcessor
 import dataProcessor.inputData.CommitInfluenceInfo
 import miners.gitMiners.GitMinerUtil.isBugFixCommit
+import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.revwalk.RevCommit
 import util.ProjectConfig
 import java.io.File
@@ -23,24 +25,21 @@ class CommitInfluenceGraphMiner(
     neededBranches,
     numThreads = numThreads
 ) {
+    val git = Git(FileRepository(repositoryFile))
 
     override fun process(
         dataProcessor: CommitInfluenceGraphDataProcessor,
         commit: RevCommit
     ) {
         if (isBugFixCommit(commit)) {
-            val git = threadLocalGit.get()
             val reader = threadLocalReader.get()
             // TODO: strange case
             val prevCommit = if (commit.parents.isNotEmpty()) commit.parents[0] else return
-            val diffs =
-                reader.use { GitMinerUtil.getDiffsWithoutText(commit, it, git) }
-
-            val adjCommits = GitMinerUtil.getCommitsAdj(diffs, prevCommit, repository, threadLocalDiffFormatter.get())
+            val diffs = reader.use { GitMinerUtil.getDiffsWithoutText(commit, it, repository) }
+            val adjCommits =
+                GitMinerUtil.getCommitsAdj(diffs, prevCommit, repository, threadLocalDiffFormatter.get())
             val data = CommitInfluenceInfo(commit.name, prevCommit.name, adjCommits)
             dataProcessor.processData(data)
         }
     }
-
-
 }
