@@ -1,12 +1,10 @@
 package miners.gitMiners
 
-import TestConfig
 import TestConfig.branch
 import TestConfig.gitDir
 import dataProcessor.FilesOwnershipDataProcessor
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
-import java.io.File
 import kotlin.test.assertTrue
 
 internal class FilesOwnershipMinerTests : GitMinerTest<Map<String, Map<String, Float>>>() {

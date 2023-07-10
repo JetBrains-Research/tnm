@@ -1,13 +1,11 @@
 package miners.gitMiners
 
-import TestConfig
 import TestConfig.branches
 import TestConfig.gitDir
 import dataProcessor.ChangedFilesDataProcessor
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.SetSerializer
 import kotlinx.serialization.builtins.serializer
-import java.io.File
 import kotlin.test.assertTrue
 
 internal class UserChangedFilesMinerTests : GitMinerTest<Map<String, Set<String>>>() {

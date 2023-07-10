@@ -6,19 +6,15 @@ import dataProcessor.CoEditNetworksDataProcessor
 import dataProcessor.CoEditNetworksDataProcessor.ChangeType
 import dataProcessor.CoEditNetworksDataProcessor.CommitInfoEncoded
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.SetSerializer
-import kotlinx.serialization.builtins.serializer
-import org.junit.Test
-import util.ProjectConfig
-import java.io.File
 import kotlin.test.assertTrue
 
 class CoEditNetworksMinerTests : GitMinerTest<Set<CoEditNetworksMinerTests.CommitResultWithoutId>>() {
 
     override val serializer = SetSerializer(CommitResultWithoutId.serializer())
 
-    override fun compareResults(result1: Set<CommitResultWithoutId>, result2: Set<CommitResultWithoutId>) = compareSets(result1, result2)
+    override fun compareResults(result1: Set<CommitResultWithoutId>, result2: Set<CommitResultWithoutId>) =
+        compareSets(result1, result2)
 
     override fun runMiner(numThreads: Int): Set<CommitResultWithoutId> {
         val dataProcessor = CoEditNetworksDataProcessor()

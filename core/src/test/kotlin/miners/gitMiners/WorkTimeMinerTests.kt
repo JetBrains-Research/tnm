@@ -4,13 +4,7 @@ import TestConfig.branches
 import TestConfig.gitDir
 import dataProcessor.WorkTimeDataProcessor
 import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.SetSerializer
 import kotlinx.serialization.builtins.serializer
-import org.eclipse.jgit.api.Git
-import org.junit.Test
-import util.ProjectConfig
-import java.io.File
-import kotlin.jvm.internal.Reflection
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
