@@ -25,8 +25,6 @@ class CommitInfluenceGraphMiner(
     neededBranches,
     numThreads = numThreads
 ) {
-    val git = Git(FileRepository(repositoryFile))
-
     override fun process(
         dataProcessor: CommitInfluenceGraphDataProcessor,
         commit: RevCommit

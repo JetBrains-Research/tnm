@@ -3,21 +3,19 @@ package miners.gitMiners
 import TestConfig.branches
 import TestConfig.gitDir
 import dataProcessor.AssignmentMatrixDataProcessor
-import org.junit.Test
-import util.ProjectConfig
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlin.test.assertTrue
 
-internal class AssignmentMatrixMinerTests : GitMinerTest {
+internal class AssignmentMatrixMinerTests : GitMinerTest<Map<String, Map<String, Int>>>() {
 
-    @Test
-    fun `test one thread and multithreading`() {
-        val mapOneThread = runMiner(1)
-        val mapMultithreading = runMiner()
+    override val serializer = MapSerializer(String.serializer(), MapSerializer(String.serializer(), Int.serializer()))
 
-        compareMapsOfMaps(mapOneThread, mapMultithreading)
-    }
+    override fun compareResults(result1: Map<String, Map<String, Int>>, result2: Map<String, Map<String, Int>>) =
+        compareMapsOfMaps(result1, result2)
 
-    private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Map<String, Map<String, Int>> {
+
+    override fun runMiner(numThreads: Int): Map<String, Map<String, Int>> {
         val dataProcessor = AssignmentMatrixDataProcessor()
         val miner = UserChangedFilesMiner(gitDir, numThreads = numThreads, neededBranches = branches)
         miner.run(dataProcessor)
@@ -30,4 +28,5 @@ internal class AssignmentMatrixMinerTests : GitMinerTest {
             dataProcessor.idToFile
         )
     }
+
 }

@@ -3,22 +3,23 @@ package miners.gitMiners
 import TestConfig.branches
 import TestConfig.gitDir
 import dataProcessor.WorkTimeDataProcessor
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.SetSerializer
+import kotlinx.serialization.builtins.serializer
+import org.eclipse.jgit.api.Git
 import org.junit.Test
 import util.ProjectConfig
+import java.io.File
+import kotlin.jvm.internal.Reflection
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-internal class WorkTimeMinerTests : GitMinerTest {
-    @Test
-    fun `test one thread and multithreading`() {
-        val mapOneThread = runMiner(1)
-        val mapMultithreading = runMiner()
+internal class WorkTimeMinerTests : GitMinerTest<Map<String, Map<Int, Int>>>() {
 
-        compare(mapOneThread, mapMultithreading)
-    }
+    override val serializer = MapSerializer(String.serializer(), MapSerializer(Int.serializer(), Int.serializer()))
 
-    private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Map<String, Map<Int, Int>> {
+    override fun runMiner(numThreads: Int): Map<String, Map<Int, Int>> {
         val dataProcessor = WorkTimeDataProcessor()
         val miner = WorkTimeMiner(gitDir, numThreads = numThreads, neededBranches = branches)
         miner.run(dataProcessor)
@@ -40,19 +41,16 @@ internal class WorkTimeMinerTests : GitMinerTest {
 
     }
 
-    private fun compare(
-        mapOneThread: Map<String, Map<Int, Int>>,
-        mapMultithreading: Map<String, Map<Int, Int>>
-    ) {
-        for (entry1 in mapOneThread.entries) {
+    override fun compareResults(result1: Map<String, Map<Int, Int>>, result2: Map<String, Map<Int, Int>>) {
+        for (entry1 in result1.entries) {
             for (entry2 in entry1.value.entries) {
                 val k1 = entry1.key
                 val k2 = entry2.key
 
-                val v1 = mapOneThread[k1]?.get(k2)
+                val v1 = result1[k1]?.get(k2)
                 assertNotNull(v1, "got null in v1 : [$k1][$k2]")
 
-                val v2 = mapMultithreading[k1]?.get(k2)
+                val v2 = result2[k1]?.get(k2)
                 assertNotNull(v2, "got null in v2 : [$k1][$k2]")
 
                 if (v1 != v2) {
@@ -61,4 +59,5 @@ internal class WorkTimeMinerTests : GitMinerTest {
             }
         }
     }
+
 }

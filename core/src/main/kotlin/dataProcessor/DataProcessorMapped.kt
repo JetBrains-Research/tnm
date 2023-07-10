@@ -1,6 +1,7 @@
 package dataProcessor
 
 import dataProcessor.inputData.InputData
+import kotlinx.serialization.Serializable
 import util.mappers.CommitMapper
 import util.mappers.FileMapper
 import util.mappers.UserMapper

@@ -3,60 +3,60 @@ package miners.gitMiners
 import TestConfig.branch
 import TestConfig.gitDir
 import dataProcessor.ComplexityCodeChangesDataProcessor
+import kotlinx.serialization.Serializable
 import org.junit.Assert
-import org.junit.Test
-import util.ProjectConfig
 import kotlin.test.assertTrue
 
-class ComplexityCodeChangesTests : GitMinerTest {
-    @Test
-    fun `test one thread and multithreading`() {
-        val dataProcessorOneThread = runMiner(1)
-        val dataProcessorMultithreading = runMiner()
+class ComplexityCodeChangesTests : GitMinerTest<ComplexityCodeChangesTests.Stats>() {
 
-        compare(dataProcessorOneThread, dataProcessorMultithreading)
-    }
+    @Serializable
+    data class Stats(
+        val periodsToStats: Map<Int, ComplexityCodeChangesDataProcessor.PeriodStats>,
+        val idToFile: Map<Int, String>,
+        val fileToId: Map<String, Int>
+    )
 
-    private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): ComplexityCodeChangesDataProcessor {
+    override val serializer = Stats.serializer()
+
+    override fun runMiner(numThreads: Int): Stats {
         val dataProcessor = ComplexityCodeChangesDataProcessor()
         val miner = ComplexityCodeChangesMiner(gitDir, neededBranch = branch, numThreads = numThreads)
         miner.run(dataProcessor)
 
         assertTrue(dataProcessor.periodsToStats.isNotEmpty())
 
-        return dataProcessor
-
+        return Stats(dataProcessor.periodsToStats, dataProcessor.idToFile, dataProcessor.fileToId)
     }
 
-    private fun compare(
-        dataProcessorOneThread: ComplexityCodeChangesDataProcessor,
-        dataProcessorMultithreading: ComplexityCodeChangesDataProcessor
+    override fun compareResults(
+        result1: Stats,
+        result2: Stats
     ) {
-        val idToFileOneThread = dataProcessorOneThread.idToFile
-        val fileToIdMultiThread = dataProcessorMultithreading.fileToId
+        val idToFile1 = result1.idToFile
+        val fileToId2 = result2.fileToId
 
-        val oneThreadResult = dataProcessorOneThread.periodsToStats
-        val multiThreadResult = dataProcessorMultithreading.periodsToStats
+        val periodToStats1 = result1.periodsToStats
+        val periodToStats2 = result2.periodsToStats
 
-        for ((periodId, statsOneThread) in oneThreadResult) {
-            val statsMultiThread = multiThreadResult[periodId]!!
-            Assert.assertEquals(statsOneThread.periodEntropy, statsMultiThread.periodEntropy, 0.0001)
+        for ((periodId, stats1) in periodToStats1) {
+            val stats2 = periodToStats2[periodId]!!
+            Assert.assertEquals(stats1.periodEntropy, stats2.periodEntropy, 0.0001)
 
-            val fileStatsMultiThread = statsMultiThread.filesStats
-            for ((fileIdOneThread, fileStatOneThread) in statsOneThread.filesStats) {
-                val fileName = idToFileOneThread[fileIdOneThread]!!
-                val fileIdMultiThread = fileToIdMultiThread[fileName]!!
-                val fileStatMultiThread = fileStatsMultiThread[fileIdMultiThread]!!
+            val fileStatsMultiThread = stats2.filesStats
+            for ((fileId1, fileStats1) in stats1.filesStats) {
+                val fileName = idToFile1[fileId1]!!
+                val fileId2 = fileToId2[fileName]!!
+                val fileStat2 = fileStatsMultiThread[fileId2]!!
 
-                Assert.assertEquals(fileStatOneThread.entropy, fileStatMultiThread.entropy, 0.0001)
+                Assert.assertEquals(fileStats1.entropy, fileStat2.entropy, 0.0001)
                 Assert.assertEquals(
-                    fileStatOneThread.HCPF3,
-                    fileStatMultiThread.HCPF3,
+                    fileStats1.HCPF3,
+                    fileStat2.HCPF3,
                     0.0001
                 )
                 Assert.assertEquals(
-                    fileStatOneThread.HCPF2,
-                    fileStatMultiThread.HCPF2,
+                    fileStats1.HCPF2,
+                    fileStat2.HCPF2,
                     0.0001
                 )
             }

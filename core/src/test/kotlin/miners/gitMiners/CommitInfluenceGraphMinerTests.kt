@@ -3,19 +3,16 @@ package miners.gitMiners
 import TestConfig.branches
 import TestConfig.gitDir
 import dataProcessor.CommitInfluenceGraphDataProcessor
-import org.junit.Test
-import util.ProjectConfig
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.SetSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlin.test.assertTrue
 
-class CommitInfluenceGraphMinerTests : GitMinerTest {
-    @Test
-    fun `test one thread and multithreading`() {
-        val mapOneThread = runMiner(1)
-        val mapMultithreading = runMiner()
-        compareMapOfSets(mapOneThread, mapMultithreading)
-    }
+class CommitInfluenceGraphMinerTests : GitMinerTest<Map<String, Set<String>>>() {
 
-    private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Map<String, Set<String>> {
+    override val serializer = MapSerializer(String.serializer(), SetSerializer(String.serializer()))
+
+    override fun runMiner(numThreads: Int): Map<String, Set<String>> {
         val dataProcessor = CommitInfluenceGraphDataProcessor()
         val miner = CommitInfluenceGraphMiner(gitDir, numThreads = numThreads, neededBranches = branches)
         miner.run(dataProcessor)
@@ -28,5 +25,8 @@ class CommitInfluenceGraphMinerTests : GitMinerTest {
             dataProcessor.idToCommit
         )
     }
+
+    override fun compareResults(result1: Map<String, Set<String>>, result2: Map<String, Set<String>>) =
+        compareMapOfSets(result1, result2)
 
 }

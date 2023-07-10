@@ -1,23 +1,20 @@
 package miners.gitMiners
 
+import TestConfig
 import TestConfig.branch
 import TestConfig.gitDir
 import dataProcessor.FilesOwnershipDataProcessor
-import org.junit.Test
-import util.ProjectConfig
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import java.io.File
 import kotlin.test.assertTrue
 
-internal class FilesOwnershipMinerTests : GitMinerTest {
+internal class FilesOwnershipMinerTests : GitMinerTest<Map<String, Map<String, Float>>>() {
 
-    @Test
-    fun `test one thread and multithreading`() {
-        val mapOneThread = runMiner(1)
-        val mapMultithreading = runMiner()
-        compareMapsOfMapsDouble(mapOneThread, mapMultithreading)
-    }
+    override val serializer = MapSerializer(String.serializer(), MapSerializer(String.serializer(), Float.serializer()))
 
-    private fun runMiner(
-        numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
+    override fun runMiner(
+        numThreads: Int
     ): Map<String, Map<String, Float>> {
         val dataProcessor = FilesOwnershipDataProcessor()
         val miner = FilesOwnershipMiner(gitDir, numThreads = numThreads, neededBranch = branch)
@@ -31,4 +28,8 @@ internal class FilesOwnershipMinerTests : GitMinerTest {
             dataProcessor.idToFile
         )
     }
+
+    override fun compareResults(result1: Map<String, Map<String, Float>>, result2: Map<String, Map<String, Float>>) =
+        compareMapsOfMapsDouble(result1, result2)
+
 }

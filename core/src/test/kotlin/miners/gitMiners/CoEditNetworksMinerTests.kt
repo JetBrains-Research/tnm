@@ -5,20 +5,22 @@ import TestConfig.gitDir
 import dataProcessor.CoEditNetworksDataProcessor
 import dataProcessor.CoEditNetworksDataProcessor.ChangeType
 import dataProcessor.CoEditNetworksDataProcessor.CommitInfoEncoded
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.SetSerializer
+import kotlinx.serialization.builtins.serializer
 import org.junit.Test
 import util.ProjectConfig
+import java.io.File
 import kotlin.test.assertTrue
 
-class CoEditNetworksMinerTests : GitMinerTest {
-    @Test
-    fun `test one thread and multithreading`() {
-        val resultOneThread = runMiner(1)
-        val resultMultithreading = runMiner()
+class CoEditNetworksMinerTests : GitMinerTest<Set<CoEditNetworksMinerTests.CommitResultWithoutId>>() {
 
-        compareSets(resultOneThread, resultMultithreading)
-    }
+    override val serializer = SetSerializer(CommitResultWithoutId.serializer())
 
-    private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Set<CommitResultWithoutId> {
+    override fun compareResults(result1: Set<CommitResultWithoutId>, result2: Set<CommitResultWithoutId>) = compareSets(result1, result2)
+
+    override fun runMiner(numThreads: Int): Set<CommitResultWithoutId> {
         val dataProcessor = CoEditNetworksDataProcessor()
         val miner = CoEditNetworksMiner(gitDir, numThreads = numThreads, neededBranch = branch)
         miner.run(dataProcessor)
@@ -28,6 +30,7 @@ class CoEditNetworksMinerTests : GitMinerTest {
         return replaceIds(dataProcessor)
     }
 
+    @Serializable
     data class CommitResultWithoutId(
         val prevCommitInfo: CommitInfoWithoutId,
         val commitInfo: CommitInfoWithoutId,
@@ -35,6 +38,7 @@ class CoEditNetworksMinerTests : GitMinerTest {
         val edits: List<EditWithoutId>
     )
 
+    @Serializable
     data class CommitInfoWithoutId(
         val hash: String,
         val author: String,
@@ -52,6 +56,7 @@ class CoEditNetworksMinerTests : GitMinerTest {
                 )
     }
 
+    @Serializable
     data class EditWithoutId(
         val oldPath: String,
         val newPath: String,

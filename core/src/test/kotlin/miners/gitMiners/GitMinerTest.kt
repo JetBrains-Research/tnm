@@ -1,20 +1,109 @@
 package miners.gitMiners
 
 import GitTest
+import TestConfig.gitDir
+import TestConfig.repositoryDir
+import TestConfig.resultsDir
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.Json
+import org.eclipse.jgit.api.Git
 import org.junit.Assert
+import org.junit.Assume.assumeTrue
+import org.junit.Before
+import org.junit.Test
+import util.HelpFunctionsUtil
+import util.ProjectConfig
+import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 
-internal interface GitMinerTest : GitTest {
+abstract class GitMinerTest<T> : GitTest {
+    val previousResultFile: File
+        get() = File(resultsDir, this::class.simpleName!!)
 
-    fun <T> changeIdsToValuesInMapOfMaps(
-        map: Map<Int, Map<Int, T>>,
+    abstract val serializer: KSerializer<T>
+
+    companion object {
+        private fun loadRepository() {
+
+            if (HelpFunctionsUtil.isGitRepository(gitDir)) return
+
+            val repoURI = "https://github.com/cli/cli.git"
+            println("Loading repository for tests $repoURI")
+            HelpFunctionsUtil.deleteDir(repositoryDir)
+            repositoryDir.mkdirs()
+
+            Git.cloneRepository()
+                .setURI(repoURI)
+                .setDirectory(repositoryDir)
+                .setNoCheckout(true)
+                .call().use { result ->
+                    println("Finish loading repo $repoURI")
+                    println("Repository inside: " + result.repository.directory)
+                }
+        }
+
+        private fun prepare() {
+            resultsDir.mkdirs()
+            loadRepository()
+        }
+
+        private fun forEachGitMinerTest(processTestObj: (GitMinerTest<*>) -> Unit) {
+            prepare()
+
+            val packageName = "miners.gitMiners"
+            val url = GitMinerTest::class.java.getResource(packageName.replace('.', '/'))
+            val directory = File(url.getFile())
+
+            directory.walk()
+                .filter { f -> f.isFile && !f.name.contains('$') && f.name.endsWith(".class") }
+                .forEach {
+                    val className = packageName +
+                            it.canonicalPath.removePrefix(directory.canonicalPath)
+                                .removeSuffix(".class")
+                                .replace('/', '.')
+
+                    val myClass = Class.forName(className)
+                    if (myClass.constructors.isNotEmpty()) {
+                        val constructor = myClass.getDeclaredConstructor()
+                        val objectTest = constructor.newInstance() as GitMinerTest<*>
+                        processTestObj(objectTest)
+                    }
+                }
+        }
+
+        fun generateTestData() = forEachGitMinerTest { it.generateTestData() }
+
+    }
+
+    @Before
+    fun preparations() {
+        resultsDir.mkdirs()
+    }
+
+    @Test
+    fun `test one thread and multithreading`() {
+        val resultOneThread = runMiner(1)
+        val resultMultithreading = runMiner()
+        compareResults(resultOneThread, resultMultithreading)
+    }
+
+    @Test
+    fun compareWithPrevious() {
+        assumeTrue(previousResultFile.exists())
+        val result1 = runMiner()
+        val result2 = Json.decodeFromString(serializer, previousResultFile.readText())
+        compareResults(result1, result2)
+    }
+
+    fun <V> changeIdsToValuesInMapOfMaps(
+        map: Map<Int, Map<Int, V>>,
         keys1: Map<Int, String>,
         keys2: Map<Int, String>
-    ): Map<String, Map<String, T>> {
-        val newMap = HashMap<String, HashMap<String, T>>()
+    ): Map<String, Map<String, V>> {
+        val newMap = HashMap<String, HashMap<String, V>>()
         for (entry1 in map) {
             for (entry2 in entry1.value) {
                 val key1 = keys1[entry1.key]
@@ -116,5 +205,14 @@ internal interface GitMinerTest : GitTest {
             assertNotNull(valuesMultithreading, "got null in v2 for user $userName")
             compareSets(valuesOneThread, valuesMultithreading)
         }
+    }
+
+    abstract fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): T
+
+    abstract fun compareResults(result1: T, result2: T)
+
+    fun generateTestData() {
+        val data = runMiner()
+        previousResultFile.writeText(Json.encodeToString(serializer, data))
     }
 }

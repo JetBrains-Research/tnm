@@ -1,22 +1,20 @@
 package miners.gitMiners
 
+import TestConfig
 import TestConfig.branches
 import TestConfig.gitDir
 import dataProcessor.ChangedFilesDataProcessor
-import org.junit.Test
-import util.ProjectConfig
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.SetSerializer
+import kotlinx.serialization.builtins.serializer
+import java.io.File
 import kotlin.test.assertTrue
 
-internal class UserChangedFilesMinerTests : GitMinerTest {
-    @Test
-    fun `test one thread and multithreading`() {
-        val mapOneThread = runMiner(1)
-        val mapMultithreading = runMiner()
+internal class UserChangedFilesMinerTests : GitMinerTest<Map<String, Set<String>>>() {
 
-        compareMapOfSets(mapOneThread, mapMultithreading)
-    }
+    override val serializer = MapSerializer(String.serializer(), SetSerializer(String.serializer()))
 
-    private fun runMiner(numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS): Map<String, Set<String>> {
+    override fun runMiner(numThreads: Int): Map<String, Set<String>> {
         val dataProcessor = ChangedFilesDataProcessor()
         val miner = UserChangedFilesMiner(gitDir, numThreads = numThreads, neededBranches = branches)
         miner.run(dataProcessor)
@@ -29,4 +27,7 @@ internal class UserChangedFilesMinerTests : GitMinerTest {
             dataProcessor.idToFile
         )
     }
+
+    override fun compareResults(result1: Map<String, Set<String>>, result2: Map<String, Set<String>>) =
+        compareMapOfSets(result1, result2)
 }

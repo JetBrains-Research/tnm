@@ -6,6 +6,10 @@ import util.HelpFunctionsUtil
 
 interface GitTest {
 
+    companion object {
+
+    }
+
     @Before
     fun `load repository`() {
 
