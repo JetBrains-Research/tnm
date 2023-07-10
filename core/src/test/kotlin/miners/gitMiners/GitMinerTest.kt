@@ -144,19 +144,19 @@ abstract class GitMinerTest<T> : GitTest {
     }
 
     fun <T> compareMapsOfMaps(
-        mapOneThread: Map<String, Map<String, T>>,
-        mapMultithreading: Map<String, Map<String, T>>
+        map1: Map<String, Map<String, T>>,
+        map2: Map<String, Map<String, T>>
     ) {
 
-        for (entry1 in mapOneThread.entries) {
-            for (entry2 in entry1.value.entries) {
+        for (entry1 in map1.entries) {
+            for (entryOfEntry1 in entry1.value.entries) {
                 val k1 = entry1.key
-                val k2 = entry2.key
+                val k2 = entryOfEntry1.key
 
-                val v1 = mapOneThread[k1]?.get(k2)
+                val v1 = map1[k1]?.get(k2)
                 assertNotNull(v1, "got null in v1 : [$k1][$k2]")
 
-                val v2 = mapMultithreading[k1]?.get(k2)
+                val v2 = map2[k1]?.get(k2)
                 assertNotNull(v2, "got null in v2 : [$k1][$k2]")
 
                 assertEquals(v1, v2, "Found non equal values in [$k1][$k2]: $v1 != $v2")
@@ -165,19 +165,19 @@ abstract class GitMinerTest<T> : GitTest {
     }
 
     fun compareMapsOfMapsDouble(
-        mapOneThread: Map<String, Map<String, Float>>,
-        mapMultithreading: Map<String, Map<String, Float>>
+        map1: Map<String, Map<String, Float>>,
+        map2: Map<String, Map<String, Float>>
     ) {
 
-        for (entry1 in mapOneThread.entries) {
-            for (entry2 in entry1.value.entries) {
-                val k1 = entry1.key
-                val k2 = entry2.key
+        for (entry1 in map1.entries) {
+            val k1 = entry1.key
+            for (entryOfEntry1 in entry1.value.entries) {
+                val k2 = entryOfEntry1.key
 
-                val v1 = mapOneThread[k1]?.get(k2)
+                val v1 = map1[k1]?.get(k2)
                 assertNotNull(v1, "got null in v1 : [$k1][$k2]")
 
-                val v2 = mapMultithreading[k1]?.get(k2)
+                val v2 = map2[k1]?.get(k2)
                 assertNotNull(v2, "got null in v2 : [$k1][$k2]")
 
                 Assert.assertEquals(v1, v2, 0.0001f)
@@ -195,15 +195,15 @@ abstract class GitMinerTest<T> : GitTest {
     }
 
     fun compareMapOfSets(
-        mapOneThread: Map<String, Set<String>>,
-        mapMultithreading: Map<String, Set<String>>
+        map1: Map<String, Set<String>>,
+        map2: Map<String, Set<String>>
     ) {
-        for (entry in mapOneThread) {
+        for (entry in map1) {
             val userName = entry.key
-            val valuesOneThread = entry.value
-            val valuesMultithreading = mapMultithreading[userName]
-            assertNotNull(valuesMultithreading, "got null in v2 for user $userName")
-            compareSets(valuesOneThread, valuesMultithreading)
+            val value1 = entry.value
+            val value2 = map2[userName]
+            assertNotNull(value2, "got null in v2 for user $userName")
+            compareSets(value1, value2)
         }
     }
 
