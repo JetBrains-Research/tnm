@@ -1,0 +1,29 @@
+name: Publish to Maven Repository
+on:
+  workflow_run:
+    workflows: ["Java CI with Gradle"]
+    branches: [main]
+    types:
+      - completed
+jobs:
+  publish-maven:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }} # only if CI passed
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: .github/skip-list.yml
+      - name: Set up JDK 17
+        if: steps.changes.outputs.src == 'true'
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Publish to maven repository
+        if: steps.changes.outputs.src == 'true'
+        run: ./gradlew publish
+        env:
+          MAVEN_USERNAME: ${{ secrets.SPACE_MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.SPACE_MAVEN_PASSWORD }}
