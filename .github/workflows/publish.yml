@@ -1,6 +1,6 @@
 name: Publish to Maven Repository
 on:
-  pull_request:
+  workflow_dispatch:
     branches: [main]
 jobs:
   publish-maven:
