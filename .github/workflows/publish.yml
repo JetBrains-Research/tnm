@@ -1,13 +1,8 @@
 name: Publish to Maven Repository
 on:
   workflow_run:
-    workflows: ["Java CI with Gradle"]
-    branches: [main]
-    types:
-      - completed
 jobs:
   publish-maven:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }} # only if CI passed
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

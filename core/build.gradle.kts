@@ -4,10 +4,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
+    `maven-publish`
 }
 
-group = "me.xxx"
-version = "1.0-SNAPSHOT"
+group = "org.jetbrains.research.ictl"
+version = "0.4.13"
 
 val testConfig = configurations.create("testArtifacts") {
     extendsFrom(configurations["testCompile"])
@@ -31,4 +32,24 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = group.toString()
+            artifactId = "tnm"
+            version = version
+            from(components["java"])
+        }
+    }
+    repositories {
+        maven {
+            url = uri("https://packages.jetbrains.team/maven/p/ictl-public/public-maven")
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+    }
 }
