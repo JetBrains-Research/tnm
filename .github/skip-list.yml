@@ -1,0 +1,6 @@
+src: # Match everything as src except files in the skip list
+  - '!.github/**'
+  - '!.editorconfig'
+  - '!.gitignore'
+  - '!.qodana.yaml'
+  - '!README.md'
