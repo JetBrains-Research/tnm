@@ -8,12 +8,8 @@ import cli.AbstractCLI.Companion.LONGNAME_NUM_THREADS
 import cli.AbstractCLITest
 import cli.gitMinersCLI.ComplexityCodeChangesCLI.Companion.LONGNAME_CHANGE_TYPE
 import cli.gitMinersCLI.ComplexityCodeChangesCLI.Companion.LONGNAME_COMPLEXITY_CODE_CHANGES
-import cli.gitMinersCLI.ComplexityCodeChangesCLI.Companion.LONGNAME_NUM_OF_COMMITS
-import cli.gitMinersCLI.ComplexityCodeChangesCLI.Companion.LONGNAME_NUM_OF_MONTH
 import cli.gitMinersCLI.ComplexityCodeChangesCLI.Companion.LONGNAME_PERIOD_TYPE
 import dataProcessor.ComplexityCodeChangesDataProcessor.*
-import dataProcessor.ComplexityCodeChangesDataProcessor.Companion.DEFAULT_NUM_COMMITS
-import dataProcessor.ComplexityCodeChangesDataProcessor.Companion.DEFAULT_NUM_MONTH
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertTrue
@@ -44,15 +40,14 @@ class ComplexityCodeChangesCLITest : AbstractCLITest(testFolder) {
     }
 
     @Test
-    fun `test time based and lines`() {
+    fun `test time based and lines month`() {
         val requiredOptions = listOf(
             AbstractCLI.LONGNAME_REPOSITORY to gitDir.absolutePath
         )
 
         val nonRequiredOptions = listOf(
-            LONGNAME_NUM_OF_MONTH to DEFAULT_NUM_MONTH.toString(),
             LONGNAME_CHANGE_TYPE to ChangeType.LINES.toString(),
-            LONGNAME_PERIOD_TYPE to PeriodType.TIME_BASED.toString(),
+            LONGNAME_PERIOD_TYPE to PeriodType.MONTH.toString(),
             LONGNAME_COMPLEXITY_CODE_CHANGES to complexityCodeChangesJsonFile.absolutePath,
             LONGNAME_NUM_THREADS to ProjectConfig.DEFAULT_NUM_THREADS.toString(),
             LONGNAME_ID_TO_FILE to idToFileJsonFile.absolutePath,
@@ -66,37 +61,14 @@ class ComplexityCodeChangesCLITest : AbstractCLITest(testFolder) {
     }
 
     @Test
-    fun `test time based and files`() {
+    fun `test time based and lines week`() {
         val requiredOptions = listOf(
             AbstractCLI.LONGNAME_REPOSITORY to gitDir.absolutePath
         )
 
         val nonRequiredOptions = listOf(
-            LONGNAME_NUM_OF_MONTH to DEFAULT_NUM_MONTH.toString(),
-            LONGNAME_CHANGE_TYPE to ChangeType.FILE.toString(),
-            LONGNAME_PERIOD_TYPE to PeriodType.TIME_BASED.toString(),
-            LONGNAME_COMPLEXITY_CODE_CHANGES to complexityCodeChangesJsonFile.absolutePath,
-            LONGNAME_NUM_THREADS to ProjectConfig.DEFAULT_NUM_THREADS.toString(),
-            LONGNAME_ID_TO_FILE to idToFileJsonFile.absolutePath,
-        )
-
-        val arguments = listOf(
-            branch
-        )
-
-        runTest(requiredOptions, nonRequiredOptions, arguments)
-    }
-
-    @Test
-    fun `test modification based and lines`() {
-        val requiredOptions = listOf(
-            AbstractCLI.LONGNAME_REPOSITORY to gitDir.absolutePath
-        )
-
-        val nonRequiredOptions = listOf(
-            LONGNAME_NUM_OF_COMMITS to DEFAULT_NUM_COMMITS.toString(),
             LONGNAME_CHANGE_TYPE to ChangeType.LINES.toString(),
-            LONGNAME_PERIOD_TYPE to PeriodType.MODIFICATION_LIMIT.toString(),
+            LONGNAME_PERIOD_TYPE to PeriodType.WEEK.toString(),
             LONGNAME_COMPLEXITY_CODE_CHANGES to complexityCodeChangesJsonFile.absolutePath,
             LONGNAME_NUM_THREADS to ProjectConfig.DEFAULT_NUM_THREADS.toString(),
             LONGNAME_ID_TO_FILE to idToFileJsonFile.absolutePath,
@@ -110,15 +82,35 @@ class ComplexityCodeChangesCLITest : AbstractCLITest(testFolder) {
     }
 
     @Test
-    fun `test modification based and files`() {
+    fun `test time based and files month`() {
         val requiredOptions = listOf(
             AbstractCLI.LONGNAME_REPOSITORY to gitDir.absolutePath
         )
 
         val nonRequiredOptions = listOf(
-            LONGNAME_NUM_OF_COMMITS to DEFAULT_NUM_COMMITS.toString(),
             LONGNAME_CHANGE_TYPE to ChangeType.FILE.toString(),
-            LONGNAME_PERIOD_TYPE to PeriodType.MODIFICATION_LIMIT.toString(),
+            LONGNAME_PERIOD_TYPE to PeriodType.MONTH.toString(),
+            LONGNAME_COMPLEXITY_CODE_CHANGES to complexityCodeChangesJsonFile.absolutePath,
+            LONGNAME_NUM_THREADS to ProjectConfig.DEFAULT_NUM_THREADS.toString(),
+            LONGNAME_ID_TO_FILE to idToFileJsonFile.absolutePath,
+        )
+
+        val arguments = listOf(
+            branch
+        )
+
+        runTest(requiredOptions, nonRequiredOptions, arguments)
+    }
+
+    @Test
+    fun `test time based and files week`() {
+        val requiredOptions = listOf(
+            AbstractCLI.LONGNAME_REPOSITORY to gitDir.absolutePath
+        )
+
+        val nonRequiredOptions = listOf(
+            LONGNAME_CHANGE_TYPE to ChangeType.FILE.toString(),
+            LONGNAME_PERIOD_TYPE to PeriodType.WEEK.toString(),
             LONGNAME_COMPLEXITY_CODE_CHANGES to complexityCodeChangesJsonFile.absolutePath,
             LONGNAME_NUM_THREADS to ProjectConfig.DEFAULT_NUM_THREADS.toString(),
             LONGNAME_ID_TO_FILE to idToFileJsonFile.absolutePath,

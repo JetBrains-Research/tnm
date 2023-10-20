@@ -1,25 +1,25 @@
 package dataProcessor
 
-import dataProcessor.inputData.FileModification
+import dataProcessor.inputData.CommitFilesModifications
 import kotlinx.serialization.Serializable
+import util.TrimmedDate
+import java.time.YearMonth
+import java.time.temporal.WeekFields
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.log2
 
 class ComplexityCodeChangesDataProcessor(
     val periodType: PeriodType = DEFAULT_PERIOD_TYPE,
     val changeType: ChangeType = DEFAULT_CHANGE_TYPE,
-    val numOfCommitsInPeriod: Int = DEFAULT_NUM_COMMITS,
-    val numOfMonthInPeriod: Int = DEFAULT_NUM_MONTH
-) : DataProcessorMapped<FileModification>() {
+) : DataProcessorMappedWithInit<TrimmedDate, CommitFilesModifications>() {
 
     companion object {
-        const val DEFAULT_NUM_MONTH = 1
-        const val DEFAULT_NUM_COMMITS = 500
-        val DEFAULT_PERIOD_TYPE = PeriodType.MODIFICATION_LIMIT
+        val DEFAULT_PERIOD_TYPE = PeriodType.MONTH
         val DEFAULT_CHANGE_TYPE = ChangeType.LINES
     }
 
-    enum class PeriodType { TIME_BASED, MODIFICATION_LIMIT }
+    enum class PeriodType { MONTH, WEEK}
     enum class ChangeType { FILE, LINES }
 
     // HCPF1 is equal to periodEntropy
@@ -41,19 +41,20 @@ class ComplexityCodeChangesDataProcessor(
     val periodsToStats: Map<Int, PeriodStats>
         get() = _periodsToStats
 
-    private val _commitsInPeriod = ConcurrentHashMap<Int, Int>()
-    val commitsInPeriod: Map<Int, Int>
-        get() = _commitsInPeriod
+    private lateinit var latestCommitDate: TrimmedDate
 
-    fun incNumOfCommits(period: Int) {
-        _commitsInPeriod.compute(period) { _, v -> if (v == null) 1 else v + 1 }
+    override fun processData(data: CommitFilesModifications) {
+        val periodId = getPeriod(data.trimmedDate)
+        for (fileModification in data.filesModifications) {
+            val fileId = fileMapper.add(fileModification.filePath)
+            periodToFileChanges
+                .computeIfAbsent(periodId) { ConcurrentHashMap() }
+                .compute(fileId) { _, v -> if (v == null) fileModification.modifications else v + fileModification.modifications }
+        }
     }
 
-    override fun processData(data: FileModification) {
-        val fileId = fileMapper.add(data.filePath)
-        periodToFileChanges
-            .computeIfAbsent(data.periodId) { ConcurrentHashMap() }
-            .compute(fileId) { _, v -> if (v == null) data.modifications else v + data.modifications }
+    override fun init(initData: TrimmedDate) {
+        latestCommitDate = initData
     }
 
     override fun calculate() {
@@ -90,5 +91,39 @@ class ComplexityCodeChangesDataProcessor(
         }
     }
 
+    private fun getPeriod(commitTrimmedDate: TrimmedDate): Int {
+        return when (periodType) {
+            PeriodType.MONTH -> {
+                val months = commitTrimmedDate.diffInMonthIgnoreDays(latestCommitDate)
+                months
+            }
+
+            PeriodType.WEEK -> {
+                val weeks = commitTrimmedDate.diffInWeeks(latestCommitDate)
+                weeks
+            }
+        }
+    }
+
+    fun getTimePeriodOfPeriodId(periodId: Int): Pair<TrimmedDate, TrimmedDate> {
+        val latestLocalDate = latestCommitDate.toLocalDate()
+        return when (periodType) {
+            PeriodType.MONTH -> {
+                val newDate = latestLocalDate.minusMonths(periodId.toLong())
+                val yearMonth = YearMonth.of(newDate.year, newDate.month)
+                val startMonth = TrimmedDate.fromLocalDate(yearMonth.atDay(1))
+                val endMonth = TrimmedDate.fromLocalDate(yearMonth.atEndOfMonth())
+                (startMonth to endMonth)
+            }
+
+            PeriodType.WEEK -> {
+                val isoField = WeekFields.of(Locale.GERMANY).dayOfWeek()
+                val newDate = latestLocalDate.minusWeeks(periodId.toLong())
+                val startWeek = TrimmedDate.fromLocalDate(newDate.with(isoField, 1))
+                val endWeek = TrimmedDate.fromLocalDate(newDate.with(isoField, 7))
+                (startWeek to endWeek)
+            }
+        }
+    }
 
 }

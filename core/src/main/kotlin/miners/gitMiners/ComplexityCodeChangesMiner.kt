@@ -2,10 +2,11 @@ package miners.gitMiners
 
 import dataProcessor.ComplexityCodeChangesDataProcessor
 import dataProcessor.ComplexityCodeChangesDataProcessor.ChangeType
-import dataProcessor.ComplexityCodeChangesDataProcessor.PeriodType
+import dataProcessor.inputData.CommitFilesModifications
 import dataProcessor.inputData.FileModification
 import miners.gitMiners.GitMinerUtil.isBugFixCommit
 import miners.gitMiners.GitMinerUtil.isNotNeededFilePath
+import miners.gitMiners.exceptions.ProcessInThreadPoolException
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.revwalk.RevCommit
@@ -13,7 +14,10 @@ import org.eclipse.jgit.util.io.DisabledOutputStream
 import util.ProjectConfig
 import util.TrimmedDate
 import java.io.File
-import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
 
 
 class ComplexityCodeChangesMiner(
@@ -23,28 +27,24 @@ class ComplexityCodeChangesMiner(
     numOfCommits: Int? = null,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner<ComplexityCodeChangesDataProcessor>(repositoryFile, setOf(neededBranch), numOfCommits, numThreads) {
-    // Mark each commit for period
-    // [commitId][periodId]
-    private val markedCommits = ConcurrentHashMap<String, Int>()
-
-    private val _periodToDate = mutableMapOf<Int, TrimmedDate>()
-    val periodToDate: Map<Int, TrimmedDate>
-        get() = _periodToDate
-
     override fun process(
         dataProcessor: ComplexityCodeChangesDataProcessor,
         commit: RevCommit
     ) {
-        if (!isFeatureIntroductionCommit(commit)) return
+        val filesModifications = extractData(commit, dataProcessor.changeType)
+        val data = CommitFilesModifications(TrimmedDate.getTrimDate(commit), filesModifications)
+        dataProcessor.processData(data)
+    }
+
+    private fun extractData(commit: RevCommit, changeType: ChangeType): Iterable<FileModification> {
+        if (!isFeatureIntroductionCommit(commit)) return emptyList()
 
         val reader = threadLocalReader.get()
-        val periodId = markedCommits[commit.name]!!
-        var containsNeededFiles = false
 
-        when (dataProcessor.changeType) {
+        val result = mutableListOf<FileModification>()
+        when (changeType) {
             ChangeType.LINES -> {
                 val diffs = reader.use { GitMinerUtil.getDiffsWithoutText(commit, it, repository) }
-
                 val diffFormatter = DiffFormatter(DisabledOutputStream.INSTANCE)
                 diffFormatter.setRepository(repository)
                 diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
@@ -53,7 +53,6 @@ class ComplexityCodeChangesMiner(
                 for (diff in diffs) {
                     val filePath = GitMinerUtil.getFilePath(diff)
                     if (isNotNeededFilePath(filePath, filesToProceed)) continue
-                    containsNeededFiles = true
 
                     val editList = diffFormatter.toFileHeader(diff).toEditList()
                     for (edit in editList) {
@@ -61,9 +60,7 @@ class ComplexityCodeChangesMiner(
                         val numOfDeletedLines = edit.endA - edit.beginA
 
                         val modifiedLines = numOfAddedLines + numOfDeletedLines
-
-                        val data = FileModification(periodId, filePath, modifiedLines)
-                        dataProcessor.processData(data)
+                        result.add(FileModification(filePath, modifiedLines))
                     }
                 }
             }
@@ -77,79 +74,28 @@ class ComplexityCodeChangesMiner(
 
                 for (filePath in changedFiles) {
                     if (isNotNeededFilePath(filePath, filesToProceed)) continue
-                    containsNeededFiles = true
-
-                    val data = FileModification(periodId, filePath, 1)
-                    dataProcessor.processData(data)
+                    result.add(FileModification(filePath, 1))
                 }
             }
         }
-
-        if (containsNeededFiles) {
-            dataProcessor.incNumOfCommits(periodId)
-        }
-
+        return result
     }
 
     override fun run(dataProcessor: ComplexityCodeChangesDataProcessor) {
-        GitMinerUtil.findNeededBranches(threadLocalGit.get(), neededBranches)
-        markCommits(dataProcessor)
-
+        val git = threadLocalGit.get()
+        val branch = GitMinerUtil.findNeededBranch(git, neededBranch)
+        val commitsInBranch = getUnprocessedCommits(branch.name)
+        if (commitsInBranch.isEmpty()) {
+            println("Nothing to proceed in branch $branch")
+            return
+        }
+        val lastCommit = commitsInBranch.first()
+        dataProcessor.init(TrimmedDate.getTrimDate(lastCommit))
         super.run(dataProcessor)
-        dataProcessor.calculate()
     }
 
     private fun isFeatureIntroductionCommit(commit: RevCommit): Boolean {
         return !isBugFixCommit(commit)
-    }
-
-    private fun splitInPeriods(dataProcessor: ComplexityCodeChangesDataProcessor): List<List<RevCommit>> {
-        val git = threadLocalGit.get()
-        val commitsInBranch = GitMinerUtil.getCommits(git, repository, neededBranch)
-        if (commitsInBranch.isEmpty()) return listOf()
-
-        return when (dataProcessor.periodType) {
-            PeriodType.TIME_BASED -> {
-                val periods = mutableListOf<List<RevCommit>>()
-                var period = mutableListOf<RevCommit>()
-                val sortedByDayCommits = commitsInBranch.sortedBy { TrimmedDate.getTrimDate(it) }
-                for ((commit1, commit2) in sortedByDayCommits.windowed(2)) {
-                    period.add(commit1)
-                    if (!isSameTimePeriod(commit1, commit2, dataProcessor.numOfMonthInPeriod)) {
-                        periods.add(period)
-                        period = mutableListOf()
-                    }
-                }
-
-                val lastCommit = sortedByDayCommits.last()
-                if (isSameTimePeriod(period.last(), lastCommit, dataProcessor.numOfMonthInPeriod)) {
-                    period.add(lastCommit)
-                } else {
-                    periods.add(period)
-                    period = mutableListOf(lastCommit)
-                }
-                periods.add(period)
-                periods
-            }
-            PeriodType.MODIFICATION_LIMIT -> commitsInBranch.chunked(dataProcessor.numOfCommitsInPeriod)
-        }
-    }
-
-    private fun isSameTimePeriod(commit1: RevCommit, commit2: RevCommit, monthThreshold: Int): Boolean {
-        val trimDate1 = TrimmedDate.getTrimDate(commit1)
-        val trimDate2 = TrimmedDate.getTrimDate(commit2)
-        return trimDate1.diffInMonth(trimDate2) < monthThreshold
-    }
-
-    private fun markCommits(dataProcessor: ComplexityCodeChangesDataProcessor) {
-        val periods = splitInPeriods(dataProcessor)
-        for ((i, period) in periods.withIndex()) {
-            val month = TrimmedDate.getTrimDate(period.first())
-            _periodToDate[i] = month
-            for (commit in period) {
-                markedCommits[commit.name] = i
-            }
-        }
     }
 
 }
