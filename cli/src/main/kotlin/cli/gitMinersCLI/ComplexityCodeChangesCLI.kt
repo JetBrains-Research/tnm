@@ -4,12 +4,9 @@ import cli.gitMinersCLI.base.GitMinerMultithreadedOneBranchCLI
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.validate
-import com.github.ajalt.clikt.parameters.types.int
 import dataProcessor.ComplexityCodeChangesDataProcessor
 import dataProcessor.ComplexityCodeChangesDataProcessor.ChangeType
 import dataProcessor.ComplexityCodeChangesDataProcessor.Companion.DEFAULT_CHANGE_TYPE
-import dataProcessor.ComplexityCodeChangesDataProcessor.Companion.DEFAULT_NUM_COMMITS
-import dataProcessor.ComplexityCodeChangesDataProcessor.Companion.DEFAULT_NUM_MONTH
 import dataProcessor.ComplexityCodeChangesDataProcessor.Companion.DEFAULT_PERIOD_TYPE
 import dataProcessor.ComplexityCodeChangesDataProcessor.PeriodType
 import miners.gitMiners.ComplexityCodeChangesMiner
@@ -26,30 +23,10 @@ class ComplexityCodeChangesCLI : GitMinerMultithreadedOneBranchCLI(
                 "files (changed in that period) stats. Each file stat includes entropy and History Complexity Period Factors, such as " +
                 "HCPF2 and HCPF3."
 
-        const val LONGNAME_NUM_OF_MONTH = "--num-of-month"
-        const val LONGNAME_NUM_OF_COMMITS = "--num-of-commits"
         const val LONGNAME_CHANGE_TYPE = "--change-type"
         const val LONGNAME_PERIOD_TYPE = "--period-type"
         const val LONGNAME_COMPLEXITY_CODE_CHANGES = "--complexity-code-changes"
     }
-
-    private val numOfMonth by option(
-        LONGNAME_NUM_OF_MONTH,
-        help = "Number of month in one period. Used in creating period of ${PeriodType.TIME_BASED} type. " +
-                "By default ${DEFAULT_NUM_MONTH}. " +
-                "Period starts from latest commit in branch."
-    )
-        .int()
-        .default(DEFAULT_NUM_MONTH)
-
-    private val numOfCommits by option(
-        LONGNAME_NUM_OF_COMMITS,
-        help = "Number of commits in one period. Used in creating period of ${PeriodType.MODIFICATION_LIMIT} type. " +
-                "By default ${DEFAULT_NUM_COMMITS}. " +
-                "Period starts from latest commit in branch."
-    )
-        .int()
-        .default(DEFAULT_NUM_COMMITS)
 
     private val changeType by option(
         LONGNAME_CHANGE_TYPE,
@@ -101,10 +78,8 @@ class ComplexityCodeChangesCLI : GitMinerMultithreadedOneBranchCLI(
 
     override fun run() {
         val dataProcessor = ComplexityCodeChangesDataProcessor(
-            numOfMonthInPeriod = numOfMonth,
-            numOfCommitsInPeriod = numOfCommits,
+            periodType = periodTypeStringToEnum[periodType]!!,
             changeType = changedTypeStringToEnum[changeType]!!,
-            periodType = periodTypeStringToEnum[periodType]!!
         )
 
         val miner = ComplexityCodeChangesMiner(repositoryDirectory, branch, numThreads = numThreads)

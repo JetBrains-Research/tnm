@@ -1,3 +1,3 @@
 package dataProcessor.inputData
 
-data class FileModification(val periodId: Int, val filePath: String, val modifications: Int) : InputData
+data class FileModification(val filePath: String, val modifications: Int) : InputData

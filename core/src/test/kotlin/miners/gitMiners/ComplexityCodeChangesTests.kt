@@ -19,7 +19,8 @@ class ComplexityCodeChangesTests : GitMinerTest<ComplexityCodeChangesTests.Stats
     override val serializer = Stats.serializer()
 
     override fun runMiner(numThreads: Int): Stats {
-        val dataProcessor = ComplexityCodeChangesDataProcessor()
+        val dataProcessor =
+            ComplexityCodeChangesDataProcessor()
         val miner = ComplexityCodeChangesMiner(gitDir, neededBranch = branch, numThreads = numThreads)
         miner.run(dataProcessor)
 
