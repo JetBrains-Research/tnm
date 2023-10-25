@@ -67,9 +67,10 @@ class ComplexityCodeChangesDataProcessor(
             // Calculate entropy for each file and overall
             val filesEntropy = mutableListOf<Triple<Int, Double, Double>>()
             var periodEntropy = 0.0
+            val maxEntropy = log2(numOfAllChanges.toDouble())
             for ((fileId, numOfChanges) in changes) {
                 val p = numOfChanges.toDouble() / numOfAllChanges
-                val entropy = -p * log2(p) / log2(numOfAllChanges.toDouble())
+                val entropy = if (maxEntropy == 0.0) 0.0 else -p * log2(p) / maxEntropy
                 periodEntropy += entropy
                 filesEntropy.add(Triple(fileId, entropy, p))
             }
