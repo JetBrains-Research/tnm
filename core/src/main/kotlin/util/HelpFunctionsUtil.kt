@@ -6,6 +6,8 @@ import kotlinx.serialization.json.Json
 import org.apache.commons.io.FileUtils
 import org.eclipse.jgit.lib.RepositoryCache
 import org.eclipse.jgit.util.FS
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
@@ -13,6 +15,8 @@ import kotlin.math.log2
 
 object HelpFunctionsUtil {
     val json = Json { encodeDefaults = true }
+
+    private val log: Logger = LoggerFactory.getLogger(HelpFunctionsUtil::class.java)
 
     fun isGitRepository(directory: File): Boolean {
         return RepositoryCache.FileKey.isGitRepository(directory, FS.DETECTED)
@@ -41,7 +45,7 @@ object HelpFunctionsUtil {
             try {
                 FileUtils.deleteDirectory(directory)
             } catch (e: Exception) {
-                println("Got error while cleaning directory $directory: $e")
+                log.error("Got error while cleaning directory $directory: $e")
             }
         }
     }

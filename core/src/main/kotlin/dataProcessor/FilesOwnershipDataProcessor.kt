@@ -3,6 +3,8 @@ package dataProcessor
 import dataProcessor.initData.LatestCommitOwnedLines
 import dataProcessor.inputData.FileLinesAddedByUser
 import kotlinx.serialization.Serializable
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListSet
@@ -16,6 +18,7 @@ class FilesOwnershipDataProcessor(private val decayFactor: Float = DEFAULT_DECAY
         const val DEFAULT_DECAY_FACTOR = 0.01f
     }
 
+    private val log: Logger = LoggerFactory.getLogger(FilesOwnershipDataProcessor::class.java)
     private lateinit var latestCommitDate: Date
 
     // [fileId][userId]
@@ -103,7 +106,7 @@ class FilesOwnershipDataProcessor(private val decayFactor: Float = DEFAULT_DECAY
     }
 
     private fun calculatePotentialAuthorship() {
-        println("Start calculating potential authorship")
+        log.info("Start calculating potential authorship")
         for (fileEntry in authorsForLine) {
             val fileId = fileEntry.key
             var potentialAuthorshipForFile = 0
@@ -112,11 +115,11 @@ class FilesOwnershipDataProcessor(private val decayFactor: Float = DEFAULT_DECAY
             }
             _potentialAuthorship[fileId] = potentialAuthorshipForFile
         }
-        println("End calculating potential authorship")
+        log.info("End calculating potential authorship")
     }
 
     private fun calculateDeveloperKnowledge() {
-        println("Start calculating developer knowledge")
+        log.info("Start calculating developer knowledge")
         for (entryOwnership in _filesOwnership) {
             val fileId = entryOwnership.key
             for (entryUserData in entryOwnership.value) {
@@ -127,6 +130,6 @@ class FilesOwnershipDataProcessor(private val decayFactor: Float = DEFAULT_DECAY
                     userData.authorship / _potentialAuthorship[fileId]!!
             }
         }
-        println("End calculating developer knowledge")
+        log.info("End calculating developer knowledge")
     }
 }

@@ -11,6 +11,8 @@ import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.util.io.DisabledOutputStream
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import util.ProjectConfig
 import util.TrimmedDate
 import java.io.File
@@ -27,6 +29,9 @@ class ComplexityCodeChangesMiner(
     numOfCommits: Int? = null,
     numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : GitMiner<ComplexityCodeChangesDataProcessor>(repositoryFile, setOf(neededBranch), numOfCommits, numThreads) {
+
+    private val log: Logger = LoggerFactory.getLogger(ComplexityCodeChangesMiner::class.java)
+
     override fun process(
         dataProcessor: ComplexityCodeChangesDataProcessor,
         commit: RevCommit
@@ -86,7 +91,7 @@ class ComplexityCodeChangesMiner(
         val branch = GitMinerUtil.findNeededBranch(git, neededBranch)
         val commitsInBranch = getUnprocessedCommits(branch.name)
         if (commitsInBranch.isEmpty()) {
-            println("Nothing to proceed in branch $branch")
+            log.info("Nothing to proceed in branch $branch")
             return
         }
         val lastCommit = commitsInBranch.first()
