@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "org.jetbrains.research.ictl"
-version = "0.4.15"
+version = "0.4.16"
 
 val testConfig = configurations.create("testArtifacts") {
     extendsFrom(configurations["testCompile"])
@@ -40,6 +40,7 @@ publishing {
             groupId = group.toString()
             artifactId = "tnm"
             version = version
+
             from(components["java"])
         }
     }

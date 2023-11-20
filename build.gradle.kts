@@ -26,6 +26,9 @@ subprojects {
         implementation("org.jetbrains.kotlinx:multik-api:0.1.0")
         implementation("org.jetbrains.kotlinx:multik-default:0.1.0")
 
+        implementation("org.slf4j:slf4j-api:2.0.9")
+        implementation("ch.qos.logback:logback-core:1.4.11")
+
         testImplementation(kotlin("test-junit"))
     }
 }

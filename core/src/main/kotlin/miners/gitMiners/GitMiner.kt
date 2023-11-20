@@ -12,6 +12,8 @@ import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.util.io.DisabledOutputStream
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import util.HelpFunctionsUtil
 import util.ProjectConfig
 import java.io.File
@@ -26,6 +28,8 @@ abstract class GitMiner<T>(
     val numOfCommits: Int? = null,
     protected val numThreads: Int = ProjectConfig.DEFAULT_NUM_THREADS
 ) : Miner<T> where T : DataProcessor<*> {
+    
+    private val log: Logger = LoggerFactory.getLogger(GitMiner::class.java)
 
     companion object {
         const val EMPTY_COMMIT_SHA = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
@@ -85,11 +89,11 @@ abstract class GitMiner<T>(
 
     private fun processAllCommitsInThreadPool(branches: Set<Ref>, dataProcessor: T, threadPool: ExecutorService) {
         for (branch in branches) {
-            println("Start mining for branch ${GitMinerUtil.getShortBranchName(branch.name)}")
+            log.info("Start mining for branch ${GitMinerUtil.getShortBranchName(branch.name)}")
 
             val commitsInBranch = getUnprocessedCommits(branch.name)
             if (commitsInBranch.isEmpty()) {
-                println("Nothing to proceed in branch $branch")
+                log.info("Nothing to proceed in branch $branch")
                 continue
             }
 
@@ -110,7 +114,7 @@ abstract class GitMiner<T>(
                     } finally {
                         val num = proceedCommits.incrementAndGet()
                         if (num % logFrequency == 0 || num == commitsInBranch.size) {
-                            println("Processed $num commits out of ${commitsInBranch.size}")
+                            log.info("Processed $num commits out of ${commitsInBranch.size}")
                         }
 
                     }
@@ -130,7 +134,7 @@ abstract class GitMiner<T>(
             }
 
 
-            println("End mining for branch ${GitMinerUtil.getShortBranchName(branch.name)}")
+            log.info("End mining for branch ${GitMinerUtil.getShortBranchName(branch.name)}")
         }
     }
 

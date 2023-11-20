@@ -9,6 +9,8 @@ import miners.gitMiners.exceptions.ProcessInThreadPoolException
 import org.eclipse.jgit.diff.EditList
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.revwalk.RevCommit
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import util.HelpFunctionsUtil
 import util.ProjectConfig
 import java.io.File
@@ -22,6 +24,8 @@ class FilesOwnershipMiner(
     val filesToProceed: Set<String>? = null
 ) : GitMiner<FilesOwnershipDataProcessor>(repositoryFile, setOf(neededBranch), numThreads = numThreads) {
 
+    private val log: Logger = LoggerFactory.getLogger(FilesOwnershipMiner::class.java)
+    
     private data class FutureResult(
         val listOfEditsToFile: List<Pair<EditList, String>>,
         val commitDate: Date,
@@ -79,7 +83,7 @@ class FilesOwnershipMiner(
         // TODO: Refactor, code
         val commitsInBranch = getUnprocessedCommits(branch.name)
         if (commitsInBranch.isEmpty()) {
-            println("Nothing to proceed in branch $branch")
+            log.info("Nothing to proceed in branch $branch")
             return
         }
 
@@ -105,7 +109,7 @@ class FilesOwnershipMiner(
             }
 
             if (num % logFrequency == 0 || num == futures.size) {
-                println("Processed $num commits out of ${futures.size}")
+                log.info("Processed $num commits out of ${futures.size}")
             }
             num++
 
@@ -117,7 +121,7 @@ class FilesOwnershipMiner(
     }
 
     private fun processLatestCommit(latestCommit: RevCommit, threadPool: ExecutorService): List<FileLineOwnedByUser> {
-        println("Start processing latest commit")
+        log.info("Start processing latest commit")
 
         val filePaths = GitMinerUtil.getAllFilePathsOnCommit(repository, latestCommit)
 
@@ -158,7 +162,7 @@ class FilesOwnershipMiner(
 
         HelpFunctionsUtil.runInThreadPoolWithExceptionHandle(threadPool, tasks)
 
-        println("End processing latest commit")
+        log.info("End processing latest commit")
 
         return concurrentLinkedQueue.toList()
     }
