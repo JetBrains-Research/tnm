@@ -99,6 +99,21 @@ Example of script usage:
 
 ### API library
 
+Modify `build.gradle.kts`
+
+```gradle
+
+repositories {
+  maven {
+    url = uri("https://packages.jetbrains.team/maven/p/ictl-public/public-maven")
+  }
+}
+
+dependencies {
+  implementation("org.jetbrains.research.ictl:tnm:0.4.16")
+}
+```
+
 #### Miner usage example
 
 ```kotlin
