@@ -3,6 +3,8 @@
 TNM is an open-source tool for mining socio-technical data from Git repositories and vizualizing it.
 Instead of implementing their own mining pipeline, researchers can use our tool or integrate it in their own mining pipelines.
 
+**TNM is no longer maintained.**
+
 ## About
 
 TNM incorporates implementations of several established data mining techniques, or individual miners. Every class implements one interface or abstract class for each task type, which makes it easily extendable.
