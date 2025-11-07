@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+preferred-citation:
+  type: conference-paper
+  title: "TNM: A tool for mining of socio-technical data from git repositories"
+  authors:
+    - family-names: Sviridov
+      given-names: Nikolai
+    - family-names: Evtikhiev
+      given-names: Mikhail
+    - family-names: Kovalenko
+      given-names: Vladimir
+  year: 2021
+  collection-title: "2021 IEEE/ACM 18th International Conference on Mining Software Repositories (MSR)"
+  pages:
+    start: 295
+    end: 299
+  publisher: "IEEE"
